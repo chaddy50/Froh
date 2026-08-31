@@ -19,18 +19,23 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+private const val NOW_PLAYING_DESCRIPTION = "Now playing"
+
 @RunWith(RobolectricTestRunner::class)
 class QueueViewTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
+    /** The title [buildQueue] gives the track at [index]; keeps assertions tied to the fixture. */
+    private fun trackTitle(index: Int) = "Track $index"
+
     private fun buildQueue(count: Int): List<MediaItem> = (0 until count).map { index ->
         MediaItem.Builder()
             .setMediaId(index.toString())
             .setMediaMetadata(
                 MediaMetadata.Builder()
-                    .setTitle("Track $index")
+                    .setTitle(trackTitle(index))
                     .setArtist("Artist $index")
                     .setDurationMs(125_000)
                     .build()
@@ -52,16 +57,16 @@ class QueueViewTest {
     fun rendersTracksInSuppliedOrder() {
         setContent(queue = listOf(2, 0, 1).map { buildQueue(3)[it] })
 
-        composeTestRule.onNodeWithText("Track 2").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Track 0").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Track 1").assertIsDisplayed()
+        composeTestRule.onNodeWithText(trackTitle(2)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(trackTitle(0)).assertIsDisplayed()
+        composeTestRule.onNodeWithText(trackTitle(1)).assertIsDisplayed()
     }
 
     @Test
     fun currentTrackShowsNowPlayingIndicator() {
         setContent(currentTrackIndex = 1)
 
-        composeTestRule.onNodeWithContentDescription("Now playing").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(NOW_PLAYING_DESCRIPTION).assertIsDisplayed()
     }
 
     @Test
@@ -69,7 +74,7 @@ class QueueViewTest {
         setContent(currentTrackIndex = 1)
 
         val indicators = composeTestRule
-            .onAllNodesWithContentDescription("Now playing")
+            .onAllNodesWithContentDescription(NOW_PLAYING_DESCRIPTION)
             .fetchSemanticsNodes()
         assert(indicators.size == 1)
     }
@@ -79,7 +84,7 @@ class QueueViewTest {
         var clickedIndex = -1
         setContent(onTrackClicked = { clickedIndex = it })
 
-        composeTestRule.onNodeWithText("Track 2").performClick()
+        composeTestRule.onNodeWithText(trackTitle(2)).performClick()
 
         assert(clickedIndex == 2)
     }
@@ -88,7 +93,7 @@ class QueueViewTest {
     fun scrollsToCurrentTrackOnFirstComposition() {
         setContent(queue = buildQueue(50), currentTrackIndex = 40)
 
-        composeTestRule.onNodeWithText("Track 40").assertIsDisplayed()
+        composeTestRule.onNodeWithText(trackTitle(40)).assertIsDisplayed()
     }
 
     @Test
@@ -106,8 +111,8 @@ class QueueViewTest {
         }
         composeTestRule.waitForIdle()
 
-        // Position 40 of the reversed queue holds Track 9.
-        composeTestRule.onNodeWithText("Track 9").assertIsDisplayed()
+        // Position 40 of the reversed queue holds track 9.
+        composeTestRule.onNodeWithText(trackTitle(9)).assertIsDisplayed()
     }
 
     @Test
@@ -121,7 +126,7 @@ class QueueViewTest {
         composeTestRule.runOnIdle { currentTrackIndex = 40 }
         composeTestRule.waitForIdle()
 
-        assert(composeTestRule.onAllNodesWithText("Track 40").fetchSemanticsNodes().isEmpty())
+        assert(composeTestRule.onAllNodesWithText(trackTitle(40)).fetchSemanticsNodes().isEmpty())
     }
 
     @Test
@@ -139,7 +144,7 @@ class QueueViewTest {
         }
         composeTestRule.waitForIdle()
 
-        assert(composeTestRule.onAllNodesWithText("Track 40").fetchSemanticsNodes().isEmpty())
+        assert(composeTestRule.onAllNodesWithText(trackTitle(40)).fetchSemanticsNodes().isEmpty())
     }
 
     @Test
@@ -147,7 +152,7 @@ class QueueViewTest {
         setContent(queue = emptyList(), currentTrackIndex = -1)
 
         val indicators = composeTestRule
-            .onAllNodesWithContentDescription("Now playing")
+            .onAllNodesWithContentDescription(NOW_PLAYING_DESCRIPTION)
             .fetchSemanticsNodes()
         assert(indicators.isEmpty())
     }

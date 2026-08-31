@@ -64,17 +64,17 @@ class FakeTimeline(
 
     // Unused by the playback-order traversal; fail loudly rather than return a misleading value.
     override fun getWindow(windowIndex: Int, window: Window, defaultPositionProjectionUs: Long) =
-        throw UnsupportedOperationException("FakeTimeline models window ordering only")
+        modelsWindowOrderingOnly()
 
-    override fun getPeriodCount() =
-        throw UnsupportedOperationException("FakeTimeline models window ordering only")
+    override fun getPeriodCount() = modelsWindowOrderingOnly()
 
     override fun getPeriod(periodIndex: Int, period: Period, setIds: Boolean) =
-        throw UnsupportedOperationException("FakeTimeline models window ordering only")
+        modelsWindowOrderingOnly()
 
-    override fun getIndexOfPeriod(uid: Any) =
-        throw UnsupportedOperationException("FakeTimeline models window ordering only")
+    override fun getIndexOfPeriod(uid: Any) = modelsWindowOrderingOnly()
 
-    override fun getUidOfPeriod(periodIndex: Int) =
+    override fun getUidOfPeriod(periodIndex: Int) = modelsWindowOrderingOnly()
+
+    private fun modelsWindowOrderingOnly(): Nothing =
         throw UnsupportedOperationException("FakeTimeline models window ordering only")
 }
