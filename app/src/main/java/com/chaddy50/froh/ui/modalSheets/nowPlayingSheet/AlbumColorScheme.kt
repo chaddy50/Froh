@@ -198,3 +198,7 @@ private fun buildColorScheme(
 @androidx.annotation.VisibleForTesting
 internal fun getContrastingColor(background: Color): Color =
     if (background.luminance() > 0.179f) Color.Black else Color.White
+
+@androidx.annotation.VisibleForTesting
+internal fun shouldUseDarkSystemBarIcons(surfaceColor: Color): Boolean =
+    getContrastingColor(surfaceColor) == Color.Black
