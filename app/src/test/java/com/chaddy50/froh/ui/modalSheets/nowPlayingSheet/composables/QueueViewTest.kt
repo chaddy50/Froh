@@ -55,11 +55,16 @@ class QueueViewTest {
 
     @Test
     fun rendersTracksInSuppliedOrder() {
-        setContent(queue = listOf(2, 0, 1).map { buildQueue(3)[it] })
+        val library = buildQueue(3)
+        setContent(queue = listOf(2, 0, 1).map { library[it] })
 
-        composeTestRule.onNodeWithText(trackTitle(2)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(trackTitle(0)).assertIsDisplayed()
-        composeTestRule.onNodeWithText(trackTitle(1)).assertIsDisplayed()
+        // Rows must descend the screen in the supplied order — merely being present would hold
+        // for any ordering, which is the thing under test.
+        val rowTops = listOf(2, 0, 1).map { index ->
+            composeTestRule.onNodeWithText(trackTitle(index)).fetchSemanticsNode().positionInRoot.y
+        }
+
+        assert(rowTops == rowTops.sorted()) { "Expected rows ordered 2, 0, 1 but tops were $rowTops" }
     }
 
     @Test
@@ -81,12 +86,18 @@ class QueueViewTest {
 
     @Test
     fun clickingTrackInvokesCallbackWithItsQueuePosition() {
+        val library = buildQueue(3)
         var clickedIndex = -1
-        setContent(onTrackClicked = { clickedIndex = it })
+        // Reordered so position and track number diverge: track 0 sits at queue position 1. An
+        // identity-ordered queue cannot tell the two apart, which is the contract skipToTrack relies on.
+        setContent(
+            queue = listOf(2, 0, 1).map { library[it] },
+            onTrackClicked = { clickedIndex = it }
+        )
 
-        composeTestRule.onNodeWithText(trackTitle(2)).performClick()
+        composeTestRule.onNodeWithText(trackTitle(0)).performClick()
 
-        assert(clickedIndex == 2)
+        assert(clickedIndex == 1)
     }
 
     @Test
