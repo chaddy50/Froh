@@ -1,5 +1,6 @@
 package com.chaddy50.froh.ui.modalSheets.nowPlayingSheet
 
+import android.view.Window
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,10 +16,15 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
 import androidx.media3.common.MediaItem
 import com.chaddy50.froh.ui.modalSheets.nowPlayingSheet.composables.AlbumArtwork
 import com.chaddy50.froh.ui.modalSheets.nowPlayingSheet.composables.PagerIndicator
@@ -65,6 +71,8 @@ fun NowPlayingSheet(
             .fillMaxSize()
     ) {
         MaterialTheme(colorScheme) {
+            ApplySystemBarTheme(MaterialTheme.colorScheme.surface)
+
             Surface(
                 color = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface,
@@ -126,5 +134,32 @@ fun NowPlayingSheet(
                 }
             }
         }
+    }
+}
+
+// The sheet renders in its own dialog window, which never receives the activity's
+// enableEdgeToEdge() setup, and Material3 pins both appearance flags to the system theme
+// when it builds that window — neither reflects the album-derived surface.
+@androidx.annotation.VisibleForTesting
+internal fun applyAlbumThemeToSystemBars(window: Window, shouldUseDarkIcons: Boolean) {
+    // Left enabled, the platform paints its own scrim over the album-tinted surface
+    // behind the navigation bar in 2-/3-button navigation.
+    window.isNavigationBarContrastEnforced = false
+
+    WindowCompat.getInsetsController(window, window.decorView).apply {
+        isAppearanceLightStatusBars = shouldUseDarkIcons
+        isAppearanceLightNavigationBars = shouldUseDarkIcons
+    }
+}
+
+@Composable
+private fun ApplySystemBarTheme(surfaceColor: Color) {
+    val dialogWindow = (LocalView.current.parent as? DialogWindowProvider)?.window ?: return
+    val shouldUseDarkIcons = shouldUseDarkSystemBarIcons(surfaceColor)
+
+    // Keyed on the derived boolean rather than the surface color, which animates for 500ms
+    // on every track change.
+    LaunchedEffect(dialogWindow, shouldUseDarkIcons) {
+        applyAlbumThemeToSystemBars(dialogWindow, shouldUseDarkIcons)
     }
 }
