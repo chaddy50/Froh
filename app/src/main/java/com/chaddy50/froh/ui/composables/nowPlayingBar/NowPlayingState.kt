@@ -2,6 +2,7 @@ package com.chaddy50.froh.ui.composables.nowPlayingBar
 
 import android.app.Application
 import android.content.ComponentName
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
@@ -38,6 +39,9 @@ class NowPlayingState(
 
     private val _currentTrackIndex = MutableStateFlow(0)
     val currentTrackIndex = _currentTrackIndex.asStateFlow()
+
+    /** The timeline window index behind each position in [queue]; they differ once shuffle is on. */
+    private var queueWindowIndices: List<Int> = emptyList()
 
     private var controllerFuture: ListenableFuture<MediaController>
     val controller: MediaController? get() = if (controllerFuture.isDone) controllerFuture.get() else null
@@ -84,6 +88,7 @@ class NowPlayingState(
     override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
         super.onShuffleModeEnabledChanged(shuffleModeEnabled)
         _isShuffleModeEnabled.value = shuffleModeEnabled
+        updateQueue()
     }
 
     fun play() = controller?.play()
@@ -110,16 +115,20 @@ class NowPlayingState(
         controller?.seekTo(positionMs)
     }
 
-    fun skipToTrack(index: Int) {
-        controller?.seekToDefaultPosition(index)
+    fun skipToTrack(queueIndex: Int) {
+        val windowIndex = queueWindowIndices.getOrNull(queueIndex) ?: return
+
+        controller?.seekToDefaultPosition(windowIndex)
         controller?.play()
     }
 
     private fun updateQueue() {
-        controller?.let {
-            _queue.value = (0 until it.mediaItemCount).map { i -> it.getMediaItemAt(i) }
-            _currentTrackIndex.value = it.currentMediaItemIndex
-        }
+        val controller = controller ?: return
+
+        val playbackOrder = controller.currentTimeline.buildPlaybackOrder(controller.shuffleModeEnabled)
+        queueWindowIndices = playbackOrder
+        _queue.value = playbackOrder.map { windowIndex -> controller.getMediaItemAt(windowIndex) }
+        _currentTrackIndex.value = playbackOrder.indexOf(controller.currentMediaItemIndex)
     }
 
     private fun startPositionUpdates() {
@@ -153,4 +162,22 @@ class NowPlayingState(
         MediaController.releaseFuture(controllerFuture)
         stopPositionUpdates()
     }
+}
+
+/**
+ * The window indices of this timeline in the order they will actually play. With shuffle off this
+ * is simply `0, 1, 2, …`; with shuffle on it follows the player's shuffle order.
+ */
+internal fun Timeline.buildPlaybackOrder(isShuffleModeEnabled: Boolean): List<Int> {
+    if (isEmpty) return emptyList()
+
+    val playbackOrder = ArrayList<Int>(windowCount)
+    var windowIndex = getFirstWindowIndex(isShuffleModeEnabled)
+    while (windowIndex != C.INDEX_UNSET) {
+        playbackOrder.add(windowIndex)
+        // REPEAT_MODE_OFF rather than the player's repeat mode: REPEAT_MODE_ONE would return the
+        // same index forever and REPEAT_MODE_ALL would wrap, so neither traversal terminates.
+        windowIndex = getNextWindowIndex(windowIndex, Player.REPEAT_MODE_OFF, isShuffleModeEnabled)
+    }
+    return playbackOrder
 }

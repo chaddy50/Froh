@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
@@ -19,7 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,12 +41,13 @@ fun QueueView(
     currentTrackIndex: Int,
     onTrackClicked: (Int) -> Unit
 ) {
-    val listState = rememberLazyListState()
-
-    LaunchedEffect(Unit) {
-        if (queue.isEmpty()) return@LaunchedEffect
-
-        listState.scrollToItem(currentTrackIndex)
+    // Re-created whenever the queue's order changes, already anchored on the playing track, so the
+    // reordered list renders in position on its very first frame. Scrolling from an effect instead
+    // would paint one frame of the new order at the old offset before jumping — the reorder and the
+    // scroll would read as two separate movements. A track advance rebuilds an equal list, so the
+    // state survives and the scroll position holds.
+    val listState = rememberSaveable(queue, saver = LazyListState.Saver) {
+        LazyListState(firstVisibleItemIndex = currentTrackIndex.coerceAtLeast(0))
     }
 
     LazyColumn(
