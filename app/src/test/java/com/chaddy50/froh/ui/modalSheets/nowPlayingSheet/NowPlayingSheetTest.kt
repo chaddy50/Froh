@@ -6,7 +6,6 @@ import androidx.core.view.WindowCompat
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
@@ -15,11 +14,9 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class NowPlayingSheetTest {
 
-    private lateinit var window: Window
-
-    @Before
-    fun setUp() {
-        window = Robolectric.buildActivity(ComponentActivity::class.java).setup().get().window
+    // JUnit builds a fresh instance per test method, so each test gets its own window.
+    private val window: Window by lazy {
+        Robolectric.buildActivity(ComponentActivity::class.java).setup().get().window
     }
 
     private fun isAppearanceLightStatusBars() =
