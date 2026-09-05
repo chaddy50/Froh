@@ -12,7 +12,6 @@ import androidx.media3.extractor.metadata.id3.TextInformationFrame
 import androidx.media3.inspector.MetadataRetriever
 import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.withTimeoutOrNull
-import java.io.IOException
 import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -47,7 +46,7 @@ class Media3MetadataReader(private val context: Context) : IMedia3MetadataReader
 
     override suspend fun read(trackUri: Uri): TrackMetadata? =
         withTimeoutOrNull(METADATA_READ_TIMEOUT_MILLISECONDS) {
-            try {
+            runCatching {
                 MetadataRetriever.Builder(context, MediaItem.fromUri(trackUri))
                     .build()
                     .use { retriever ->
@@ -55,17 +54,12 @@ class Media3MetadataReader(private val context: Context) : IMedia3MetadataReader
                         val entries = collectMetadataEntries(retriever.retrieveTrackGroups().await())
                         toTrackMetadata(entries, durationMicroseconds)
                     }
-            } catch (cancellation: CancellationException) {
-                // Must not be swallowed, or cancelling a scan would look like an unreadable file
-                throw cancellation
-            } catch (malformedMedia: IOException) {
-                malformedMedia.printStackTrace()
-                null
-            } catch (unexpectedState: IllegalStateException) {
-                unexpectedState.printStackTrace()
-                null
-            } catch (unsupportedSource: IllegalArgumentException) {
-                unsupportedSource.printStackTrace()
+            }.getOrElse { failure ->
+                // Cancellation must propagate, or cancelling a scan would look like a run of
+                // unreadable files; so must JVM errors. Anything the media parser throws is just
+                // an unreadable file and must not abort a scan over thousands of them.
+                if (failure is CancellationException || failure !is Exception) throw failure
+                failure.printStackTrace()
                 null
             }
         }
