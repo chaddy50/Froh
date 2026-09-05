@@ -1,37 +1,19 @@
 package com.chaddy50.froh.data.scanner.processor
 
 import com.chaddy50.froh.data.repository.IAlbumArtistRepository
-import com.chaddy50.froh.data.scanner.util.CursorData
+import com.chaddy50.froh.data.scanner.util.UNKNOWN_ARTIST
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AlbumArtistProcessorTest {
 
-    private fun cursorData(
-        albumArtistName: String? = "Beethoven",
-    ) = CursorData(
-        trackId = 1L,
-        trackTitle = null,
-        trackNumber = null,
-        trackDuration = null,
-        discNumber = null,
-        genreName = null,
-        artistId = null,
-        artistName = null,
-        albumArtistName = albumArtistName,
-        albumId = null,
-        albumName = null,
-        year = null,
-        0
-    )
-
     @Test
     fun returnsAlbumArtistIdAndName() = runTest {
         val repo = FakeAlbumArtistRepository(nextId = 42L)
         val processor = AlbumArtistProcessor(repo)
 
-        val result = processor.process(cursorData())
+        val result = processor.process("Beethoven")
 
         assertEquals(42L, result.first)
         assertEquals("Beethoven", result.second)
@@ -43,8 +25,8 @@ class AlbumArtistProcessorTest {
         val repo = FakeAlbumArtistRepository(nextId = 42L)
         val processor = AlbumArtistProcessor(repo)
 
-        processor.process(cursorData())
-        val result = processor.process(cursorData())
+        processor.process("Beethoven")
+        val result = processor.process("Beethoven")
 
         assertEquals(42L, result.first)
         assertEquals(1, repo.insertCount)
@@ -55,10 +37,23 @@ class AlbumArtistProcessorTest {
         val repo = FakeAlbumArtistRepository(nextId = 42L)
         val processor = AlbumArtistProcessor(repo)
 
-        processor.process(cursorData(albumArtistName = "Beethoven"))
-        processor.process(cursorData(albumArtistName = "Mozart"))
+        processor.process("Beethoven")
+        processor.process("Mozart")
 
         assertEquals(2, repo.insertCount)
+    }
+
+    @Test
+    fun resolvedValuesAreUsedInsteadOfCursorFields() = runTest {
+        val repo = FakeAlbumArtistRepository(nextId = 7L)
+        val processor = AlbumArtistProcessor(repo)
+
+        // The album artist name now comes from Media3, where MediaStore had nothing at all
+        val result = processor.process("Disasterpeace")
+
+        assertEquals(7L, result.first)
+        assertEquals("Disasterpeace", result.second)
+        assertEquals("Disasterpeace", repo.lastRequestedName)
     }
 
     @Test
@@ -66,7 +61,8 @@ class AlbumArtistProcessorTest {
         val repo = FakeAlbumArtistRepository(nextId = 1L)
         val processor = AlbumArtistProcessor(repo)
 
-        val result = processor.process(cursorData(albumArtistName = null))
+        // MetadataResolver substitutes UNKNOWN_ARTIST before the processor sees the name
+        val result = processor.process(UNKNOWN_ARTIST)
 
         assertEquals("Unknown Artist", result.second)
     }
@@ -76,9 +72,11 @@ private class FakeAlbumArtistRepository(
     private val nextId: Long = 1L,
 ) : IAlbumArtistRepository {
     var insertCount = 0
+    var lastRequestedName: String? = null
 
     override suspend fun findOrInsertAlbumArtist(albumArtistName: String): Long {
         insertCount++
+        lastRequestedName = albumArtistName
         return nextId
     }
 }

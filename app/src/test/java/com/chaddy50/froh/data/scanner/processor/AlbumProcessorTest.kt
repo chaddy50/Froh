@@ -2,7 +2,7 @@ package com.chaddy50.froh.data.scanner.processor
 
 import com.chaddy50.froh.data.entity.Album
 import com.chaddy50.froh.data.repository.IAlbumRepository
-import com.chaddy50.froh.data.scanner.util.CursorData
+import com.chaddy50.froh.data.scanner.util.UNKNOWN_ALBUM
 import com.chaddy50.froh.data.scanner.util.IArtworkSaver
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -12,24 +12,14 @@ import org.junit.Test
 
 class AlbumProcessorTest {
 
-    private fun cursorData(
-        albumId: Long? = 100L,
-        albumName: String? = "Symphony No. 5 Op. 67",
-    ) = CursorData(
-        trackId = 1L,
-        trackTitle = null,
-        trackNumber = null,
-        trackDuration = null,
-        discNumber = null,
-        genreName = null,
-        artistId = null,
-        artistName = null,
-        albumArtistName = null,
-        albumId = albumId,
-        albumName = albumName,
-        year = null,
-        0
-    )
+    private suspend fun process(
+        processor: AlbumProcessor,
+        albumId: Long = 100L,
+        trackId: Long = 1L,
+        albumArtistId: Long = 5L,
+        albumName: String = "Symphony No. 5 Op. 67",
+        albumYear: String = "1808",
+    ) = processor.process(albumId, trackId, albumArtistId, albumName, albumYear)
 
     @Test
     fun returnsAlbumProcessorResult() = runTest {
@@ -37,7 +27,7 @@ class AlbumProcessorTest {
         val artworkSaver = FakeArtworkSaver(artworkPath = "/art/100.jpg")
         val processor = AlbumProcessor(repo, artworkSaver)
 
-        val result = processor.process(cursorData(), trackId = 1L, albumArtistId = 5L) { "1808" }
+        val result = process(processor)
 
         assertEquals(100L, result.albumId)
         assertEquals("Symphony No. 5", result.albumName)
@@ -50,7 +40,7 @@ class AlbumProcessorTest {
         val repo = FakeAlbumRepository()
         val processor = AlbumProcessor(repo, FakeArtworkSaver())
 
-        processor.process(cursorData(), trackId = 1L, albumArtistId = 5L) { "1808" }
+        process(processor)
 
         val album = repo.lastInsertedAlbum!!
         assertEquals(100L, album.id)
@@ -62,12 +52,26 @@ class AlbumProcessorTest {
     }
 
     @Test
+    fun resolvedValuesAreUsedInsteadOfCursorFields() = runTest {
+        val repo = FakeAlbumRepository()
+        val processor = AlbumProcessor(repo, FakeArtworkSaver())
+
+        // Album name and year now come from Media3, not the MediaStore row
+        val result = process(processor, albumName = "Pyre - Original Soundtrack", albumYear = "2017")
+
+        assertEquals("Pyre - Original Soundtrack", result.albumName)
+        assertEquals("2017", result.year)
+        assertEquals("Pyre - Original Soundtrack", repo.lastInsertedAlbum?.title)
+        assertEquals("2017", repo.lastInsertedAlbum?.year)
+    }
+
+    @Test
     fun secondCallReturnsCachedResult() = runTest {
         val repo = FakeAlbumRepository()
         val processor = AlbumProcessor(repo, FakeArtworkSaver())
 
-        processor.process(cursorData(), trackId = 1L, albumArtistId = 5L) { "1808" }
-        val result = processor.process(cursorData(), trackId = 2L, albumArtistId = 5L) { "1808" }
+        process(processor, trackId = 1L)
+        val result = process(processor, trackId = 2L)
 
         assertEquals(100L, result.albumId)
         assertEquals(1, repo.insertCount)
@@ -78,32 +82,30 @@ class AlbumProcessorTest {
         val repo = FakeAlbumRepository()
         val processor = AlbumProcessor(repo, FakeArtworkSaver())
 
-        processor.process(cursorData(albumId = 100L), trackId = 1L, albumArtistId = 5L) { "1808" }
-        processor.process(cursorData(albumId = 200L), trackId = 2L, albumArtistId = 5L) { "1900" }
+        process(processor, albumId = 100L, trackId = 1L, albumYear = "1808")
+        process(processor, albumId = 200L, trackId = 2L, albumYear = "1900")
 
         assertEquals(2, repo.insertCount)
     }
 
     @Test
-    fun nullAlbumNameFallsBackToUnknown() = runTest {
+    fun unknownAlbumNameIsPassedThrough() = runTest {
         val repo = FakeAlbumRepository()
         val processor = AlbumProcessor(repo, FakeArtworkSaver())
 
-        val result = processor.process(
-            cursorData(albumName = null), trackId = 1L, albumArtistId = 5L
-        ) { "1808" }
+        // MetadataResolver substitutes UNKNOWN_ALBUM before the processor sees the name
+        val result = process(processor, albumName = UNKNOWN_ALBUM)
 
         assertEquals("Unknown Album", result.albumName)
     }
 
     @Test
-    fun nullAlbumIdFallsBackToNegativeOne() = runTest {
+    fun missingAlbumIdIsPassedThroughAsNegativeOne() = runTest {
         val repo = FakeAlbumRepository()
         val processor = AlbumProcessor(repo, FakeArtworkSaver())
 
-        val result = processor.process(
-            cursorData(albumId = null), trackId = 1L, albumArtistId = 5L
-        ) { "1808" }
+        // MusicScanner substitutes -1 when MediaStore has no ALBUM_ID for the row
+        val result = process(processor, albumId = -1L)
 
         assertEquals(-1L, result.albumId)
     }
@@ -113,9 +115,7 @@ class AlbumProcessorTest {
         val repo = FakeAlbumRepository()
         val processor = AlbumProcessor(repo, FakeArtworkSaver())
 
-        processor.process(
-            cursorData(albumName = "Abbey Road"), trackId = 1L, albumArtistId = 5L
-        ) { "1969" }
+        process(processor, albumName = "Abbey Road", albumYear = "1969")
 
         assertEquals(99_999_999, repo.lastInsertedAlbum?.catalogueSortIndex)
         assertNull(repo.lastInsertedAlbum?.catalogueString)
@@ -126,7 +126,7 @@ class AlbumProcessorTest {
         val repo = FakeAlbumRepository()
         val processor = AlbumProcessor(repo, FakeArtworkSaver(artworkPath = null))
 
-        val result = processor.process(cursorData(), trackId = 1L, albumArtistId = 5L) { "1808" }
+        val result = process(processor)
 
         assertNull(result.artworkPath)
     }

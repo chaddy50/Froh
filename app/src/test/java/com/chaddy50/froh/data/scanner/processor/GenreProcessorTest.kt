@@ -3,7 +3,6 @@ package com.chaddy50.froh.data.scanner.processor
 
 import com.chaddy50.froh.data.repository.GenreMappingRepository
 import com.chaddy50.froh.data.repository.GenreRepository
-import com.chaddy50.froh.data.scanner.util.CursorData
 import com.chaddy50.froh.fakes.FakeGenreDao
 import com.chaddy50.froh.fakes.FakeGenreMappingDao
 import kotlinx.coroutines.test.runTest
@@ -14,13 +13,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-
-private fun cursorData(genreName: String? = "Rock") = CursorData(
-    trackId = 1L, trackTitle = "Track", trackNumber = 1,
-    trackDuration = 200000L, discNumber = 1, genreName = genreName,
-    artistId = 1L, artistName = "Artist", albumArtistName = "Artist",
-    albumId = 1L, albumName = "Album", year = "2024", lastModifiedAt = 0L,
-)
 
 private fun createProcessor(
     genreDao: FakeGenreDao = FakeGenreDao(),
@@ -49,22 +41,22 @@ class GenreProcessorProcessTest {
     @Test
     fun returnsGenreIdAndName() = runTest {
         val processor = createProcessor()
-        val result = processor.process(cursorData(genreName = "Rock"))
+        val result = processor.process("Rock")
         assertEquals("Rock", result.genreName)
         assertEquals(1L, result.genreId)
     }
 
     @Test
-    fun nullGenreNameDefaultsToUnknownGenre() = runTest {
+    fun unknownGenreNameIsPassedThrough() = runTest {
         val processor = createProcessor()
-        val result = processor.process(cursorData(genreName = null))
+        val result = processor.process("Unknown Genre")
         assertEquals("Unknown Genre", result.genreName)
     }
 
     @Test
     fun nonClassicalGenreHasNullParentAndIsNotClassical() = runTest {
         val processor = createProcessor()
-        val result = processor.process(cursorData(genreName = "Rock"))
+        val result = processor.process("Rock")
         assertNull(result.parentGenreId)
         assertFalse(result.isClassical)
     }
@@ -73,7 +65,7 @@ class GenreProcessorProcessTest {
     fun classicalSubGenreHasParentIdAndIsClassical() = runTest {
         val processor = createProcessor(genreMappingDao = createSeededGenreMappingDao())
         processor.setUpClassicalMappings()
-        val result = processor.process(cursorData(genreName = "Symphony"))
+        val result = processor.process("Symphony")
         assertTrue(result.isClassical)
         assertNotNull(result.parentGenreId)
     }
@@ -82,7 +74,7 @@ class GenreProcessorProcessTest {
     fun classicalParentGenreIsNotMarkedClassical() = runTest {
         val processor = createProcessor(genreMappingDao = createSeededGenreMappingDao())
         processor.setUpClassicalMappings()
-        val result = processor.process(cursorData(genreName = "Classical"))
+        val result = processor.process("Classical")
         assertFalse(result.isClassical)
     }
 
@@ -90,8 +82,8 @@ class GenreProcessorProcessTest {
     fun secondCallWithSameGenreReturnsCachedId() = runTest {
         val dao = FakeGenreDao()
         val processor = createProcessor(genreDao = dao)
-        val first = processor.process(cursorData(genreName = "Jazz"))
-        val second = processor.process(cursorData(genreName = "Jazz"))
+        val first = processor.process("Jazz")
+        val second = processor.process("Jazz")
         assertEquals(first.genreId, second.genreId)
         assertEquals(1, dao.insertCount)
     }
@@ -100,8 +92,8 @@ class GenreProcessorProcessTest {
     fun differentGenresGetDifferentIds() = runTest {
         val dao = FakeGenreDao()
         val processor = createProcessor(genreDao = dao)
-        val rock = processor.process(cursorData(genreName = "Rock"))
-        val jazz = processor.process(cursorData(genreName = "Jazz"))
+        val rock = processor.process("Rock")
+        val jazz = processor.process("Jazz")
         assertNotEquals(rock.genreId, jazz.genreId)
         assertEquals(2, dao.insertCount)
     }
@@ -127,7 +119,7 @@ class GenreProcessorSetUpClassicalMappingsTest {
             "Piano Concerto", "Ballet", "Violin Concerto",
         )
         for (name in subGenres) {
-            val result = processor.process(cursorData(genreName = name))
+            val result = processor.process(name)
             assertTrue("$name should be classical", result.isClassical)
             assertNotNull("$name should have parentGenreId", result.parentGenreId)
         }
@@ -150,7 +142,7 @@ class GenreProcessorSetUpClassicalMappingsTest {
         )
         val processor = createProcessor(genreMappingDao = mappingDao)
         processor.setUpClassicalMappings()
-        val result = processor.process(cursorData(genreName = "TestGenre"))
+        val result = processor.process("TestGenre")
         assertTrue(result.isClassical)
         assertNotNull(result.parentGenreId)
     }
@@ -159,7 +151,7 @@ class GenreProcessorSetUpClassicalMappingsTest {
     fun emptyMappingsResultsInNoClassicalGenres() = runTest {
         val processor = createProcessor(genreMappingDao = FakeGenreMappingDao())
         processor.setUpClassicalMappings()
-        val result = processor.process(cursorData(genreName = "Symphony"))
+        val result = processor.process("Symphony")
         assertFalse(result.isClassical)
         assertNull(result.parentGenreId)
     }

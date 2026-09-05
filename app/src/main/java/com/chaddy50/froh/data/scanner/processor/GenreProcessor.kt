@@ -2,7 +2,6 @@ package com.chaddy50.froh.data.scanner.processor
 
 import com.chaddy50.froh.data.repository.GenreMappingRepository
 import com.chaddy50.froh.data.repository.GenreRepository
-import com.chaddy50.froh.data.scanner.util.CursorData
 
 private val GENRES_WITHOUT_ARTIST_ARTWORK = listOf("Anime", "Movie", "Video Game")
 
@@ -16,9 +15,8 @@ class GenreProcessor(
     private val GENRE_CLASSICAL = "Classical"
 
     suspend fun process(
-        cursorData: CursorData
+        genreName: String
     ): GenreProcessorResponse {
-        val genreName = cursorData.genreName ?: "Unknown Genre"
         val parentGenreId = getParentGenreId(genreName)
         val isClassical = classicalGenreMappings[genreName] == GENRE_CLASSICAL
 

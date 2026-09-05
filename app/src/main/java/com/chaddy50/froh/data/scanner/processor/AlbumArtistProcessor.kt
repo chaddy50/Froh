@@ -1,7 +1,6 @@
 package com.chaddy50.froh.data.scanner.processor
 
 import com.chaddy50.froh.data.repository.IAlbumArtistRepository
-import com.chaddy50.froh.data.scanner.util.CursorData
 
 class AlbumArtistProcessor(
     private val albumArtistRepository: IAlbumArtistRepository,
@@ -9,9 +8,8 @@ class AlbumArtistProcessor(
     private val processedAlbumArtists: MutableMap<String, Pair<Long, String>> = mutableMapOf()
 
     suspend fun process(
-        cursorData: CursorData,
+        albumArtistName: String,
     ): Pair<Long, String> {
-        val albumArtistName = cursorData.albumArtistName ?: "Unknown Artist"
         processedAlbumArtists[albumArtistName]?.let { return it }
 
         val albumArtistId = albumArtistRepository.findOrInsertAlbumArtist(

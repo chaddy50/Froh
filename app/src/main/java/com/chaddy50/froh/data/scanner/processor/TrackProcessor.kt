@@ -3,13 +3,11 @@ package com.chaddy50.froh.data.scanner.processor
 import android.content.ContentUris
 import android.provider.MediaStore
 import com.chaddy50.froh.data.entity.Track
-import com.chaddy50.froh.data.scanner.util.CursorData
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 class TrackProcessor() {
     fun process(
-        cursorData: CursorData,
         trackId: Long,
         trackNumber: Int,
         genreId: Long,
@@ -25,15 +23,14 @@ class TrackProcessor() {
         albumArtistName: String,
         performanceId: Long?,
         year: String,
+        trackTitle: String,
+        discNumber: Int,
+        trackDuration: Long,
     ): Track {
         val trackUri = ContentUris.withAppendedId(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             trackId
         ).toString()
-        val trackTitle = cursorData.trackTitle ?: "Unknown Title"
-        val discNumber = cursorData.discNumber ?: 0
-        val trackDuration = cursorData.trackDuration ?: 0
-
         return Track(
             trackId,
             trackUri,

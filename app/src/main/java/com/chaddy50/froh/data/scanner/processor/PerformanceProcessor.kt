@@ -3,7 +3,6 @@ package com.chaddy50.froh.data.scanner.processor
 import com.chaddy50.froh.data.entity.Performance
 import com.chaddy50.froh.data.repository.IPerformanceRepository
 import com.chaddy50.froh.data.scanner.util.IArtworkSaver
-import com.chaddy50.froh.data.scanner.util.CursorData
 
 class PerformanceProcessor(
     private val performanceRepository: IPerformanceRepository,
@@ -12,13 +11,14 @@ class PerformanceProcessor(
     private val performanceIdCache: MutableMap<Pair<Long, Long>, Triple<Long, String?, String>> = mutableMapOf()
 
     suspend fun process(
-        cursorData: CursorData,
         isClassical: Boolean,
         trackId: Long,
         genreId: Long,
         albumId: Long,
         artistId: Long,
-        yearResolver: () -> String,
+        albumName: String,
+        artistName: String,
+        year: String,
     ): Triple<Long, String?, String>? {
         if (!isClassical) return null
 
@@ -26,10 +26,6 @@ class PerformanceProcessor(
         if (performance != null) {
             return Triple(performance.first, performance.second, performance.third)
         }
-
-        val albumName = cursorData.albumName ?: "Unknown Album"
-        val artistName = cursorData.artistName ?: "Unknown Artist"
-        val year = yearResolver()
 
         var performanceId = performanceRepository.insert(
             Performance(

@@ -2,93 +2,95 @@ package com.chaddy50.froh.data.scanner.processor
 
 import com.chaddy50.froh.data.entity.Artist
 import com.chaddy50.froh.data.repository.IArtistRepository
-import com.chaddy50.froh.data.scanner.util.CursorData
+import com.chaddy50.froh.data.scanner.util.UNKNOWN_ARTIST
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class ArtistProcessorTest {
 
-    private fun cursorData(
-        artistId: Long? = 10L,
-        artistName: String? = "Beethoven",
-    ) = CursorData(
-        trackId = 1L,
-        trackTitle = null,
-        trackNumber = null,
-        trackDuration = null,
-        discNumber = null,
-        genreName = null,
-        artistId = artistId,
-        artistName = artistName,
-        albumArtistName = null,
-        albumId = null,
-        albumName = null,
-        year = null,
-        0
-    )
-
     @Test
-    fun returnsArtistIdAndName() = runTest {
+    fun returnsArtistIdAndNameFromRepository() = runTest {
         val repo = FakeArtistRepository()
         val processor = ArtistProcessor(repo)
 
-        val result = processor.process(cursorData())
+        val result = processor.process("Beethoven")
 
-        assertEquals(10L, result.first)
+        assertEquals(1L, result.first)
         assertEquals("Beethoven", result.second)
         assertEquals(1, repo.insertCount)
     }
 
     @Test
-    fun secondCallReturnsCachedResult() = runTest {
+    fun sameArtistNameReturnsCachedIdAndInsertsOnce() = runTest {
         val repo = FakeArtistRepository()
         val processor = ArtistProcessor(repo)
 
-        processor.process(cursorData())
-        val result = processor.process(cursorData())
+        val first = processor.process("Beethoven")
+        val second = processor.process("Beethoven")
 
-        assertEquals(10L, result.first)
-        assertEquals("Beethoven", result.second)
+        assertEquals(first.first, second.first)
+        assertEquals("Beethoven", second.second)
         assertEquals(1, repo.insertCount)
     }
 
     @Test
-    fun differentArtistIdsAreNotCached() = runTest {
+    fun differentArtistNamesGetDifferentIds() = runTest {
         val repo = FakeArtistRepository()
         val processor = ArtistProcessor(repo)
 
-        processor.process(cursorData(artistId = 10L, artistName = "Beethoven"))
-        processor.process(cursorData(artistId = 20L, artistName = "Mozart"))
+        val beethoven = processor.process("Beethoven")
+        val mozart = processor.process("Mozart")
 
+        assertNotEquals(beethoven.first, mozart.first)
         assertEquals(2, repo.insertCount)
     }
 
     @Test
-    fun nullArtistNameFallsBackToUnknown() = runTest {
+    fun nullArtistNameFallsBackToUnknownArtist() = runTest {
         val repo = FakeArtistRepository()
         val processor = ArtistProcessor(repo)
 
-        val result = processor.process(cursorData(artistName = null))
+        // MetadataResolver substitutes UNKNOWN_ARTIST before the processor sees the name
+        val result = processor.process(UNKNOWN_ARTIST)
 
         assertEquals("Unknown Artist", result.second)
     }
 
     @Test
-    fun nullArtistIdFallsBackToNegativeOne() = runTest {
+    fun tracksWithSameNameButDifferentMediaStoreIdsCollapseToOneArtist() = runTest {
         val repo = FakeArtistRepository()
         val processor = ArtistProcessor(repo)
 
-        val result = processor.process(cursorData(artistId = null))
+        // Two tracks MediaStore reported under different ARTIST_IDs (one of them <unknown>)
+        // resolve to the same Media3 name, so they must share a single artist row
+        val fromWorkingRow = processor.process("Darren Korb")
+        val fromDegenerateRow = processor.process("Darren Korb")
 
-        assertEquals(-1L, result.first)
+        assertEquals(fromWorkingRow.first, fromDegenerateRow.first)
+        assertEquals(1, repo.insertCount)
+        assertEquals(1, repo.insertedNames.size)
     }
 }
 
 private class FakeArtistRepository : IArtistRepository {
     var insertCount = 0
+    val insertedNames = mutableSetOf<String>()
+    private val artistIds = mutableMapOf<String, Long>()
+    private var nextId = 1L
 
     override suspend fun insert(artist: Artist) {
         insertCount++
+    }
+
+    override suspend fun findOrInsertArtist(artistName: String): Long {
+        artistIds[artistName]?.let { return it }
+
+        insertCount++
+        insertedNames.add(artistName)
+        val artistId = nextId++
+        artistIds[artistName] = artistId
+        return artistId
     }
 }

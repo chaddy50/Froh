@@ -1,28 +1,19 @@
 package com.chaddy50.froh.data.scanner.processor
 
-import com.chaddy50.froh.data.entity.Artist
 import com.chaddy50.froh.data.repository.IArtistRepository
-import com.chaddy50.froh.data.scanner.util.CursorData
 
 class ArtistProcessor(
     private val artistRepository: IArtistRepository,
 ) {
-    private val processedArtists = mutableMapOf<Long, String>()
+    private val processedArtists = mutableMapOf<String, Long>()
 
     suspend fun process(
-        cursorData: CursorData
+        artistName: String
     ): Pair<Long, String> {
-        val artistId = cursorData.artistId ?: -1
-        processedArtists[artistId]?.let { return Pair(artistId, it) }
+        processedArtists[artistName]?.let { return Pair(it, artistName) }
 
-        val artistName = cursorData.artistName ?: "Unknown Artist"
-        artistRepository.insert(
-            Artist(
-                artistId,
-                artistName,
-            )
-        )
-        processedArtists[artistId] = artistName
+        val artistId = artistRepository.findOrInsertArtist(artistName)
+        processedArtists[artistName] = artistId
         return Pair(artistId, artistName)
     }
 }

@@ -21,6 +21,9 @@ interface ArtistDao {
     @Delete
     suspend fun delete(artist: Artist)
 
+    @Query("SELECT * FROM artists WHERE name = :name")
+    suspend fun getArtistByName(name: String): Artist?
+
     @Query("SELECT * FROM artists WHERE id = :id")
     fun getArtistById(id: Int): Flow<Artist?>
 
