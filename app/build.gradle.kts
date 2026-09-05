@@ -74,6 +74,8 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.9.0")
     implementation("androidx.media3:media3-common:1.9.0")
     implementation("androidx.media3:media3-session:1.9.0")
+    implementation("androidx.media3:media3-extractor:1.9.0")
+    implementation("androidx.media3:media3-inspector:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.8.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

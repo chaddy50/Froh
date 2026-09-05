@@ -21,6 +21,8 @@ import com.chaddy50.froh.data.scanner.processor.shouldFetchArtistArtworkForGenre
 import com.chaddy50.froh.data.scanner.util.ArtworkSaver
 import com.chaddy50.froh.data.scanner.util.ColumnIndices
 import com.chaddy50.froh.data.scanner.util.CursorData
+import com.chaddy50.froh.data.scanner.util.Media3MetadataReader
+import com.chaddy50.froh.data.scanner.util.setMaximumParallelMetadataReads
 import com.chaddy50.froh.data.scanner.util.MetadataResolver
 import com.chaddy50.froh.data.scanner.util.getDataFromCursor
 import kotlinx.coroutines.Dispatchers
@@ -56,6 +58,8 @@ class MusicScanner(
             val lastScanTime = prefs.getLong("last_scan_time", 0L)
             val scanStartTime = System.currentTimeMillis() / 1000
 
+            setMaximumParallelMetadataReads(WORKER_COUNT)
+
             genreMappingRepository.seedDefaultClassicalMappingsIfEmpty()
 
             deleteTracksThatAreNoLongerInFileSystem()
@@ -64,16 +68,7 @@ class MusicScanner(
 
             val projection = arrayOf(
                 MediaStore.Audio.AudioColumns._ID,
-                MediaStore.Audio.AudioColumns.GENRE,
                 MediaStore.Audio.AudioColumns.ALBUM_ID,
-                MediaStore.Audio.AudioColumns.ALBUM,
-                MediaStore.Audio.AudioColumns.ARTIST_ID,
-                MediaStore.Audio.AudioColumns.ARTIST,
-                MediaStore.Audio.AudioColumns.ALBUM_ARTIST,
-                MediaStore.Audio.AudioColumns.YEAR,
-                MediaStore.Audio.AudioColumns.TITLE,
-                MediaStore.Audio.AudioColumns.DISC_NUMBER,
-                MediaStore.Audio.AudioColumns.CD_TRACK_NUMBER,
                 MediaStore.Audio.AudioColumns.DURATION,
                 MediaStore.Audio.AudioColumns.DATE_MODIFIED,
             )
@@ -113,7 +108,7 @@ class MusicScanner(
                 coroutineScope {
                     for (chunk in chunks) {
                         launch {
-                            val metadataResolver = MetadataResolver(context)
+                            val metadataResolver = MetadataResolver(Media3MetadataReader(context))
                             val trackProcessor = TrackProcessor()
                             val genreProcessor = GenreProcessor(genreRepository, genreMappingRepository)
                             val artistProcessor = ArtistProcessor(artistRepository)
@@ -126,16 +121,13 @@ class MusicScanner(
                             val trackBuffer = mutableListOf<Track>()
 
                             for (cursorData in chunk) {
-                                metadataResolver.resetForNextTrack()
+                                val metadata = metadataResolver.resolve(cursorData)
 
-                                val yearResolver: () -> String = { metadataResolver.getYear(cursorData) }
-                                val trackNumber = metadataResolver.getTrackNumber(cursorData)
-
-                                val (genreId, genreName, parentGenreId, isClassical) = genreProcessor.process(cursorData)
-                                val (artistId, artistName) = artistProcessor.process(cursorData)
-                                val (albumArtistId, albumArtistName) = albumArtistProcessor.process(cursorData)
-                                val (albumId, albumName, albumArtworkPath, albumYear) = albumProcessor.process(cursorData, cursorData.trackId, albumArtistId, yearResolver)
-                                val performance = performanceProcessor.process(cursorData, isClassical, cursorData.trackId, genreId, albumId, artistId, yearResolver)
+                                val (genreId, genreName, parentGenreId, isClassical) = genreProcessor.process(metadata.genre)
+                                val (artistId, artistName) = artistProcessor.process(metadata.artist)
+                                val (albumArtistId, albumArtistName) = albumArtistProcessor.process(metadata.albumArtist)
+                                val (albumId, albumName, albumArtworkPath, albumYear) = albumProcessor.process(cursorData.albumId ?: -1, cursorData.trackId, albumArtistId, metadata.album, metadata.year)
+                                val performance = performanceProcessor.process(isClassical, cursorData.trackId, genreId, albumId, artistId, metadata.album, metadata.artist, metadata.year)
 
                                 // Always use performance artwork for classical
                                 // Even if it doesn't have artwork, we don't want to use artwork from a different performance
@@ -145,9 +137,8 @@ class MusicScanner(
 
                                 trackBuffer.add(
                                     trackProcessor.process(
-                                        cursorData,
                                         cursorData.trackId,
-                                        trackNumber,
+                                        metadata.trackNumber,
                                         genreId,
                                         genreName,
                                         parentGenreId,
@@ -161,6 +152,9 @@ class MusicScanner(
                                         albumArtistName,
                                         performance?.first,
                                         year,
+                                        metadata.title,
+                                        metadata.discNumber,
+                                        metadata.durationMilliseconds,
                                     )
                                 )
 
@@ -177,7 +171,6 @@ class MusicScanner(
                                 }
                             }
 
-                            metadataResolver.release()
                             if (trackBuffer.isNotEmpty()) {
                                 trackRepository.insertMultiple(trackBuffer)
                             }

@@ -61,6 +61,7 @@ class MusicScannerTest {
             override suspend fun insert(artist: Artist) = Unit
             override suspend fun update(artist: Artist) = Unit
             override suspend fun delete(artist: Artist) = Unit
+            override suspend fun getArtistByName(name: String): Artist? = null
             override fun getArtistById(id: Int): Flow<Artist?> = emptyFlow()
             override fun getAllArtists(): Flow<List<Artist>> = emptyFlow()
         }

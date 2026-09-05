@@ -3,7 +3,6 @@ package com.chaddy50.froh.data.scanner.processor
 import com.chaddy50.froh.data.entity.Album
 import com.chaddy50.froh.data.repository.IAlbumRepository
 import com.chaddy50.froh.data.scanner.util.IArtworkSaver
-import com.chaddy50.froh.data.scanner.util.CursorData
 
 class AlbumProcessor(
     private val albumRepository: IAlbumRepository,
@@ -12,20 +11,17 @@ class AlbumProcessor(
     private val processedAlbums = mutableMapOf<Long, AlbumProcessorResult>()
 
     suspend fun process(
-        cursorData: CursorData,
+        albumId: Long,
         trackId: Long,
         albumArtistId: Long,
-        yearResolver: () -> String,
+        albumName: String,
+        albumYear: String,
     ) : AlbumProcessorResult {
-        val albumId = cursorData.albumId ?: -1
-
         processedAlbums[albumId]?.let { return it }
 
-        val albumName = cursorData.albumName ?: "Unknown Album"
         val catalogueSortIndex = extractCatalogueSortIndex(albumName)
         val catalogueString = extractCatalogueString(albumName)
         val cleanTitle = stripCatalogueFromTitle(albumName)
-        val albumYear = yearResolver()
 
         val albumArtworkPath = artworkSaver.loadAndSaveArtwork(trackId, albumId)
         albumRepository.insert(

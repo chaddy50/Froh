@@ -1,57 +1,47 @@
 package com.chaddy50.froh.data.scanner.util
 
 import android.content.ContentUris
-import android.content.Context
-import android.media.MediaMetadataRetriever
 import android.provider.MediaStore
 import com.chaddy50.froh.utilities.normalizeYear
 import com.chaddy50.froh.utilities.parseTrackNumber
+import com.chaddy50.froh.utilities.resolveId3GenreName
 
-class MetadataResolver(private val context: Context) {
-    private val metadataRetriever = MediaMetadataRetriever()
-    private var hasRetrieverBeenInitializedForTrack = false
+const val UNKNOWN_TITLE = "Unknown Title"
+const val UNKNOWN_ARTIST = "Unknown Artist"
+const val UNKNOWN_ALBUM = "Unknown Album"
+const val UNKNOWN_GENRE = "Unknown Genre"
 
-    fun resetForNextTrack() {
-        hasRetrieverBeenInitializedForTrack = false
-    }
+data class ResolvedTrackMetadata(
+    val title: String,
+    val artist: String,
+    val albumArtist: String,
+    val album: String,
+    val genre: String,
+    val year: String,
+    val trackNumber: Int,
+    val discNumber: Int,
+    val durationMilliseconds: Long,
+)
 
-    fun release() {
-        metadataRetriever.release()
-    }
+class MetadataResolver(private val metadataReader: IMedia3MetadataReader) {
 
-    fun getYear(cursorData: CursorData): String {
-        var year = cursorData.year
-        if (year.isNullOrBlank() || year == "0") {
-            initializeMetadataRetrieverIfNeeded(cursorData.trackId)
-            year = metadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)
-        }
-        return normalizeYear(year)
-    }
-
-    fun getTrackNumber(cursorData: CursorData): Int {
-        var trackNumber = cursorData.trackNumber ?: -1
-        if (trackNumber < 1) {
-            initializeMetadataRetrieverIfNeeded(cursorData.trackId)
-            val trackNumberAsString = metadataRetriever.extractMetadata(
-                MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER
-            )
-            trackNumber = parseTrackNumber(trackNumberAsString)
-        }
-        return trackNumber
-    }
-
-    private fun initializeMetadataRetrieverIfNeeded(trackId: Long) {
-        if (hasRetrieverBeenInitializedForTrack) {
-            return
-        }
-
-        val contentUri = ContentUris.withAppendedId(
+    suspend fun resolve(cursorData: CursorData): ResolvedTrackMetadata {
+        val trackUri = ContentUris.withAppendedId(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            trackId
+            cursorData.trackId
         )
-        context.contentResolver.openAssetFileDescriptor(contentUri, "r")?.use { afd ->
-            metadataRetriever.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-        }
-        hasRetrieverBeenInitializedForTrack = true
+        val metadata = metadataReader.read(trackUri)
+
+        return ResolvedTrackMetadata(
+            title = metadata?.title ?: UNKNOWN_TITLE,
+            artist = metadata?.artist ?: UNKNOWN_ARTIST,
+            albumArtist = metadata?.albumArtist ?: UNKNOWN_ARTIST,
+            album = metadata?.album ?: UNKNOWN_ALBUM,
+            genre = resolveId3GenreName(metadata?.genre) ?: UNKNOWN_GENRE,
+            year = normalizeYear(metadata?.year),
+            trackNumber = parseTrackNumber(metadata?.trackNumber),
+            discNumber = parseTrackNumber(metadata?.discNumber).coerceAtLeast(0),
+            durationMilliseconds = metadata?.durationMilliseconds ?: cursorData.trackDuration ?: 0,
+        )
     }
 }

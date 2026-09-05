@@ -1,6 +1,6 @@
 package com.chaddy50.froh.data.scanner.processor
 
-import com.chaddy50.froh.data.scanner.util.CursorData
+import com.chaddy50.froh.data.scanner.util.UNKNOWN_TITLE
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -12,28 +12,7 @@ import kotlin.time.toDuration
 @RunWith(RobolectricTestRunner::class)
 class TrackProcessorTest {
 
-    private fun cursorData(
-        trackTitle: String? = "Symphony No. 5",
-        trackDuration: Long? = 300000L,
-        discNumber: Int? = 1,
-    ) = CursorData(
-        trackId = 1L,
-        trackTitle = trackTitle,
-        trackNumber = null,
-        trackDuration = trackDuration,
-        discNumber = discNumber,
-        genreName = null,
-        artistId = null,
-        artistName = null,
-        albumArtistName = null,
-        albumId = null,
-        albumName = null,
-        year = null,
-        lastModifiedAt = 0
-    )
-
     private fun process(
-        cursorData: CursorData = cursorData(),
         trackId: Long = 10L,
         trackNumber: Int = 3,
         genreId: Long = 1L,
@@ -49,11 +28,15 @@ class TrackProcessorTest {
         albumArtistName: String = "Beethoven",
         performanceId: Long? = 50L,
         year: String = "1808",
+        trackTitle: String = "Symphony No. 5",
+        discNumber: Int = 1,
+        trackDuration: Long = 300000L,
     ) = TrackProcessor().process(
-        cursorData, trackId, trackNumber, genreId, genreName,
+        trackId, trackNumber, genreId, genreName,
         parentGenreId, parentGenreName, artistId, artistName,
         albumId, albumName, albumArtworkPath, albumArtistId,
-        albumArtistName, performanceId, year,
+        albumArtistName, performanceId, year, trackTitle,
+        discNumber, trackDuration,
     )
 
     @Test
@@ -74,6 +57,8 @@ class TrackProcessorTest {
         assertEquals(50L, track.performanceId)
         assertEquals("/art/30.jpg", track.artworkPath)
         assertEquals("1808", track.year)
+        assertEquals(1, track.discNumber)
+        assertEquals(300000L.toDuration(DurationUnit.MILLISECONDS), track.duration)
     }
 
     @Test
@@ -84,22 +69,30 @@ class TrackProcessorTest {
     }
 
     @Test
-    fun nullTrackTitleFallsBackToUnknownTitle() {
-        val track = process(cursorData = cursorData(trackTitle = null))
+    fun resolvedTitleIsUsedInsteadOfCursorTitle() {
+        // Titles now come from Media3, not the MediaStore row, which for some files is the filename
+        val track = process(trackTitle = "Surviving Exile")
+
+        assertEquals("Surviving Exile", track.title)
+    }
+
+    @Test
+    fun unknownTitleFallbackIsPassedThrough() {
+        val track = process(trackTitle = UNKNOWN_TITLE)
 
         assertEquals("Unknown Title", track.title)
     }
 
     @Test
-    fun nullDiscNumberDefaultsToZero() {
-        val track = process(cursorData = cursorData(discNumber = null))
+    fun missingDiscNumberDefaultsToZero() {
+        val track = process(discNumber = 0)
 
         assertEquals(0, track.discNumber)
     }
 
     @Test
-    fun nullTrackDurationDefaultsToZero() {
-        val track = process(cursorData = cursorData(trackDuration = null))
+    fun missingTrackDurationDefaultsToZero() {
+        val track = process(trackDuration = 0L)
 
         assertEquals(0L.toDuration(DurationUnit.MILLISECONDS), track.duration)
     }
