@@ -12,7 +12,9 @@ import androidx.media3.extractor.metadata.id3.TextInformationFrame
 import androidx.media3.inspector.MetadataRetriever
 import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.withTimeoutOrNull
+import java.io.IOException
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 private const val METADATA_READ_TIMEOUT_MILLISECONDS = 15_000L
 
@@ -53,8 +55,17 @@ class Media3MetadataReader(private val context: Context) : IMedia3MetadataReader
                         val entries = collectMetadataEntries(retriever.retrieveTrackGroups().await())
                         toTrackMetadata(entries, durationMicroseconds)
                     }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            } catch (cancellation: CancellationException) {
+                // Must not be swallowed, or cancelling a scan would look like an unreadable file
+                throw cancellation
+            } catch (malformedMedia: IOException) {
+                malformedMedia.printStackTrace()
+                null
+            } catch (unexpectedState: IllegalStateException) {
+                unexpectedState.printStackTrace()
+                null
+            } catch (unsupportedSource: IllegalArgumentException) {
+                unsupportedSource.printStackTrace()
                 null
             }
         }
@@ -82,15 +93,15 @@ internal fun toTrackMetadata(
     val tagValues = collectTagValues(entries)
 
     return TrackMetadata(
-        title = firstTagValue(tagValues, "TIT2", "TITLE"),
-        artist = firstTagValue(tagValues, "TPE1", "ARTIST"),
-        albumArtist = firstTagValue(tagValues, "TPE2", "ALBUMARTIST"),
-        album = firstTagValue(tagValues, "TALB", "ALBUM"),
-        genre = firstTagValue(tagValues, "TCON", "GENRE"),
+        title = firstTagValue(tagValues, "TIT2", "TT2", "TITLE"),
+        artist = firstTagValue(tagValues, "TPE1", "TP1", "ARTIST"),
+        albumArtist = firstTagValue(tagValues, "TPE2", "TP2", "ALBUMARTIST"),
+        album = firstTagValue(tagValues, "TALB", "TAL", "ALBUM"),
+        genre = firstTagValue(tagValues, "TCON", "TCO", "GENRE"),
         // TDRC is the ID3v2.4 replacement for TYER and wins when a file carries both
-        year = firstTagValue(tagValues, "TDRC", "TYER", "DATE"),
-        trackNumber = firstTagValue(tagValues, "TRCK", "TRACKNUMBER"),
-        discNumber = firstTagValue(tagValues, "TPOS", "DISCNUMBER"),
+        year = firstTagValue(tagValues, "TDRC", "TYER", "TYE", "DATE"),
+        trackNumber = firstTagValue(tagValues, "TRCK", "TRK", "TRACKNUMBER"),
+        discNumber = firstTagValue(tagValues, "TPOS", "TPA", "DISCNUMBER"),
         durationMilliseconds = durationMicroseconds?.takeIf { it > 0 }?.div(1000),
     )
 }

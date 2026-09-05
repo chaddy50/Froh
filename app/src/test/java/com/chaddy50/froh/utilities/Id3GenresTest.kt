@@ -4,16 +4,18 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
+private const val GENRE_EMO = "Emo"
+
 class ResolveId3GenreNameTest {
 
     @Test
     fun parenthesisedCodeResolvesToGenreName() {
-        assertEquals("Emo", resolveId3GenreName("(161)"))
+        assertEquals(GENRE_EMO, resolveId3GenreName("(161)"))
     }
 
     @Test
     fun parenthesisedCodeWithRefinementResolvesFromTable() {
-        assertEquals("Emo", resolveId3GenreName("(161)Emo"))
+        assertEquals(GENRE_EMO, resolveId3GenreName("(161)Emo"))
     }
 
     @Test
@@ -28,7 +30,7 @@ class ResolveId3GenreNameTest {
 
     @Test
     fun bareNumericCodeResolves() {
-        assertEquals("Emo", resolveId3GenreName("161"))
+        assertEquals(GENRE_EMO, resolveId3GenreName("161"))
     }
 
     @Test

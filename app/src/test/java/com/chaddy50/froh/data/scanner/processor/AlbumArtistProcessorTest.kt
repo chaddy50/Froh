@@ -6,6 +6,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+private const val ALBUM_ARTIST_BEETHOVEN = "Beethoven"
+private const val ALBUM_ARTIST_DISASTERPEACE = "Disasterpeace"
+
 class AlbumArtistProcessorTest {
 
     @Test
@@ -13,10 +16,10 @@ class AlbumArtistProcessorTest {
         val repo = FakeAlbumArtistRepository(nextId = 42L)
         val processor = AlbumArtistProcessor(repo)
 
-        val result = processor.process("Beethoven")
+        val result = processor.process(ALBUM_ARTIST_BEETHOVEN)
 
         assertEquals(42L, result.first)
-        assertEquals("Beethoven", result.second)
+        assertEquals(ALBUM_ARTIST_BEETHOVEN, result.second)
         assertEquals(1, repo.insertCount)
     }
 
@@ -25,8 +28,8 @@ class AlbumArtistProcessorTest {
         val repo = FakeAlbumArtistRepository(nextId = 42L)
         val processor = AlbumArtistProcessor(repo)
 
-        processor.process("Beethoven")
-        val result = processor.process("Beethoven")
+        processor.process(ALBUM_ARTIST_BEETHOVEN)
+        val result = processor.process(ALBUM_ARTIST_BEETHOVEN)
 
         assertEquals(42L, result.first)
         assertEquals(1, repo.insertCount)
@@ -37,7 +40,7 @@ class AlbumArtistProcessorTest {
         val repo = FakeAlbumArtistRepository(nextId = 42L)
         val processor = AlbumArtistProcessor(repo)
 
-        processor.process("Beethoven")
+        processor.process(ALBUM_ARTIST_BEETHOVEN)
         processor.process("Mozart")
 
         assertEquals(2, repo.insertCount)
@@ -49,11 +52,11 @@ class AlbumArtistProcessorTest {
         val processor = AlbumArtistProcessor(repo)
 
         // The album artist name now comes from Media3, where MediaStore had nothing at all
-        val result = processor.process("Disasterpeace")
+        val result = processor.process(ALBUM_ARTIST_DISASTERPEACE)
 
         assertEquals(7L, result.first)
-        assertEquals("Disasterpeace", result.second)
-        assertEquals("Disasterpeace", repo.lastRequestedName)
+        assertEquals(ALBUM_ARTIST_DISASTERPEACE, result.second)
+        assertEquals(ALBUM_ARTIST_DISASTERPEACE, repo.lastRequestedName)
     }
 
     @Test

@@ -12,6 +12,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+private const val ARTIST_FALL_OUT_BOY = "Fall Out Boy"
+private const val ALBUM_TAKE_THIS_TO_YOUR_GRAVE = "Take This to Your Grave"
+private const val TITLE_DEAD_ON_ARRIVAL = "Dead on Arrival"
+private const val GENRE_EMO = "Emo"
+private const val YEAR_2003 = "2003"
+private const val DISC_ONE_OF_ONE = "1/1"
+private const val TRACK_TWO_OF_FOURTEEN = "02/14"
+
 @OptIn(UnstableApi::class)
 private fun id3Frame(frameId: String, value: String): Metadata.Entry =
     TextInformationFrame(frameId, null, listOf(value))
@@ -21,26 +29,39 @@ private fun vorbisComment(key: String, value: String): Metadata.Entry = VorbisCo
 
 @OptIn(UnstableApi::class)
 private fun id3Entries(): List<Metadata.Entry> = listOf(
-    id3Frame("TIT2", "Dead on Arrival"),
-    id3Frame("TPE1", "Fall Out Boy"),
-    id3Frame("TPE2", "Fall Out Boy"),
-    id3Frame("TALB", "Take This to Your Grave"),
-    id3Frame("TCON", "Emo"),
-    id3Frame("TRCK", "02/14"),
-    id3Frame("TPOS", "1/1"),
-    id3Frame("TDRC", "2003"),
+    id3Frame("TIT2", TITLE_DEAD_ON_ARRIVAL),
+    id3Frame("TPE1", ARTIST_FALL_OUT_BOY),
+    id3Frame("TPE2", ARTIST_FALL_OUT_BOY),
+    id3Frame("TALB", ALBUM_TAKE_THIS_TO_YOUR_GRAVE),
+    id3Frame("TCON", GENRE_EMO),
+    id3Frame("TRCK", TRACK_TWO_OF_FOURTEEN),
+    id3Frame("TPOS", DISC_ONE_OF_ONE),
+    id3Frame("TDRC", YEAR_2003),
+)
+
+/** ID3v2.2 uses three-character frame ids, which Media3 emits verbatim. */
+@OptIn(UnstableApi::class)
+private fun id3Version2Entries(): List<Metadata.Entry> = listOf(
+    id3Frame("TT2", TITLE_DEAD_ON_ARRIVAL),
+    id3Frame("TP1", ARTIST_FALL_OUT_BOY),
+    id3Frame("TP2", ARTIST_FALL_OUT_BOY),
+    id3Frame("TAL", ALBUM_TAKE_THIS_TO_YOUR_GRAVE),
+    id3Frame("TCO", GENRE_EMO),
+    id3Frame("TRK", TRACK_TWO_OF_FOURTEEN),
+    id3Frame("TPA", DISC_ONE_OF_ONE),
+    id3Frame("TYE", YEAR_2003),
 )
 
 @OptIn(UnstableApi::class)
 private fun vorbisEntries(): List<Metadata.Entry> = listOf(
-    vorbisComment("TITLE", "Dead on Arrival"),
-    vorbisComment("ARTIST", "Fall Out Boy"),
-    vorbisComment("ALBUMARTIST", "Fall Out Boy"),
-    vorbisComment("ALBUM", "Take This to Your Grave"),
-    vorbisComment("GENRE", "Emo"),
-    vorbisComment("TRACKNUMBER", "02/14"),
-    vorbisComment("DISCNUMBER", "1/1"),
-    vorbisComment("DATE", "2003"),
+    vorbisComment("TITLE", TITLE_DEAD_ON_ARRIVAL),
+    vorbisComment("ARTIST", ARTIST_FALL_OUT_BOY),
+    vorbisComment("ALBUMARTIST", ARTIST_FALL_OUT_BOY),
+    vorbisComment("ALBUM", ALBUM_TAKE_THIS_TO_YOUR_GRAVE),
+    vorbisComment("GENRE", GENRE_EMO),
+    vorbisComment("TRACKNUMBER", TRACK_TWO_OF_FOURTEEN),
+    vorbisComment("DISCNUMBER", DISC_ONE_OF_ONE),
+    vorbisComment("DATE", YEAR_2003),
 )
 
 @RunWith(RobolectricTestRunner::class)
@@ -50,28 +71,49 @@ class ToTrackMetadataTest {
     fun id3FramesMapToTrackMetadata() {
         val metadata = toTrackMetadata(id3Entries(), durationMicroseconds = null)
 
-        assertEquals("Dead on Arrival", metadata.title)
-        assertEquals("Fall Out Boy", metadata.artist)
-        assertEquals("Fall Out Boy", metadata.albumArtist)
-        assertEquals("Take This to Your Grave", metadata.album)
-        assertEquals("Emo", metadata.genre)
-        assertEquals("02/14", metadata.trackNumber)
-        assertEquals("1/1", metadata.discNumber)
-        assertEquals("2003", metadata.year)
+        assertEquals(TITLE_DEAD_ON_ARRIVAL, metadata.title)
+        assertEquals(ARTIST_FALL_OUT_BOY, metadata.artist)
+        assertEquals(ARTIST_FALL_OUT_BOY, metadata.albumArtist)
+        assertEquals(ALBUM_TAKE_THIS_TO_YOUR_GRAVE, metadata.album)
+        assertEquals(GENRE_EMO, metadata.genre)
+        assertEquals(TRACK_TWO_OF_FOURTEEN, metadata.trackNumber)
+        assertEquals(DISC_ONE_OF_ONE, metadata.discNumber)
+        assertEquals(YEAR_2003, metadata.year)
+    }
+
+    @Test
+    fun legacyId3Version2FramesMapToTrackMetadata() {
+        val metadata = toTrackMetadata(id3Version2Entries(), durationMicroseconds = null)
+
+        assertEquals(TITLE_DEAD_ON_ARRIVAL, metadata.title)
+        assertEquals(ARTIST_FALL_OUT_BOY, metadata.artist)
+        assertEquals(ARTIST_FALL_OUT_BOY, metadata.albumArtist)
+        assertEquals(ALBUM_TAKE_THIS_TO_YOUR_GRAVE, metadata.album)
+        assertEquals(GENRE_EMO, metadata.genre)
+        assertEquals(TRACK_TWO_OF_FOURTEEN, metadata.trackNumber)
+        assertEquals(DISC_ONE_OF_ONE, metadata.discNumber)
+        assertEquals(YEAR_2003, metadata.year)
+    }
+
+    @Test
+    fun modernId3FramesWinOverLegacyAliases() {
+        val entries = id3Version2Entries() + id3Frame("TIT2", "Modern Title")
+
+        assertEquals("Modern Title", toTrackMetadata(entries, durationMicroseconds = null).title)
     }
 
     @Test
     fun vorbisCommentsMapToTrackMetadata() {
         val metadata = toTrackMetadata(vorbisEntries(), durationMicroseconds = null)
 
-        assertEquals("Dead on Arrival", metadata.title)
-        assertEquals("Fall Out Boy", metadata.artist)
-        assertEquals("Fall Out Boy", metadata.albumArtist)
-        assertEquals("Take This to Your Grave", metadata.album)
-        assertEquals("Emo", metadata.genre)
-        assertEquals("02/14", metadata.trackNumber)
-        assertEquals("1/1", metadata.discNumber)
-        assertEquals("2003", metadata.year)
+        assertEquals(TITLE_DEAD_ON_ARRIVAL, metadata.title)
+        assertEquals(ARTIST_FALL_OUT_BOY, metadata.artist)
+        assertEquals(ARTIST_FALL_OUT_BOY, metadata.albumArtist)
+        assertEquals(ALBUM_TAKE_THIS_TO_YOUR_GRAVE, metadata.album)
+        assertEquals(GENRE_EMO, metadata.genre)
+        assertEquals(TRACK_TWO_OF_FOURTEEN, metadata.trackNumber)
+        assertEquals(DISC_ONE_OF_ONE, metadata.discNumber)
+        assertEquals(YEAR_2003, metadata.year)
     }
 
     @Test
@@ -86,10 +128,10 @@ class ToTrackMetadataTest {
     fun tdrcIsPreferredOverTyer() {
         val entries = listOf(
             id3Frame("TYER", "1999"),
-            id3Frame("TDRC", "2003"),
+            id3Frame("TDRC", YEAR_2003),
         )
 
-        assertEquals("2003", toTrackMetadata(entries, durationMicroseconds = null).year)
+        assertEquals(YEAR_2003, toTrackMetadata(entries, durationMicroseconds = null).year)
     }
 
     @Test

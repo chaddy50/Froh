@@ -8,6 +8,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
+private const val ARTIST_BEETHOVEN = "Beethoven"
+
 class ArtistProcessorTest {
 
     @Test
@@ -15,10 +17,10 @@ class ArtistProcessorTest {
         val repo = FakeArtistRepository()
         val processor = ArtistProcessor(repo)
 
-        val result = processor.process("Beethoven")
+        val result = processor.process(ARTIST_BEETHOVEN)
 
         assertEquals(1L, result.first)
-        assertEquals("Beethoven", result.second)
+        assertEquals(ARTIST_BEETHOVEN, result.second)
         assertEquals(1, repo.insertCount)
     }
 
@@ -27,11 +29,11 @@ class ArtistProcessorTest {
         val repo = FakeArtistRepository()
         val processor = ArtistProcessor(repo)
 
-        val first = processor.process("Beethoven")
-        val second = processor.process("Beethoven")
+        val first = processor.process(ARTIST_BEETHOVEN)
+        val second = processor.process(ARTIST_BEETHOVEN)
 
         assertEquals(first.first, second.first)
-        assertEquals("Beethoven", second.second)
+        assertEquals(ARTIST_BEETHOVEN, second.second)
         assertEquals(1, repo.insertCount)
     }
 
@@ -40,7 +42,7 @@ class ArtistProcessorTest {
         val repo = FakeArtistRepository()
         val processor = ArtistProcessor(repo)
 
-        val beethoven = processor.process("Beethoven")
+        val beethoven = processor.process(ARTIST_BEETHOVEN)
         val mozart = processor.process("Mozart")
 
         assertNotEquals(beethoven.first, mozart.first)

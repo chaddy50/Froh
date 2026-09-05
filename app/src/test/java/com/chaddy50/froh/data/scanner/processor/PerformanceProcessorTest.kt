@@ -95,7 +95,7 @@ class PerformanceProcessorTest {
             year = "1901",
         )
 
-        val performance = repo.lastInsertedPerformance!!
+        val performance = requireNotNull(repo.lastInsertedPerformance)
         assertEquals("Piano Concerto No. 2", performance.albumName)
         assertEquals("Rachmaninoff", performance.artistName)
         assertEquals("1901", performance.year)

@@ -10,6 +10,14 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+private const val ALBUM_SYMPHONY = "Symphony No. 5"
+private const val ALBUM_ABBEY_ROAD = "Abbey Road"
+private const val ALBUM_PYRE = "Pyre - Original Soundtrack"
+private const val ALBUM_PIANO_SONATA = "Piano Sonata K. 545"
+private const val ALBUM_HUNGARIAN_DANCE = "Hungarian Dance WoO 1"
+private const val YEAR_1808 = "1808"
+private const val YEAR_2017 = "2017"
+
 class AlbumProcessorTest {
 
     private suspend fun process(
@@ -18,7 +26,7 @@ class AlbumProcessorTest {
         trackId: Long = 1L,
         albumArtistId: Long = 5L,
         albumName: String = "Symphony No. 5 Op. 67",
-        albumYear: String = "1808",
+        albumYear: String = YEAR_1808,
     ) = processor.process(albumId, trackId, albumArtistId, albumName, albumYear)
 
     @Test
@@ -30,9 +38,9 @@ class AlbumProcessorTest {
         val result = process(processor)
 
         assertEquals(100L, result.albumId)
-        assertEquals("Symphony No. 5", result.albumName)
+        assertEquals(ALBUM_SYMPHONY, result.albumName)
         assertEquals("/art/100.jpg", result.artworkPath)
-        assertEquals("1808", result.year)
+        assertEquals(YEAR_1808, result.year)
     }
 
     @Test
@@ -44,11 +52,11 @@ class AlbumProcessorTest {
 
         val album = repo.lastInsertedAlbum!!
         assertEquals(100L, album.id)
-        assertEquals("Symphony No. 5", album.title)
+        assertEquals(ALBUM_SYMPHONY, album.title)
         assertEquals(670_000, album.catalogueSortIndex)
         assertEquals("Op. 67", album.catalogueString)
         assertEquals(5L, album.artistId)
-        assertEquals("1808", album.year)
+        assertEquals(YEAR_1808, album.year)
     }
 
     @Test
@@ -57,12 +65,12 @@ class AlbumProcessorTest {
         val processor = AlbumProcessor(repo, FakeArtworkSaver())
 
         // Album name and year now come from Media3, not the MediaStore row
-        val result = process(processor, albumName = "Pyre - Original Soundtrack", albumYear = "2017")
+        val result = process(processor, albumName = ALBUM_PYRE, albumYear = YEAR_2017)
 
-        assertEquals("Pyre - Original Soundtrack", result.albumName)
-        assertEquals("2017", result.year)
-        assertEquals("Pyre - Original Soundtrack", repo.lastInsertedAlbum?.title)
-        assertEquals("2017", repo.lastInsertedAlbum?.year)
+        assertEquals(ALBUM_PYRE, result.albumName)
+        assertEquals(YEAR_2017, result.year)
+        assertEquals(ALBUM_PYRE, repo.lastInsertedAlbum?.title)
+        assertEquals(YEAR_2017, repo.lastInsertedAlbum?.year)
     }
 
     @Test
@@ -82,7 +90,7 @@ class AlbumProcessorTest {
         val repo = FakeAlbumRepository()
         val processor = AlbumProcessor(repo, FakeArtworkSaver())
 
-        process(processor, albumId = 100L, trackId = 1L, albumYear = "1808")
+        process(processor, albumId = 100L, trackId = 1L, albumYear = YEAR_1808)
         process(processor, albumId = 200L, trackId = 2L, albumYear = "1900")
 
         assertEquals(2, repo.insertCount)
@@ -115,7 +123,7 @@ class AlbumProcessorTest {
         val repo = FakeAlbumRepository()
         val processor = AlbumProcessor(repo, FakeArtworkSaver())
 
-        process(processor, albumName = "Abbey Road", albumYear = "1969")
+        process(processor, albumName = ALBUM_ABBEY_ROAD, albumYear = "1969")
 
         assertEquals(99_999_999, repo.lastInsertedAlbum?.catalogueSortIndex)
         assertNull(repo.lastInsertedAlbum?.catalogueString)
@@ -162,7 +170,7 @@ class ExtractCatalogueSortIndexTest {
 
     @Test
     fun kWithDot() {
-        assertEquals(5_450_000, extractCatalogueSortIndex("Piano Sonata K. 545"))
+        assertEquals(5_450_000, extractCatalogueSortIndex(ALBUM_PIANO_SONATA))
     }
 
     @Test
@@ -238,7 +246,7 @@ class ExtractCatalogueSortIndexTest {
 
     @Test
     fun noMatchReturnsDefault() {
-        assertEquals(99_999_999, extractCatalogueSortIndex("Symphony No. 5"))
+        assertEquals(99_999_999, extractCatalogueSortIndex(ALBUM_SYMPHONY))
     }
 
     @Test
@@ -248,7 +256,7 @@ class ExtractCatalogueSortIndexTest {
 
     @Test
     fun plainAlbumNameReturnsDefault() {
-        assertEquals(99_999_999, extractCatalogueSortIndex("Abbey Road"))
+        assertEquals(99_999_999, extractCatalogueSortIndex(ALBUM_ABBEY_ROAD))
     }
 
     // --- Edge cases ---
@@ -297,7 +305,7 @@ class ExtractCatalogueSortIndexTest {
     @Test
     fun woo() {
         // WoO 1 = 1*10_000_000 + 1*10000 + 0 + 0 = 10_010_000
-        assertEquals(10_010_000, extractCatalogueSortIndex("Hungarian Dance WoO 1"))
+        assertEquals(10_010_000, extractCatalogueSortIndex(ALBUM_HUNGARIAN_DANCE))
     }
 
     @Test
@@ -331,7 +339,7 @@ class ExtractCatalogueStringTest {
 
     @Test
     fun kWithDot() {
-        assertEquals("K. 545", extractCatalogueString("Piano Sonata K. 545"))
+        assertEquals("K. 545", extractCatalogueString(ALBUM_PIANO_SONATA))
     }
 
     @Test
@@ -376,7 +384,7 @@ class ExtractCatalogueStringTest {
 
     @Test
     fun noMatchReturnsNull() {
-        assertNull(extractCatalogueString("Symphony No. 5"))
+        assertNull(extractCatalogueString(ALBUM_SYMPHONY))
     }
 
     @Test
@@ -386,7 +394,7 @@ class ExtractCatalogueStringTest {
 
     @Test
     fun plainAlbumNameReturnsNull() {
-        assertNull(extractCatalogueString("Abbey Road"))
+        assertNull(extractCatalogueString(ALBUM_ABBEY_ROAD))
     }
 
     @Test
@@ -415,7 +423,7 @@ class ExtractCatalogueStringTest {
 
     @Test
     fun woo() {
-        assertEquals("WoO 1", extractCatalogueString("Hungarian Dance WoO 1"))
+        assertEquals("WoO 1", extractCatalogueString(ALBUM_HUNGARIAN_DANCE))
     }
 }
 
@@ -427,7 +435,7 @@ class StripCatalogueFromTitleTest {
 
     @Test
     fun stripsFromStartWithDash() {
-        assertEquals("Symphony No. 5", stripCatalogueFromTitle("Op. 67 - Symphony No. 5"))
+        assertEquals(ALBUM_SYMPHONY, stripCatalogueFromTitle("Op. 67 - Symphony No. 5"))
     }
 
     @Test
@@ -437,7 +445,7 @@ class StripCatalogueFromTitleTest {
 
     @Test
     fun stripsFromEndWithSpaceOnly() {
-        assertEquals("Piano Sonata", stripCatalogueFromTitle("Piano Sonata K. 545"))
+        assertEquals("Piano Sonata", stripCatalogueFromTitle(ALBUM_PIANO_SONATA))
     }
 
     @Test
@@ -447,7 +455,7 @@ class StripCatalogueFromTitleTest {
 
     @Test
     fun noMatchReturnsOriginal() {
-        assertEquals("Abbey Road", stripCatalogueFromTitle("Abbey Road"))
+        assertEquals(ALBUM_ABBEY_ROAD, stripCatalogueFromTitle(ALBUM_ABBEY_ROAD))
     }
 
     @Test
@@ -472,7 +480,7 @@ class StripCatalogueFromTitleTest {
 
     @Test
     fun stripsWoo() {
-        assertEquals("Hungarian Dance", stripCatalogueFromTitle("Hungarian Dance WoO 1"))
+        assertEquals("Hungarian Dance", stripCatalogueFromTitle(ALBUM_HUNGARIAN_DANCE))
     }
 }
 

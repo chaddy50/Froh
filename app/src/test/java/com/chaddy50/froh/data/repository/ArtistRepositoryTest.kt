@@ -7,6 +7,8 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+private const val ARTIST_DARREN_KORB = "Darren Korb"
+
 class ArtistRepositoryFindOrInsertArtistTest {
 
     @Test
@@ -14,11 +16,11 @@ class ArtistRepositoryFindOrInsertArtistTest {
         val dao = FakeArtistDao()
         val repository = ArtistRepository(dao)
 
-        val artistId = repository.findOrInsertArtist("Darren Korb")
+        val artistId = repository.findOrInsertArtist(ARTIST_DARREN_KORB)
 
         assertTrue("expected a real id, got $artistId", artistId > 0L)
         assertEquals(1, dao.insertCount)
-        assertEquals("Darren Korb", dao.artists["Darren Korb"]?.name)
+        assertEquals(ARTIST_DARREN_KORB, dao.artists[ARTIST_DARREN_KORB]?.name)
     }
 
     @Test
@@ -26,8 +28,8 @@ class ArtistRepositoryFindOrInsertArtistTest {
         val dao = FakeArtistDao()
         val repository = ArtistRepository(dao)
 
-        val firstId = repository.findOrInsertArtist("Darren Korb")
-        val secondId = repository.findOrInsertArtist("Darren Korb")
+        val firstId = repository.findOrInsertArtist(ARTIST_DARREN_KORB)
+        val secondId = repository.findOrInsertArtist(ARTIST_DARREN_KORB)
 
         assertEquals(firstId, secondId)
     }
@@ -37,8 +39,8 @@ class ArtistRepositoryFindOrInsertArtistTest {
         val dao = FakeArtistDao()
         val repository = ArtistRepository(dao)
 
-        repository.findOrInsertArtist("Darren Korb")
-        repository.findOrInsertArtist("Darren Korb")
+        repository.findOrInsertArtist(ARTIST_DARREN_KORB)
+        repository.findOrInsertArtist(ARTIST_DARREN_KORB)
 
         assertEquals(1, dao.insertCount)
     }
@@ -48,7 +50,7 @@ class ArtistRepositoryFindOrInsertArtistTest {
         val dao = FakeArtistDao()
         val repository = ArtistRepository(dao)
 
-        val korbId = repository.findOrInsertArtist("Darren Korb")
+        val korbId = repository.findOrInsertArtist(ARTIST_DARREN_KORB)
         val disasterpeaceId = repository.findOrInsertArtist("Disasterpeace")
 
         assertNotEquals(korbId, disasterpeaceId)
