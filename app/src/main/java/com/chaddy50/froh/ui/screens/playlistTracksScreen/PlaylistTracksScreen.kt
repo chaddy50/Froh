@@ -53,6 +53,7 @@ fun PlaylistTracksScreen(
                             isCurrentlyPlaying = currentTrack?.mediaId == track.id.toString(),
                             onTrackClicked = { playbackViewModel.playTrack(track, uiState.tracks) },
                             onTrackLongPressed = { trackWithMenu = track },
+                            showTrackNumber = false,
                         )
                         DropdownMenu(
                             expanded = trackWithMenu?.id == track.id,
