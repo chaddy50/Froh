@@ -17,6 +17,7 @@ class FakePlaylistDao(
     private val playlistIdsContainingGenreFlow: MutableStateFlow<List<Long>> = MutableStateFlow(emptyList()),
 ) : PlaylistDao {
     val insertedPlaylists = mutableListOf<Playlist>()
+    val updatedPlaylists = mutableListOf<Playlist>()
     val deletedPlaylists = mutableListOf<Playlist>()
     val insertedPlaylistTracks = mutableListOf<PlaylistTrack>()
     val deletedPlaylistTracks = mutableListOf<Pair<Long, Long>>()
@@ -35,6 +36,10 @@ class FakePlaylistDao(
         val id = nextPlaylistId++
         insertedPlaylists.add(playlist.copy(id = id))
         return id
+    }
+
+    override suspend fun update(playlist: Playlist) {
+        updatedPlaylists.add(playlist)
     }
 
     override suspend fun deletePlaylist(playlist: Playlist) {

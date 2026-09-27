@@ -1,11 +1,23 @@
 package com.chaddy50.froh.data.repository
 
+import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.fakes.FakePlaylistDao
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class PlaylistRepositoryTest {
+
+    @Test
+    fun updateDelegatesToDaoWithGivenPlaylist() = runTest {
+        val dao = FakePlaylistDao()
+        val repo = PlaylistRepository(dao)
+        val playlist = Playlist(id = 1, name = "Renamed")
+
+        repo.update(playlist)
+
+        assertEquals(listOf(playlist), dao.updatedPlaylists)
+    }
 
     @Test
     fun addTrackToPlaylistInsertsWithNextPosition() = runTest {

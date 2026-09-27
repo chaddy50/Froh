@@ -9,6 +9,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -30,6 +32,7 @@ import com.chaddy50.froh.ui.composables.CreateNewPlaylistDialog
 import com.chaddy50.froh.ui.composables.EmptyStateContent
 import com.chaddy50.froh.ui.composables.EntityCard
 import com.chaddy50.froh.ui.composables.EntityScreen
+import com.chaddy50.froh.ui.composables.RenamePlaylistDialog
 
 @Composable
 fun PlaylistsScreen(
@@ -42,6 +45,8 @@ fun PlaylistsScreen(
 
     var showCreateDialog by remember { mutableStateOf(false) }
     var playlistToDelete by remember { mutableStateOf<Playlist?>(null) }
+    var playlistToRename by remember { mutableStateOf<Playlist?>(null) }
+    var playlistWithMenu by remember { mutableStateOf<Playlist?>(null) }
 
     EntityScreen(
         isLoading = uiState.isLoading,
@@ -56,15 +61,36 @@ fun PlaylistsScreen(
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(uiState.playlists) { playlist ->
-                            EntityCard(
-                                title = playlist.name,
-                                onClick = {
-                                    navController.navigate(PlaylistTracksRoute(playlistId = playlist.id, title = playlist.name))
-                                },
-                                onLongClick = {
-                                    playlistToDelete = playlist
-                                },
-                            )
+                            Box {
+                                EntityCard(
+                                    title = playlist.name,
+                                    onClick = {
+                                        navController.navigate(PlaylistTracksRoute(playlistId = playlist.id, title = playlist.name))
+                                    },
+                                    onLongClick = {
+                                        playlistWithMenu = playlist
+                                    },
+                                )
+                                DropdownMenu(
+                                    expanded = playlistWithMenu?.id == playlist.id,
+                                    onDismissRequest = { playlistWithMenu = null },
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Rename") },
+                                        onClick = {
+                                            playlistToRename = playlist
+                                            playlistWithMenu = null
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Delete") },
+                                        onClick = {
+                                            playlistToDelete = playlist
+                                            playlistWithMenu = null
+                                        },
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -108,6 +134,19 @@ fun PlaylistsScreen(
             dismissButton = {
                 TextButton(onClick = { playlistToDelete = null }) { Text("Cancel") }
             },
+        )
+    }
+
+    playlistToRename?.let { playlist ->
+        RenamePlaylistDialog(
+            currentName = playlist.name,
+            onConfirm = { newName ->
+                if (newName.isNotBlank()) {
+                    playlistViewModel.renamePlaylist(playlist, newName)
+                }
+                playlistToRename = null
+            },
+            onDismiss = { playlistToRename = null },
         )
     }
 }

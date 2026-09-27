@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.data.entity.PlaylistTrack
 import com.chaddy50.froh.data.entity.Track
@@ -31,6 +32,9 @@ interface PlaylistDao {
 
     @Insert
     suspend fun insertPlaylist(playlist: Playlist): Long
+
+    @Update
+    suspend fun update(playlist: Playlist)
 
     @Delete
     suspend fun deletePlaylist(playlist: Playlist)

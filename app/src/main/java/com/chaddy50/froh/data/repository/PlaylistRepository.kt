@@ -18,6 +18,10 @@ class PlaylistRepository(private val playlistDao: PlaylistDao) {
         return playlistDao.insertPlaylist(Playlist(name = name))
     }
 
+    suspend fun update(playlist: Playlist) {
+        playlistDao.update(playlist)
+    }
+
     suspend fun deletePlaylist(playlist: Playlist) {
         playlistDao.deletePlaylist(playlist)
     }
