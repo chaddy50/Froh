@@ -22,6 +22,7 @@ import com.chaddy50.froh.data.entity.Genre
 import com.chaddy50.froh.data.entity.Performance
 import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.data.entity.Track
+import com.chaddy50.froh.utilities.chooseAlbumArtworkPath
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
@@ -197,20 +198,28 @@ class AutoLibraryCallback(
             .map { it.toMediaItem(genreId) }
 
     private suspend fun getAlbumItems(genreId: Long, albumArtistId: Long): List<MediaItem> {
-        val albums = if (isClassicalGenre(genreId)) {
+        val classical = isClassicalGenre(genreId)
+        val albums = if (classical) {
             // Classical: show all albums for the artist sorted by catalogue number
             application.albumRepository.getAlbumsForArtist(albumArtistId, true).first()
         } else {
             // Non-classical: only albums in this specific genre, sorted by year
             application.albumRepository.getAlbumsForArtistInGenre(albumArtistId, genreId, false).first()
         }
-        val classical = isClassicalGenre(genreId)
-        return albums.map {
-            if (classical) {
-                it.toMediaItem(genreId, albumArtistId, isPlayable = false, isBrowsable = true)
-            } else {
-                it.toMediaItem(genreId, albumArtistId, isPlayable = true, isBrowsable = false)
-            }
+        val composerPortraitPath = if (classical) {
+            application.albumArtistRepository.getAlbumArtistById(albumArtistId).first()?.portraitPath
+        } else {
+            null
+        }
+        return albums.map { album ->
+            album.toMediaItem(
+                genreId = genreId,
+                albumArtistId = albumArtistId,
+                isPlayable = !classical,
+                isBrowsable = classical,
+                isClassical = classical,
+                composerPortraitPath = composerPortraitPath,
+            )
         }
     }
 
@@ -395,13 +404,22 @@ class AutoLibraryCallback(
             .build()
     }
 
-    private fun Album.toMediaItem(genreId: Long, albumArtistId: Long, isPlayable: Boolean = false, isBrowsable: Boolean = true): MediaItem {
+    private fun Album.toMediaItem(
+        genreId: Long,
+        albumArtistId: Long,
+        isPlayable: Boolean,
+        isBrowsable: Boolean,
+        isClassical: Boolean,
+        composerPortraitPath: String?,
+    ): MediaItem {
         val metadataBuilder = MediaMetadata.Builder()
             .setTitle(title)
             .setSubtitle(year)
             .setIsPlayable(isPlayable)
             .setIsBrowsable(isBrowsable)
-        artworkPath?.let { metadataBuilder.setArtworkUri(artworkUri(it)) }
+        chooseAlbumArtworkPath(isClassical, artworkPath, composerPortraitPath)?.let {
+            metadataBuilder.setArtworkUri(artworkUri(it))
+        }
         return MediaItem.Builder()
             .setMediaId("genre/$genreId/artist/$albumArtistId/album/$id")
             .setMediaMetadata(metadataBuilder.build())
@@ -425,14 +443,23 @@ class AutoLibraryCallback(
             )
             .build()
 
-    private fun Track.toPlayableMediaItem(): MediaItem {
+    private suspend fun Track.toPlayableMediaItem(): MediaItem {
         val metadataBuilder = MediaMetadata.Builder()
             .setTitle(title)
             .setArtist(artistName)
             .setAlbumTitle(albumName)
             .setIsPlayable(true)
             .setIsBrowsable(false)
-        artworkPath?.let { metadataBuilder.setArtworkUri(artworkUri(it)) }
+        // The only genres with a parentGenreId in this app are classical sub-genres.
+        val isClassicalTrack = parentGenreId != null
+        val composerPortraitPath = if (isClassicalTrack && artworkPath == null) {
+            application.albumArtistRepository.getAlbumArtistById(albumArtistId).first()?.portraitPath
+        } else {
+            null
+        }
+        chooseAlbumArtworkPath(isClassicalTrack, artworkPath, composerPortraitPath)?.let {
+            metadataBuilder.setArtworkUri(artworkUri(it))
+        }
         return MediaItem.Builder()
             .setMediaId("$TRACK_PREFIX$id")
             .setUri(uri)

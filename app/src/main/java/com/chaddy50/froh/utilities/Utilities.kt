@@ -41,6 +41,13 @@ fun chooseAlbumLabel(isClassical: Boolean): String =
 fun chooseArtistLabel(isClassical: Boolean): String =
     if (isClassical) "composers" else "artists"
 
+fun chooseAlbumArtworkPath(
+    isClassical: Boolean,
+    ownArtworkPath: String?,
+    albumArtistPortraitPath: String?,
+): String? =
+    if (isClassical) ownArtworkPath ?: albumArtistPortraitPath else ownArtworkPath
+
 fun formatMillisecondsIntoMinutesAndSeconds(milliseconds: Long): String {
     val totalSeconds = milliseconds / 1000
     val minutes = totalSeconds / 60

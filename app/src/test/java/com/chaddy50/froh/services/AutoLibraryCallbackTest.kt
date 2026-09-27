@@ -1,5 +1,6 @@
 package com.chaddy50.froh.services
 
+import android.net.Uri
 import com.chaddy50.froh.data.entity.Album
 import com.chaddy50.froh.data.entity.AlbumArtist
 import com.chaddy50.froh.data.entity.Genre
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -140,6 +142,83 @@ class AutoLibraryCallbackTest {
         assertEquals(emptyList<Any>(), callback.getChildrenFor("genre/abc"))
         assertEquals(emptyList<Any>(), callback.getChildrenFor("genre/1/artist/xyz"))
         assertEquals(emptyList<Any>(), callback.getChildrenFor("genre/1/artist/2/album/nope"))
+    }
+
+    // endregion
+
+    // region composer picture fallback
+
+    @Test
+    fun classicalAlbumWithNoArtworkFallsBackToComposerPortrait() = runTest {
+        val callback = createCallback(this)
+        // A sub-genre makes genre 1 classical.
+        genresFlow.value = listOf(Genre(id = 2, name = "Orchestral", parentGenreId = 1))
+        albumArtistsFlow.value = listOf(
+            AlbumArtist(id = 2, name = "Bach", sortName = "Bach", portraitPath = "/portraits/bach.jpg"),
+        )
+        albumsFlow.value = listOf(
+            Album(id = 5, title = "Goldberg Variations", catalogueSortIndex = null, artistId = 2, year = "1741"),
+        )
+
+        val items = callback.getChildrenFor("genre/1/artist/2")
+
+        assertEquals(
+            Uri.parse("content://com.chaddy50.froh.artwork/portraits/bach.jpg"),
+            items[0].mediaMetadata.artworkUri,
+        )
+    }
+
+    @Test
+    fun classicalAlbumWithOwnArtworkKeepsItOverComposerPortrait() = runTest {
+        val callback = createCallback(this)
+        genresFlow.value = listOf(Genre(id = 2, name = "Orchestral", parentGenreId = 1))
+        albumArtistsFlow.value = listOf(
+            AlbumArtist(id = 2, name = "Bach", sortName = "Bach", portraitPath = "/portraits/bach.jpg"),
+        )
+        albumsFlow.value = listOf(
+            Album(id = 5, title = "Goldberg Variations", catalogueSortIndex = null, artistId = 2, year = "1741", artworkPath = "/art/goldberg.jpg"),
+        )
+
+        val items = callback.getChildrenFor("genre/1/artist/2")
+
+        assertEquals(
+            Uri.parse("content://com.chaddy50.froh.artwork/art/goldberg.jpg"),
+            items[0].mediaMetadata.artworkUri,
+        )
+    }
+
+    @Test
+    fun nonClassicalAlbumWithNoArtworkDoesNotFallBackToPortrait() = runTest {
+        val callback = createCallback(this)
+        // No sub-genres → non-classical
+        albumArtistsFlow.value = listOf(
+            AlbumArtist(id = 2, name = "Pink Floyd", sortName = "Pink Floyd", portraitPath = "/portraits/pf.jpg"),
+        )
+        albumsFlow.value = listOf(
+            Album(id = 5, title = "The Wall", catalogueSortIndex = null, artistId = 2, year = "1979"),
+        )
+
+        val items = callback.getChildrenFor("genre/1/artist/2")
+
+        assertNull(items[0].mediaMetadata.artworkUri)
+    }
+
+    @Test
+    fun classicalPerformanceTrackWithNoArtworkFallsBackToComposerPortrait() = runTest {
+        val callback = createCallback(this)
+        albumArtistsFlow.value = listOf(
+            AlbumArtist(id = 2, name = "Bach", sortName = "Bach", portraitPath = "/portraits/bach.jpg"),
+        )
+        tracksFlow.value = listOf(
+            testTrack(id = 20, albumArtistId = 2, parentGenreId = 1, performanceId = 4, artworkPath = null),
+        )
+
+        val items = callback.getChildrenFor("genre/1/artist/2/album/3/perf/4")
+
+        assertEquals(
+            Uri.parse("content://com.chaddy50.froh.artwork/portraits/bach.jpg"),
+            items[0].mediaMetadata.artworkUri,
+        )
     }
 
     // endregion

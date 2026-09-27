@@ -85,6 +85,29 @@ class ChooseArtistLabelTest {
     }
 }
 
+class ChooseAlbumArtworkPathTest {
+
+    @Test
+    fun classicalPrefersOwnArtworkOverPortrait() {
+        assertEquals("art.jpg", chooseAlbumArtworkPath(true, "art.jpg", "portrait.jpg"))
+    }
+
+    @Test
+    fun classicalFallsBackToPortraitWhenNoOwnArtwork() {
+        assertEquals("portrait.jpg", chooseAlbumArtworkPath(true, null, "portrait.jpg"))
+    }
+
+    @Test
+    fun classicalReturnsNullWhenNeitherArtworkNorPortraitExists() {
+        assertEquals(null, chooseAlbumArtworkPath(true, null, null))
+    }
+
+    @Test
+    fun nonClassicalNeverFallsBackToPortrait() {
+        assertEquals(null, chooseAlbumArtworkPath(false, null, "portrait.jpg"))
+    }
+}
+
 class FormatMillisecondsTest {
 
     @Test
