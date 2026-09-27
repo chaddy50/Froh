@@ -43,18 +43,20 @@ class AlbumProcessor(
 
 private val cataloguePattern = Regex("""(?i)(Op\.?|K\.?|BWV|WoO|Hob\.?|RV|D\.?|S\.?|M\.?|L\.?)\s*(\d+)([a-z])?(?:[,\s]+No\.?\s*(\d+))?""")
 internal fun extractCatalogueSortIndex(albumName: String): Int {
-    val match = cataloguePattern.find(albumName) ?: return 99_999_999
+    val match = cataloguePattern.find(albumName) ?: return Int.MAX_VALUE
 
     val prefix = match.groupValues[1].uppercase().trimEnd('.')
-    val mainNumber = match.groupValues[2].toIntOrNull() ?: return 99_999_999
+    val mainNumber = match.groupValues[2].toIntOrNull() ?: return Int.MAX_VALUE
     val letterSuffix = match.groupValues[3].firstOrNull()?.lowercaseChar()?.let { it - 'a' + 1 } ?: 0
     val subNumber = match.groupValues[4].toIntOrNull() ?: 0
 
     // WoO sorts after all other catalogue types
     val prefixPriority = if (prefix == "WOO") 1 else 0
 
-    // Compound sort key: prefix priority, main number, letter suffix, sub-piece number
-    return prefixPriority * 10_000_000 + mainNumber * 10_000 + letterSuffix * 100 + subNumber
+    // Compound sort key: prefix priority, main number, letter suffix, sub-piece number.
+    // Main number needs headroom past 1_000_000 so catalogue numbers over 999
+    // (e.g. BWV 1041) don't collide with the WoO prefix offset.
+    return prefixPriority * 1_000_000_000 + mainNumber * 10_000 + letterSuffix * 100 + subNumber
 }
 
 internal fun extractCatalogueString(albumName: String): String? {

@@ -125,7 +125,7 @@ class AlbumProcessorTest {
 
         process(processor, albumName = ALBUM_ABBEY_ROAD, albumYear = "1969")
 
-        assertEquals(99_999_999, repo.lastInsertedAlbum?.catalogueSortIndex)
+        assertEquals(Int.MAX_VALUE, repo.lastInsertedAlbum?.catalogueSortIndex)
         assertNull(repo.lastInsertedAlbum?.catalogueString)
     }
 
@@ -142,7 +142,7 @@ class AlbumProcessorTest {
 
 class ExtractCatalogueSortIndexTest {
     // Catalogue number is a compound sort key:
-    // prefixPriority * 10_000_000 + mainNumber * 10_000 + letterSuffix * 100 + subNumber
+    // prefixPriority * 1_000_000_000 + mainNumber * 10_000 + letterSuffix * 100 + subNumber
     // WoO has prefixPriority=1, all others have 0
 
     // --- Opus ---
@@ -246,17 +246,17 @@ class ExtractCatalogueSortIndexTest {
 
     @Test
     fun noMatchReturnsDefault() {
-        assertEquals(99_999_999, extractCatalogueSortIndex(ALBUM_SYMPHONY))
+        assertEquals(Int.MAX_VALUE, extractCatalogueSortIndex(ALBUM_SYMPHONY))
     }
 
     @Test
     fun emptyStringReturnsDefault() {
-        assertEquals(99_999_999, extractCatalogueSortIndex(""))
+        assertEquals(Int.MAX_VALUE, extractCatalogueSortIndex(""))
     }
 
     @Test
     fun plainAlbumNameReturnsDefault() {
-        assertEquals(99_999_999, extractCatalogueSortIndex(ALBUM_ABBEY_ROAD))
+        assertEquals(Int.MAX_VALUE, extractCatalogueSortIndex(ALBUM_ABBEY_ROAD))
     }
 
     // --- Edge cases ---
@@ -309,8 +309,8 @@ class ExtractCatalogueSortIndexTest {
 
     @Test
     fun woo() {
-        // WoO 1 = 1*10_000_000 + 1*10000 + 0 + 0 = 10_010_000
-        assertEquals(10_010_000, extractCatalogueSortIndex(ALBUM_HUNGARIAN_DANCE))
+        // WoO 1 = 1*1_000_000_000 + 1*10000 + 0 + 0 = 1_000_010_000
+        assertEquals(1_000_010_000, extractCatalogueSortIndex(ALBUM_HUNGARIAN_DANCE))
     }
 
     @Test
@@ -318,6 +318,13 @@ class ExtractCatalogueSortIndexTest {
         val op = extractCatalogueSortIndex("Op. 1")
         val woo = extractCatalogueSortIndex("WoO 1")
         assertTrue(woo > op)
+    }
+
+    @Test
+    fun wooSortsAfterCatalogueNumbersOverOneThousand() {
+        val bwv = extractCatalogueSortIndex("Violin Concerto BWV 1041")
+        val woo = extractCatalogueSortIndex("WoO 1")
+        assertTrue(woo > bwv)
     }
 }
 
