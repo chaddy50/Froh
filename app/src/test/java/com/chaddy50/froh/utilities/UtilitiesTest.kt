@@ -85,6 +85,31 @@ class ChooseArtistLabelTest {
     }
 }
 
+class ChooseAlbumArtworkPathTest {
+
+    private val portraitPath = "portrait.jpg"
+
+    @Test
+    fun classicalPrefersOwnArtworkOverPortrait() {
+        assertEquals("art.jpg", chooseAlbumArtworkPath(true, "art.jpg", portraitPath))
+    }
+
+    @Test
+    fun classicalFallsBackToPortraitWhenNoOwnArtwork() {
+        assertEquals(portraitPath, chooseAlbumArtworkPath(true, null, portraitPath))
+    }
+
+    @Test
+    fun classicalReturnsNullWhenNeitherArtworkNorPortraitExists() {
+        assertEquals(null, chooseAlbumArtworkPath(true, null, null))
+    }
+
+    @Test
+    fun nonClassicalNeverFallsBackToPortrait() {
+        assertEquals(null, chooseAlbumArtworkPath(false, null, portraitPath))
+    }
+}
+
 class FormatMillisecondsTest {
 
     @Test
