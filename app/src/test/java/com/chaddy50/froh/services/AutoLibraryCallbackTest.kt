@@ -39,6 +39,7 @@ class AutoLibraryCallbackTest {
     private val tracksFlow = MutableStateFlow(listOf(
         testTrack(id = 10, albumId = 3, performanceId = 4)
     ))
+    private val bachPortraitPath = "/portraits/bach.jpg"
 
     private fun createCallback(
         testScope: TestScope,
@@ -154,7 +155,7 @@ class AutoLibraryCallbackTest {
         // A sub-genre makes genre 1 classical.
         genresFlow.value = listOf(Genre(id = 2, name = "Orchestral", parentGenreId = 1))
         albumArtistsFlow.value = listOf(
-            AlbumArtist(id = 2, name = "Bach", sortName = "Bach", portraitPath = "/portraits/bach.jpg"),
+            AlbumArtist(id = 2, name = "Bach", sortName = "Bach", portraitPath = bachPortraitPath),
         )
         albumsFlow.value = listOf(
             Album(id = 5, title = "Goldberg Variations", catalogueSortIndex = null, artistId = 2, year = "1741"),
@@ -173,7 +174,7 @@ class AutoLibraryCallbackTest {
         val callback = createCallback(this)
         genresFlow.value = listOf(Genre(id = 2, name = "Orchestral", parentGenreId = 1))
         albumArtistsFlow.value = listOf(
-            AlbumArtist(id = 2, name = "Bach", sortName = "Bach", portraitPath = "/portraits/bach.jpg"),
+            AlbumArtist(id = 2, name = "Bach", sortName = "Bach", portraitPath = bachPortraitPath),
         )
         albumsFlow.value = listOf(
             Album(id = 5, title = "Goldberg Variations", catalogueSortIndex = null, artistId = 2, year = "1741", artworkPath = "/art/goldberg.jpg"),
@@ -207,7 +208,7 @@ class AutoLibraryCallbackTest {
     fun classicalPerformanceTrackWithNoArtworkFallsBackToComposerPortrait() = runTest {
         val callback = createCallback(this)
         albumArtistsFlow.value = listOf(
-            AlbumArtist(id = 2, name = "Bach", sortName = "Bach", portraitPath = "/portraits/bach.jpg"),
+            AlbumArtist(id = 2, name = "Bach", sortName = "Bach", portraitPath = bachPortraitPath),
         )
         tracksFlow.value = listOf(
             testTrack(id = 20, albumArtistId = 2, parentGenreId = 1, performanceId = 4, artworkPath = null),

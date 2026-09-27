@@ -87,14 +87,16 @@ class ChooseArtistLabelTest {
 
 class ChooseAlbumArtworkPathTest {
 
+    private val portraitPath = "portrait.jpg"
+
     @Test
     fun classicalPrefersOwnArtworkOverPortrait() {
-        assertEquals("art.jpg", chooseAlbumArtworkPath(true, "art.jpg", "portrait.jpg"))
+        assertEquals("art.jpg", chooseAlbumArtworkPath(true, "art.jpg", portraitPath))
     }
 
     @Test
     fun classicalFallsBackToPortraitWhenNoOwnArtwork() {
-        assertEquals("portrait.jpg", chooseAlbumArtworkPath(true, null, "portrait.jpg"))
+        assertEquals(portraitPath, chooseAlbumArtworkPath(true, null, portraitPath))
     }
 
     @Test
@@ -104,7 +106,7 @@ class ChooseAlbumArtworkPathTest {
 
     @Test
     fun nonClassicalNeverFallsBackToPortrait() {
-        assertEquals(null, chooseAlbumArtworkPath(false, null, "portrait.jpg"))
+        assertEquals(null, chooseAlbumArtworkPath(false, null, portraitPath))
     }
 }
 

@@ -17,6 +17,8 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class BuildMediaItemsTest {
 
+    private val bachPortraitPath = "/portraits/bach.jpg"
+
     private fun createAlbumArtistRepository(vararg albumArtists: AlbumArtist): AlbumArtistRepository {
         val dao = FakeAlbumArtistDao(MutableStateFlow(albumArtists.toList()))
         return AlbumArtistRepository(dao, FakeAudioDbRepository())
@@ -25,19 +27,19 @@ class BuildMediaItemsTest {
     @Test
     fun classicalTrackWithNoArtworkFallsBackToAlbumArtistPortrait() = runTest {
         val albumArtistRepository = createAlbumArtistRepository(
-            AlbumArtist(id = 1, name = "Bach", sortName = "Bach", portraitPath = "/portraits/bach.jpg"),
+            AlbumArtist(id = 1, name = "Bach", sortName = "Bach", portraitPath = bachPortraitPath),
         )
         val track = testTrack(albumArtistId = 1, parentGenreId = 10, artworkPath = null)
 
         val mediaItems = buildMediaItems(listOf(track), classicalGenreId = 10, albumArtistRepository)
 
-        assertEquals("/portraits/bach.jpg".toUri(), mediaItems[0].mediaMetadata.artworkUri)
+        assertEquals(bachPortraitPath.toUri(), mediaItems[0].mediaMetadata.artworkUri)
     }
 
     @Test
     fun classicalTrackWithOwnArtworkKeepsItOverPortrait() = runTest {
         val albumArtistRepository = createAlbumArtistRepository(
-            AlbumArtist(id = 1, name = "Bach", sortName = "Bach", portraitPath = "/portraits/bach.jpg"),
+            AlbumArtist(id = 1, name = "Bach", sortName = "Bach", portraitPath = bachPortraitPath),
         )
         val track = testTrack(albumArtistId = 1, parentGenreId = 10, artworkPath = "/art/goldberg.jpg")
 
