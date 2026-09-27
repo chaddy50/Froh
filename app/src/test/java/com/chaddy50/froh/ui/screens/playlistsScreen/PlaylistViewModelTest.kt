@@ -193,6 +193,17 @@ class PlaylistViewModelTest {
     }
 
     @Test
+    fun renamePlaylistDelegatesToRepositoryWithNewName() = runTest {
+        val playlist = Playlist(id = 1, name = "Old Name")
+        val vm = createViewModel()
+        vm.renamePlaylist(playlist, "New Name")
+        advanceUntilIdle()
+        assertEquals(1, playlistDao.updatedPlaylists.size)
+        assertEquals(1L, playlistDao.updatedPlaylists[0].id)
+        assertEquals("New Name", playlistDao.updatedPlaylists[0].name)
+    }
+
+    @Test
     fun removeTrackFromPlaylistDelegatesToRepository() = runTest {
         val vm = createViewModel()
         vm.removeTrackFromPlaylist(playlistId = 5, trackId = 7)

@@ -44,6 +44,11 @@ fun PlaylistTracksScreen(
                     EntityHeader(
                         uiState = entityHeaderState,
                         type = EntityType.Playlist,
+                        onRename = { newName ->
+                            uiState.playlist?.let { playlist ->
+                                playlistViewModel.renamePlaylist(playlist, newName)
+                            }
+                        },
                     )
                 }
                 items(uiState.tracks) { track ->

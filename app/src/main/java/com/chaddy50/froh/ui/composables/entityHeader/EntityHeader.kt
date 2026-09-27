@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.ui.composables.AddToPlaylistSheet
+import com.chaddy50.froh.ui.composables.RenamePlaylistDialog
 
 enum class EntityType {
     Genre,
@@ -59,8 +61,10 @@ fun EntityHeader(
     allPlaylists: List<Playlist> = emptyList(),
     onAddToPlaylist: (playlistId: Long) -> Unit = {},
     onCreateAndAdd: (name: String) -> Unit = {},
+    onRename: (String) -> Unit = {},
 ) {
     var showAddToPlaylistSheet by remember { mutableStateOf(false) }
+    var showRenameDialog by remember { mutableStateOf(false) }
 
     if (uiState.isLoading) {
         CircularProgressIndicator()
@@ -116,6 +120,12 @@ fun EntityHeader(
                         Icon(Icons.AutoMirrored.Filled.PlaylistAdd, contentDescription = "Add to playlist")
                     }
                 }
+
+                if (type == EntityType.Playlist) {
+                    IconButton(onClick = { showRenameDialog = true }) {
+                        Icon(Icons.Filled.Edit, contentDescription = "Rename playlist")
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.size(8.dp))
@@ -133,6 +143,19 @@ fun EntityHeader(
                 onCreateAndAdd = { name -> onCreateAndAdd(name) },
                 onDismiss = { showAddToPlaylistSheet = false },
                 playlistsThatEntityIsAlreadyIn = uiState.playlistsThatEntityIsAlreadyIn
+            )
+        }
+
+        if (showRenameDialog) {
+            RenamePlaylistDialog(
+                currentName = uiState.title,
+                onConfirm = { newName ->
+                    if (newName.isNotBlank()) {
+                        onRename(newName)
+                    }
+                    showRenameDialog = false
+                },
+                onDismiss = { showRenameDialog = false },
             )
         }
     }
