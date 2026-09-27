@@ -47,7 +47,7 @@ internal fun extractCatalogueSortIndex(albumName: String): Int {
 
     val prefix = match.groupValues[1].uppercase().trimEnd('.')
     val mainNumber = match.groupValues[2].toIntOrNull() ?: return 99_999_999
-    val letterSuffix = match.groupValues[3].firstOrNull()?.let { it - 'a' + 1 } ?: 0
+    val letterSuffix = match.groupValues[3].firstOrNull()?.lowercaseChar()?.let { it - 'a' + 1 } ?: 0
     val subNumber = match.groupValues[4].toIntOrNull() ?: 0
 
     // WoO sorts after all other catalogue types
