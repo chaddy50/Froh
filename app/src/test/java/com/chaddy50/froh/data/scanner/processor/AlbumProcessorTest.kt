@@ -291,6 +291,11 @@ class ExtractCatalogueSortIndexTest {
     }
 
     @Test
+    fun opWithUppercaseLetterSuffixSortsSameAsLowercase() {
+        assertEquals(extractCatalogueSortIndex("Op. 3a"), extractCatalogueSortIndex("Op. 3A"))
+    }
+
+    @Test
     fun subPieceSortsCorrectly() {
         // Op. 21, No. 1 should sort before Op. 21, No. 2
         val no1 = extractCatalogueSortIndex("Op. 21, No. 1")
