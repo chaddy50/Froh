@@ -109,11 +109,21 @@ class FormatMillisecondsTest {
 
     @Test
     fun largeValue() {
-        assertEquals("75:30", formatMillisecondsIntoMinutesAndSeconds(4530000))
+        assertEquals("1:15:30", formatMillisecondsIntoMinutesAndSeconds(4530000))
     }
 
     @Test
     fun truncatesSubSecondMilliseconds() {
         assertEquals("0:01", formatMillisecondsIntoMinutesAndSeconds(1999))
+    }
+
+    @Test
+    fun oneHourExactlyRollsOverIntoHourComponent() {
+        assertEquals("1:00:00", formatMillisecondsIntoMinutesAndSeconds(3_600_000))
+    }
+
+    @Test
+    fun multiHourValuePadsMinutesAndSeconds() {
+        assertEquals("2:30:05", formatMillisecondsIntoMinutesAndSeconds(9_005_000))
     }
 }
