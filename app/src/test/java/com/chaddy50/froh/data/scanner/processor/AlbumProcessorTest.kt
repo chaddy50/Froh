@@ -259,6 +259,16 @@ class ExtractCatalogueSortIndexTest {
         assertEquals(Int.MAX_VALUE, extractCatalogueSortIndex(ALBUM_ABBEY_ROAD))
     }
 
+    @Test
+    fun wordEndingInSinglePrefixLetterDoesNotMatch() {
+        assertEquals(Int.MAX_VALUE, extractCatalogueSortIndex("Symphonies 3 & 4"))
+    }
+
+    @Test
+    fun wordEndingInPrefixFollowedByDotDoesNotMatch() {
+        assertEquals(Int.MAX_VALUE, extractCatalogueSortIndex("Piano Sonatas Vol. 1"))
+    }
+
     // --- Edge cases ---
 
     @Test
@@ -412,6 +422,11 @@ class ExtractCatalogueStringTest {
     @Test
     fun firstMatchWins() {
         assertEquals("Op. 10", extractCatalogueString("Sonata Op. 10 BWV 999"))
+    }
+
+    @Test
+    fun wordEndingInPrefixLetterIsSkippedInFavorOfRealCatalogueNumber() {
+        assertEquals("K. 466", extractCatalogueString("Piano Concertos 20 & 21, K. 466"))
     }
 
     // --- Sub-pieces ---
