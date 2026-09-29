@@ -41,7 +41,7 @@ class AlbumProcessor(
     }
 }
 
-private val cataloguePattern = Regex("""(?i)(Op\.?|K\.?|BWV|WoO|Hob\.?|RV|D\.?|S\.?|M\.?|L\.?)\s*(\d+)([a-z])?(?:[,\s]+No\.?\s*(\d+))?""")
+private val cataloguePattern = Regex("""(?i)\b(Op\.?|K\.?|BWV|WoO|Hob\.?|RV|D\.?|S\.?|M\.?|L\.?)\s*(\d+)([a-z])?(?:[,\s]+No\.?\s*(\d+))?""")
 internal fun extractCatalogueSortIndex(albumName: String): Int {
     val match = cataloguePattern.find(albumName) ?: return Int.MAX_VALUE
 
