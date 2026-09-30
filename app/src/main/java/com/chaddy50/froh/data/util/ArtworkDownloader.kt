@@ -21,10 +21,13 @@ class ArtworkDownloader(private val context: Context) : IArtworkDownloader {
             val file = File(directory, "$fileId.jpg")
 
             val request = Request.Builder().url(url).build()
-            val response = client.newCall(request).execute()
-            response.body?.byteStream()?.use { input ->
-                FileOutputStream(file).use { output ->
-                    input.copyTo(output)
+            client.newCall(request).execute().use { response ->
+                val body = response.body
+                if (!response.isSuccessful || body == null) return null
+                body.byteStream().use { input ->
+                    FileOutputStream(file).use { output ->
+                        input.copyTo(output)
+                    }
                 }
             }
             file.absolutePath
