@@ -9,7 +9,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 
 @Stable
 class AppNavigator(val backStack: NavBackStack<NavKey>) {
-    val currentKey: NavKey? get() = backStack.lastOrNull()
+    val currentKey: NavKey get() = backStack.last()
     val canGoBack: Boolean get() = backStack.size > 1
 
     fun push(route: NavKey) {

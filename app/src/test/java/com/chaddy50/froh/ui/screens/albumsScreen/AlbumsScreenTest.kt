@@ -52,6 +52,11 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AlbumsScreenTest {
 
+    private val classicalGenreName = "Classical"
+    private val keyboardGenreName = "Keyboard"
+    private val concertoGenreName = "Concerto"
+    private val subGenreFilterContentDescription = "Filter by sub-genre"
+
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
@@ -100,38 +105,38 @@ class AlbumsScreenTest {
     @Test
     fun showsSubGenreFilterWhenComposerHasMultipleSubGenres() {
         genresFlow.value = listOf(
-            Genre(id = 10L, name = "Classical"),
-            Genre(id = 20L, name = "Keyboard", parentGenreId = 10L),
-            Genre(id = 21L, name = "Concerto", parentGenreId = 10L),
+            Genre(id = 10L, name = classicalGenreName),
+            Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
+            Genre(id = 21L, name = concertoGenreName, parentGenreId = 10L),
         )
         setAlbumsScreenContent(createScreenViewModel(genreId = 10L, classicalGenreId = 10L), genreId = 10L)
 
-        composeTestRule.onNodeWithContentDescription("Filter by sub-genre").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).assertIsDisplayed()
     }
 
     @Test
     fun hidesSubGenreFilterWhenComposerHasOnlyOneSubGenre() {
         genresFlow.value = listOf(
-            Genre(id = 10L, name = "Classical"),
-            Genre(id = 20L, name = "Keyboard", parentGenreId = 10L),
+            Genre(id = 10L, name = classicalGenreName),
+            Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
         )
         setAlbumsScreenContent(createScreenViewModel(genreId = 10L, classicalGenreId = 10L), genreId = 10L)
 
-        composeTestRule.onNodeWithContentDescription("Filter by sub-genre").assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).assertDoesNotExist()
     }
 
     @Test
     fun selectingSubGenreUpdatesScreenViewModelSelection() {
         genresFlow.value = listOf(
-            Genre(id = 10L, name = "Classical"),
-            Genre(id = 20L, name = "Keyboard", parentGenreId = 10L),
-            Genre(id = 21L, name = "Concerto", parentGenreId = 10L),
+            Genre(id = 10L, name = classicalGenreName),
+            Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
+            Genre(id = 21L, name = concertoGenreName, parentGenreId = 10L),
         )
         val screenViewModel = createScreenViewModel(genreId = 10L, classicalGenreId = 10L)
         setAlbumsScreenContent(screenViewModel, genreId = 10L)
 
-        composeTestRule.onNodeWithContentDescription("Filter by sub-genre").performClick()
-        composeTestRule.onNodeWithText("Keyboard").performClick()
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).performClick()
+        composeTestRule.onNodeWithText(keyboardGenreName).performClick()
 
         assertEquals(20L, screenViewModel.selectedSubGenreId.value)
     }
@@ -139,16 +144,16 @@ class AlbumsScreenTest {
     @Test
     fun selectingAllClearsSubGenreSelection() {
         genresFlow.value = listOf(
-            Genre(id = 10L, name = "Classical"),
-            Genre(id = 20L, name = "Keyboard", parentGenreId = 10L),
-            Genre(id = 21L, name = "Concerto", parentGenreId = 10L),
+            Genre(id = 10L, name = classicalGenreName),
+            Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
+            Genre(id = 21L, name = concertoGenreName, parentGenreId = 10L),
         )
         val screenViewModel = createScreenViewModel(genreId = 10L, classicalGenreId = 10L)
         setAlbumsScreenContent(screenViewModel, genreId = 10L)
 
-        composeTestRule.onNodeWithContentDescription("Filter by sub-genre").performClick()
-        composeTestRule.onNodeWithText("Keyboard").performClick()
-        composeTestRule.onNodeWithContentDescription("Filter by sub-genre").performClick()
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).performClick()
+        composeTestRule.onNodeWithText(keyboardGenreName).performClick()
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).performClick()
         composeTestRule.onNodeWithText("All").performClick()
 
         assertNull(screenViewModel.selectedSubGenreId.value)

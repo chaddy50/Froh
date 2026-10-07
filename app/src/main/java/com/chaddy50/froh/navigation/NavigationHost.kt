@@ -80,10 +80,9 @@ fun NavigationHost(
     val isOnHomeRoute = currentKey is HomeRoute
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
-    val topBarTitle = when {
-        currentKey == null -> ""
-        currentKey is HomeRoute -> homeTopBarContent.title
-        currentKey is AlbumsRoute -> albumsTopBarContent.title
+    val topBarTitle = when (currentKey) {
+        is HomeRoute -> homeTopBarContent.title
+        is AlbumsRoute -> albumsTopBarContent.title
         else -> screenTopBarContent.title
     }
 

@@ -38,13 +38,14 @@ class PlaylistTracksScreenTest {
 
     @Test
     fun reportsRouteTitleAsTopBarTitle() {
-        val screenViewModel = PlaylistTracksScreenViewModel(PlaylistTracksRoute(playlistId = 1L, title = "Favorites"), PlaylistRepository(FakePlaylistDao()))
+        val playlistTitle = "Favorites"
+        val screenViewModel = PlaylistTracksScreenViewModel(PlaylistTracksRoute(playlistId = 1L, title = playlistTitle), PlaylistRepository(FakePlaylistDao()))
         var reportedTitle = ""
 
         composeTestRule.setContent {
             PlaylistTracksScreen(
                 playlistId = 1L,
-                title = "Favorites",
+                title = playlistTitle,
                 playbackViewModel = mockk<PlaybackViewModel>(relaxed = true),
                 playlistViewModel = PlaylistViewModel(TrackRepository(FakeTrackDao()), PlaylistRepository(FakePlaylistDao())),
                 screenViewModel = screenViewModel,
@@ -52,7 +53,7 @@ class PlaylistTracksScreenTest {
             )
         }
 
-        assertEquals("Favorites", reportedTitle)
+        assertEquals(playlistTitle, reportedTitle)
     }
 
     @Test
