@@ -1,6 +1,5 @@
 package com.chaddy50.froh.ui.screens.artistsScreen
 
-import androidx.lifecycle.SavedStateHandle
 import com.chaddy50.froh.data.ClassicalGenreConfig
 import com.chaddy50.froh.data.entity.Album
 import com.chaddy50.froh.data.entity.AlbumArtist
@@ -10,6 +9,7 @@ import com.chaddy50.froh.data.repository.AlbumArtistRepository
 import com.chaddy50.froh.data.repository.AlbumRepository
 import com.chaddy50.froh.data.repository.GenreRepository
 import com.chaddy50.froh.data.repository.PlaylistRepository
+import com.chaddy50.froh.navigation.ArtistsRoute
 import kotlinx.coroutines.Dispatchers
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
@@ -55,11 +55,8 @@ class ArtistsScreenViewModelTest {
         val albumDao = FakeAlbumDao(albumsFlow, tracksFlow)
 
         val config = ClassicalGenreConfig().apply { this.classicalGenreId = classicalGenreId }
-        val savedStateHandle = SavedStateHandle(
-            mapOf("genreId" to genreId, "title" to title)
-        )
         return ArtistsScreenViewModel(
-            savedStateHandle,
+            ArtistsRoute(genreId = genreId, title = title),
             config,
             AlbumArtistRepository(albumArtistDao, FakeAudioDbRepository()),
             AlbumRepository(albumDao),

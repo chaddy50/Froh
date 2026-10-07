@@ -1,6 +1,5 @@
 package com.chaddy50.froh.ui.screens.tracksScreen
 
-import androidx.lifecycle.SavedStateHandle
 import com.chaddy50.froh.data.ClassicalGenreConfig
 import com.chaddy50.froh.data.entity.Album
 import com.chaddy50.froh.data.entity.AlbumArtist
@@ -21,6 +20,7 @@ import com.chaddy50.froh.fakes.FakePlaylistDao
 import com.chaddy50.froh.fakes.FakeTrackDao
 import com.chaddy50.froh.fakes.MainDispatcherRule
 import com.chaddy50.froh.fakes.testTrack
+import com.chaddy50.froh.navigation.TracksRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -62,11 +62,8 @@ class TracksScreenViewModelTest {
         val audioDbRepository = FakeAudioDbRepository()
 
         val config = ClassicalGenreConfig().apply { this.classicalGenreId = classicalGenreId }
-        val savedStateHandle = SavedStateHandle(
-            mapOf("genreId" to genreId, "albumId" to albumId, "performanceId" to performanceId, "title" to "Test")
-        )
         return TracksScreenViewModel(
-            savedStateHandle,
+            TracksRoute(genreId = genreId, albumId = albumId, performanceId = performanceId, title = "Test"),
             config,
             TrackRepository(trackDao),
             AlbumRepository(albumDao),

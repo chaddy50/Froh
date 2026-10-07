@@ -1,9 +1,7 @@
 package com.chaddy50.froh.ui.screens.performancesScreen
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.chaddy50.froh.data.ClassicalGenreConfig
 import com.chaddy50.froh.data.entity.Performance
 import com.chaddy50.froh.data.repository.AlbumArtistRepository
@@ -14,6 +12,9 @@ import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.navigation.PerformancesRoute
 import com.chaddy50.froh.ui.composables.entityHeader.EntityHeaderState
 import com.chaddy50.froh.utilities.formatMillisecondsIntoMinutesAndSeconds
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +26,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
 data class PerformanceScreenUiState(
     val screenTitle: String = "Performance",
@@ -34,9 +34,9 @@ data class PerformanceScreenUiState(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class PerformancesScreenViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = PerformancesScreenViewModel.Factory::class)
+class PerformancesScreenViewModel @AssistedInject constructor(
+    @Assisted route: PerformancesRoute,
     classicalGenreConfig: ClassicalGenreConfig,
     performanceRepository: PerformanceRepository,
     albumRepository: AlbumRepository,
@@ -48,8 +48,12 @@ class PerformancesScreenViewModel @Inject constructor(
     val uiState: StateFlow<PerformanceScreenUiState>
     val entityHeaderState: StateFlow<EntityHeaderState>
 
+    @AssistedFactory
+    interface Factory {
+        fun create(route: PerformancesRoute): PerformancesScreenViewModel
+    }
+
     init {
-        val route = savedStateHandle.toRoute<PerformancesRoute>()
         val albumId = route.albumId
         genreId = route.genreId
         val classicalGenreId = classicalGenreConfig.classicalGenreId

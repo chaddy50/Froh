@@ -11,11 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -27,28 +23,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import com.chaddy50.froh.ui.composables.MusicScannerProgressBar
-import com.chaddy50.froh.ui.composables.SubGenreFilterButton
 import com.chaddy50.froh.ui.composables.TopBar
 import com.chaddy50.froh.ui.composables.nowPlayingBar.NowPlayingBar
 import com.chaddy50.froh.ui.modalSheets.nowPlayingSheet.NowPlayingSheet
 import com.chaddy50.froh.ui.screens.HomeScreen
 import com.chaddy50.froh.ui.screens.albumsScreen.AlbumsScreen
+import com.chaddy50.froh.ui.screens.albumsScreen.AlbumsScreenViewModel
 import com.chaddy50.froh.ui.screens.artistsScreen.ArtistsScreen
+import com.chaddy50.froh.ui.screens.artistsScreen.ArtistsScreenViewModel
 import com.chaddy50.froh.ui.screens.performancesScreen.PerformancesScreen
+import com.chaddy50.froh.ui.screens.performancesScreen.PerformancesScreenViewModel
 import com.chaddy50.froh.ui.screens.playlistTracksScreen.PlaylistTracksScreen
+import com.chaddy50.froh.ui.screens.playlistTracksScreen.PlaylistTracksScreenViewModel
 import com.chaddy50.froh.ui.screens.tracksScreen.TracksScreen
+import com.chaddy50.froh.ui.screens.tracksScreen.TracksScreenViewModel
 import com.chaddy50.froh.data.scanner.LibraryScanViewModel
 import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
-import com.chaddy50.froh.ui.screens.albumsScreen.AlbumsScreenUiState
-import com.chaddy50.froh.ui.screens.albumsScreen.AlbumsScreenViewModel
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 import com.chaddy50.froh.ui.screens.settingsScreen.SettingsScreen
 import com.chaddy50.froh.ui.screens.settingsScreen.genreMappings.ClassicalGenreSettingsScreen
@@ -59,10 +52,12 @@ fun NavigationHost(
     playbackViewModel: PlaybackViewModel,
     playlistViewModel: PlaylistViewModel,
     libraryScanViewModel: LibraryScanViewModel,
-    navController: NavHostController = rememberNavController(),
+    appNavigator: AppNavigator = rememberAppNavigator(HomeRoute),
 ) {
     var shouldShowNowPlayingSheet by remember { mutableStateOf(false) }
-    var homeScreenTitle by remember { mutableStateOf("Library") }
+    var homeTopBarContent by remember { mutableStateOf(TopBarContent(title = "Library")) }
+    var albumsTopBarContent by remember { mutableStateOf(TopBarContent(title = "")) }
+    var screenTopBarContent by remember { mutableStateOf(TopBarContent(title = "")) }
     val currentTrack by playbackViewModel.nowPlayingState.currentTrack.collectAsStateWithLifecycle()
     val isPlaying by playbackViewModel.nowPlayingState.isPlaying.collectAsStateWithLifecycle()
     val playbackPosition by playbackViewModel.nowPlayingState.playbackPosition.collectAsStateWithLifecycle()
@@ -80,37 +75,16 @@ fun NavigationHost(
     val isScanInProgress by libraryScanViewModel.isScanInProgress.collectAsStateWithLifecycle()
     val scanProgress by libraryScanViewModel.scanProgress.collectAsStateWithLifecycle()
 
-    // Derive top bar title and sub-genre filter state from current route
-    val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val destination = currentBackStackEntry?.destination
-    val isOnAlbumsRoute = destination?.hasRoute<AlbumsRoute>() == true
-
-    val albumsScreenViewModel: AlbumsScreenViewModel? = if (isOnAlbumsRoute && currentBackStackEntry != null) {
-        hiltViewModel(currentBackStackEntry!!)
-    } else null
-
-    val albumsUiState by albumsScreenViewModel?.uiState?.collectAsStateWithLifecycle()
-        ?: remember { mutableStateOf(AlbumsScreenUiState()) }
-    val subGenres by albumsScreenViewModel?.subGenres?.collectAsStateWithLifecycle()
-        ?: remember { mutableStateOf(emptyList()) }
-    val selectedSubGenreId by albumsScreenViewModel?.selectedSubGenreId?.collectAsStateWithLifecycle()
-        ?: remember { mutableStateOf(null) }
-    val showFilterButton = subGenres.size > 1 && isOnAlbumsRoute
-
-    val isOnHomeRoute = destination?.hasRoute<HomeRoute>() == true
+    val currentKey = appNavigator.currentKey
+    val isOnAlbumsRoute = currentKey is AlbumsRoute
+    val isOnHomeRoute = currentKey is HomeRoute
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     val topBarTitle = when {
-        destination == null -> ""
-        destination.hasRoute<HomeRoute>() -> homeScreenTitle
-        destination.hasRoute<AlbumsRoute>() -> albumsUiState.screenTitle
-        destination.hasRoute<ArtistsRoute>() -> currentBackStackEntry?.toRoute<ArtistsRoute>()?.title ?: ""
-        destination.hasRoute<PerformancesRoute>() -> currentBackStackEntry?.toRoute<PerformancesRoute>()?.title ?: ""
-        destination.hasRoute<PlaylistTracksRoute>() -> currentBackStackEntry?.toRoute<PlaylistTracksRoute>()?.title ?: ""
-        destination.hasRoute<TracksRoute>() -> currentBackStackEntry?.toRoute<TracksRoute>()?.title ?: ""
-        destination.hasRoute<SettingsRoute>() -> "Settings"
-        destination.hasRoute<ClassicalGenreSettingsRoute>() -> "Classical Genres"
-        else -> ""
+        currentKey == null -> ""
+        currentKey is HomeRoute -> homeTopBarContent.title
+        currentKey is AlbumsRoute -> albumsTopBarContent.title
+        else -> screenTopBarContent.title
     }
 
     Box(
@@ -123,23 +97,14 @@ fun NavigationHost(
             topBar = {
                 TopBar(
                     topBarTitle,
-                    navController,
+                    appNavigator,
                     scrollBehavior = scrollBehavior,
                     actions = {
-                        if (showFilterButton) {
-                            SubGenreFilterButton(
-                                subGenres = subGenres,
-                                selectedSubGenreId = selectedSubGenreId,
-                                onSubGenreSelected = { albumsScreenViewModel?.updateSelectedSubGenreId(it) }
-                            )
+                        if (isOnAlbumsRoute) {
+                            albumsTopBarContent.actions(this)
                         }
                         if (isOnHomeRoute) {
-                            IconButton(onClick = { navController.navigate(SettingsRoute) }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Settings,
-                                    contentDescription = "Settings"
-                                )
-                            }
+                            homeTopBarContent.actions(this)
                         }
                     }
                 )
@@ -165,78 +130,107 @@ fun NavigationHost(
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .windowInsetsPadding(WindowInsets.navigationBars)
         ) { innerPadding ->
-            NavHost(
-                navController = navController,
-                startDestination = HomeRoute,
+            NavDisplay(
+                backStack = appNavigator.backStack,
+                onBack = { appNavigator.pop() },
                 modifier = Modifier
                     .padding(innerPadding)
-                    .imePadding()
-            ) {
-                composable<HomeRoute> {
-                    HomeScreen(
-                        playbackViewModel = playbackViewModel,
-                        playlistViewModel = playlistViewModel,
-                        navController = navController,
-                        onTitleChanged = { homeScreenTitle = it },
-                    )
-                }
-                composable<ArtistsRoute> { backStackEntry ->
-                    val route = backStackEntry.toRoute<ArtistsRoute>()
-                    ArtistsScreen(
-                        genreId = route.genreId,
-                        playbackViewModel = playbackViewModel,
-                        playlistViewModel = playlistViewModel,
-                        navController = navController,
-                    )
-                }
-                composable<AlbumsRoute> { backStackEntry ->
-                    val route = backStackEntry.toRoute<AlbumsRoute>()
-                    AlbumsScreen(
-                        genreId = route.genreId,
-                        albumArtistId = route.albumArtistId,
-                        playbackViewModel = playbackViewModel,
-                        playlistViewModel = playlistViewModel,
-                        navController = navController,
-                    )
-                }
-                composable<PerformancesRoute> { backStackEntry ->
-                    val route = backStackEntry.toRoute<PerformancesRoute>()
-                    PerformancesScreen(
-                        genreId = route.genreId,
-                        albumId = route.albumId,
-                        playbackViewModel = playbackViewModel,
-                        playlistViewModel = playlistViewModel,
-                        navController = navController,
-                    )
-                }
-                composable<TracksRoute> { backStackEntry ->
-                    val route = backStackEntry.toRoute<TracksRoute>()
-                    TracksScreen(
-                        genreId = route.genreId,
-                        albumId = route.albumId,
-                        performanceId = if (route.performanceId == -1L) null else route.performanceId,
-                        playbackViewModel = playbackViewModel,
-                        playlistViewModel = playlistViewModel,
-                    )
-                }
-                composable<PlaylistTracksRoute> { backStackEntry ->
-                    val route = backStackEntry.toRoute<PlaylistTracksRoute>()
-                    PlaylistTracksScreen(
-                        playlistId = route.playlistId,
-                        playbackViewModel = playbackViewModel,
-                        playlistViewModel = playlistViewModel,
-                    )
-                }
-                composable<SettingsRoute> {
-                    SettingsScreen(navController = navController)
-                }
-                composable<ClassicalGenreSettingsRoute> {
-                    ClassicalGenreSettingsScreen(
-                        onNavigateBack = { navController.popBackStack() },
-                        onRebuildLibrary = { libraryScanViewModel.rebuildLibrary() },
-                    )
-                }
-            }
+                    .imePadding(),
+                entryProvider = entryProvider {
+                    entry<HomeRoute> {
+                        HomeScreen(
+                            playbackViewModel = playbackViewModel,
+                            playlistViewModel = playlistViewModel,
+                            appNavigator = appNavigator,
+                            onTopBarContentChanged = { homeTopBarContent = it },
+                        )
+                    }
+                    entry<ArtistsRoute> { route ->
+                        val screenViewModel = hiltViewModel<ArtistsScreenViewModel, ArtistsScreenViewModel.Factory>(
+                            creationCallback = { factory -> factory.create(route) }
+                        )
+                        ArtistsScreen(
+                            genreId = route.genreId,
+                            title = route.title,
+                            playbackViewModel = playbackViewModel,
+                            playlistViewModel = playlistViewModel,
+                            appNavigator = appNavigator,
+                            screenViewModel = screenViewModel,
+                            onTopBarContentChanged = { screenTopBarContent = it },
+                        )
+                    }
+                    entry<AlbumsRoute> { route ->
+                        val screenViewModel = hiltViewModel<AlbumsScreenViewModel, AlbumsScreenViewModel.Factory>(
+                            creationCallback = { factory -> factory.create(route) }
+                        )
+                        AlbumsScreen(
+                            genreId = route.genreId,
+                            albumArtistId = route.albumArtistId,
+                            playbackViewModel = playbackViewModel,
+                            playlistViewModel = playlistViewModel,
+                            appNavigator = appNavigator,
+                            screenViewModel = screenViewModel,
+                            onTopBarContentChanged = { albumsTopBarContent = it },
+                        )
+                    }
+                    entry<PerformancesRoute> { route ->
+                        val screenViewModel = hiltViewModel<PerformancesScreenViewModel, PerformancesScreenViewModel.Factory>(
+                            creationCallback = { factory -> factory.create(route) }
+                        )
+                        PerformancesScreen(
+                            genreId = route.genreId,
+                            albumId = route.albumId,
+                            title = route.title,
+                            playbackViewModel = playbackViewModel,
+                            playlistViewModel = playlistViewModel,
+                            appNavigator = appNavigator,
+                            screenViewModel = screenViewModel,
+                            onTopBarContentChanged = { screenTopBarContent = it },
+                        )
+                    }
+                    entry<TracksRoute> { route ->
+                        val screenViewModel = hiltViewModel<TracksScreenViewModel, TracksScreenViewModel.Factory>(
+                            creationCallback = { factory -> factory.create(route) }
+                        )
+                        TracksScreen(
+                            genreId = route.genreId,
+                            albumId = route.albumId,
+                            performanceId = if (route.performanceId == -1L) null else route.performanceId,
+                            title = route.title,
+                            playbackViewModel = playbackViewModel,
+                            playlistViewModel = playlistViewModel,
+                            screenViewModel = screenViewModel,
+                            onTopBarContentChanged = { screenTopBarContent = it },
+                        )
+                    }
+                    entry<PlaylistTracksRoute> { route ->
+                        val screenViewModel = hiltViewModel<PlaylistTracksScreenViewModel, PlaylistTracksScreenViewModel.Factory>(
+                            creationCallback = { factory -> factory.create(route) }
+                        )
+                        PlaylistTracksScreen(
+                            playlistId = route.playlistId,
+                            title = route.title,
+                            playbackViewModel = playbackViewModel,
+                            playlistViewModel = playlistViewModel,
+                            screenViewModel = screenViewModel,
+                            onTopBarContentChanged = { screenTopBarContent = it },
+                        )
+                    }
+                    entry<SettingsRoute> {
+                        SettingsScreen(
+                            appNavigator = appNavigator,
+                            onTopBarContentChanged = { screenTopBarContent = it },
+                        )
+                    }
+                    entry<ClassicalGenreSettingsRoute> {
+                        ClassicalGenreSettingsScreen(
+                            onNavigateBack = { appNavigator.pop() },
+                            onRebuildLibrary = { libraryScanViewModel.rebuildLibrary() },
+                            onTopBarContentChanged = { screenTopBarContent = it },
+                        )
+                    }
+                },
+            )
         }
 
         if (shouldShowNowPlayingSheet) {

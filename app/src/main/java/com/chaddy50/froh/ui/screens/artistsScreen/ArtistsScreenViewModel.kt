@@ -1,9 +1,7 @@
 package com.chaddy50.froh.ui.screens.artistsScreen
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.chaddy50.froh.data.ClassicalGenreConfig
 import com.chaddy50.froh.data.entity.AlbumArtist
 import com.chaddy50.froh.data.repository.AlbumArtistRepository
@@ -14,6 +12,9 @@ import com.chaddy50.froh.navigation.ArtistsRoute
 import com.chaddy50.froh.ui.composables.entityHeader.EntityHeaderState
 import com.chaddy50.froh.utilities.chooseAlbumLabel
 import com.chaddy50.froh.utilities.chooseArtistLabel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +24,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
 data class ArtistWithSubtitle(
     val artist: AlbumArtist,
@@ -37,9 +37,9 @@ data class ArtistsScreenUiState(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class ArtistsScreenViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = ArtistsScreenViewModel.Factory::class)
+class ArtistsScreenViewModel @AssistedInject constructor(
+    @Assisted route: ArtistsRoute,
     classicalGenreConfig: ClassicalGenreConfig,
     albumArtistRepository: AlbumArtistRepository,
     albumRepository: AlbumRepository,
@@ -49,8 +49,12 @@ class ArtistsScreenViewModel @Inject constructor(
     val uiState: StateFlow<ArtistsScreenUiState>
     val entityHeaderState: StateFlow<EntityHeaderState>
 
+    @AssistedFactory
+    interface Factory {
+        fun create(route: ArtistsRoute): ArtistsScreenViewModel
+    }
+
     init {
-        val route = savedStateHandle.toRoute<ArtistsRoute>()
         val genreId = route.genreId
         val classicalGenreId = classicalGenreConfig.classicalGenreId
         val isClassical = genreId == classicalGenreId

@@ -1,12 +1,12 @@
 package com.chaddy50.froh.ui.screens.playlistTracksScreen
 
-import androidx.lifecycle.SavedStateHandle
 import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.data.entity.Track
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.fakes.FakePlaylistDao
 import com.chaddy50.froh.fakes.MainDispatcherRule
 import com.chaddy50.froh.fakes.testTrack
+import com.chaddy50.froh.navigation.PlaylistTracksRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -40,10 +40,7 @@ class PlaylistTracksScreenViewModelTest {
             playlistByIdFlow = playlistFlow,
             tracksForPlaylistFlow = tracksFlow,
         )
-        val savedStateHandle = SavedStateHandle(
-            mapOf("playlistId" to playlistId, "title" to title)
-        )
-        return PlaylistTracksScreenViewModel(savedStateHandle, PlaylistRepository(dao))
+        return PlaylistTracksScreenViewModel(PlaylistTracksRoute(playlistId = playlistId, title = title), PlaylistRepository(dao))
     }
 
     @Test

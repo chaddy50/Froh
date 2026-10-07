@@ -1,6 +1,5 @@
 package com.chaddy50.froh.ui.screens.albumsScreen
 
-import androidx.lifecycle.SavedStateHandle
 import com.chaddy50.froh.data.ClassicalGenreConfig
 import com.chaddy50.froh.data.entity.Album
 import com.chaddy50.froh.data.entity.AlbumArtist
@@ -13,6 +12,7 @@ import com.chaddy50.froh.data.repository.AlbumRepository
 import com.chaddy50.froh.data.repository.ComposerRepository
 import com.chaddy50.froh.data.repository.GenreRepository
 import com.chaddy50.froh.data.repository.PlaylistRepository
+import com.chaddy50.froh.navigation.AlbumsRoute
 import kotlinx.coroutines.Dispatchers
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
@@ -92,11 +92,8 @@ class AlbumsScreenViewModelTest {
         val openOpusRepository = FakeOpenOpusRepository()
 
         val config = ClassicalGenreConfig().apply { this.classicalGenreId = classicalGenreId }
-        val savedStateHandle = SavedStateHandle(
-            mapOf("genreId" to genreId, "albumArtistId" to albumArtistId, "title" to "Test")
-        )
         return AlbumsScreenViewModel(
-            savedStateHandle,
+            AlbumsRoute(genreId = genreId, albumArtistId = albumArtistId, title = "Test"),
             config,
             AlbumRepository(albumDao),
             AlbumArtistRepository(albumArtistDao, audioDbRepository),

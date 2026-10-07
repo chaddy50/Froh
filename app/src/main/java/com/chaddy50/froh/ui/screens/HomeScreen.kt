@@ -15,7 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
+import com.chaddy50.froh.navigation.AppNavigator
+import com.chaddy50.froh.navigation.SettingsRoute
+import com.chaddy50.froh.navigation.TopBarContent
+import com.chaddy50.froh.ui.composables.SettingsGearButton
 import com.chaddy50.froh.ui.screens.genresScreen.GenresScreen
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistsScreen
 import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
@@ -26,18 +29,20 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     playbackViewModel: PlaybackViewModel,
     playlistViewModel: PlaylistViewModel,
-    navController: NavController,
-    onTitleChanged: (String) -> Unit,
+    appNavigator: AppNavigator,
+    onTopBarContentChanged: (TopBarContent) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState.currentPage) {
-        if (pagerState.currentPage == 0) {
-            onTitleChanged("Library")
-        } else if (pagerState.currentPage == 1) {
-            onTitleChanged("Playlists")
-        }
+        val title = if (pagerState.currentPage == 0) "Library" else "Playlists"
+        onTopBarContentChanged(
+            TopBarContent(
+                title = title,
+                actions = { SettingsGearButton(onClick = { appNavigator.push(SettingsRoute) }) },
+            )
+        )
     }
 
     Column {
@@ -62,8 +67,8 @@ fun HomeScreen(
                 .imePadding(),
         ) { page ->
             when (page) {
-                0 -> GenresScreen(playbackViewModel, playlistViewModel, navController)
-                1 -> PlaylistsScreen(playlistViewModel, navController)
+                0 -> GenresScreen(playbackViewModel, playlistViewModel, appNavigator)
+                1 -> PlaylistsScreen(playlistViewModel, appNavigator)
             }
         }
     }

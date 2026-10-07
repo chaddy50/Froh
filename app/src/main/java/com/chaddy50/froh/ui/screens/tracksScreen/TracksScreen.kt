@@ -12,14 +12,15 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chaddy50.froh.data.entity.Track
+import com.chaddy50.froh.navigation.TopBarContent
 import com.chaddy50.froh.ui.composables.AddToPlaylistHandler
 import com.chaddy50.froh.ui.composables.EntityScreen
 import com.chaddy50.froh.ui.composables.entityHeader.EntityHeader
@@ -34,14 +35,20 @@ fun TracksScreen(
     genreId: Long,
     albumId: Long,
     performanceId: Long?,
+    title: String,
     playbackViewModel: PlaybackViewModel,
     playlistViewModel: PlaylistViewModel,
-    screenViewModel: TracksScreenViewModel = hiltViewModel(),
+    onTopBarContentChanged: (TopBarContent) -> Unit = {},
+    screenViewModel: TracksScreenViewModel,
 ) {
     val currentTrack by playbackViewModel.nowPlayingState.currentTrack.collectAsStateWithLifecycle()
     val entityHeaderState by screenViewModel.entityHeaderState.collectAsStateWithLifecycle()
     val allPlaylists by playlistViewModel.allPlaylists.collectAsStateWithLifecycle()
     val uiState by screenViewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(title) {
+        onTopBarContentChanged(TopBarContent(title = title))
+    }
 
     val addToPlaylistState = rememberAddToPlaylistState<Track>(
         getPlaylistMembership = { track -> playlistViewModel.getPlaylistsThatTrackIsAlreadyIn(track.id) },
