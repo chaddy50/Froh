@@ -38,8 +38,9 @@ class TracksScreenTest {
 
     @Test
     fun reportsRouteTitleAsTopBarTitle() {
+        val performanceTitle = "Goldberg Variations"
         val screenViewModel = TracksScreenViewModel(
-            TracksRoute(genreId = 1L, albumId = 2L, performanceId = -1L, title = "Goldberg Variations"),
+            TracksRoute(genreId = 1L, albumId = 2L, performanceId = -1L, title = performanceTitle),
             ClassicalGenreConfig(),
             TrackRepository(FakeTrackDao()),
             AlbumRepository(FakeAlbumDao()),
@@ -54,7 +55,7 @@ class TracksScreenTest {
                 genreId = 1L,
                 albumId = 2L,
                 performanceId = null,
-                title = "Goldberg Variations",
+                title = performanceTitle,
                 playbackViewModel = mockk(relaxed = true),
                 playlistViewModel = PlaylistViewModel(TrackRepository(FakeTrackDao()), PlaylistRepository(FakePlaylistDao())),
                 screenViewModel = screenViewModel,
@@ -62,6 +63,6 @@ class TracksScreenTest {
             )
         }
 
-        assertEquals("Goldberg Variations", reportedTitle)
+        assertEquals(performanceTitle, reportedTitle)
     }
 }
