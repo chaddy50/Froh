@@ -25,6 +25,7 @@ jobs:
         run: ./gradlew app:testDebugUnitTest
 
   instrumentation-tests-matrix:
+    name: instrumentation-tests (API ${{ matrix.api-level }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
