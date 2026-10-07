@@ -1,9 +1,7 @@
 package com.chaddy50.froh.ui.screens.tracksScreen
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.chaddy50.froh.data.ClassicalGenreConfig
 import com.chaddy50.froh.data.entity.Album
 import com.chaddy50.froh.data.entity.AlbumArtist
@@ -16,6 +14,9 @@ import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.navigation.TracksRoute
 import com.chaddy50.froh.ui.composables.entityHeader.EntityHeaderState
 import com.chaddy50.froh.utilities.formatMillisecondsIntoMinutesAndSeconds
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +26,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
 data class TracksScreenUiState(
     val screenTitle: String = "Tracks",
@@ -37,9 +37,9 @@ data class TracksScreenUiState(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class TracksScreenViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = TracksScreenViewModel.Factory::class)
+class TracksScreenViewModel @AssistedInject constructor(
+    @Assisted route: TracksRoute,
     classicalGenreConfig: ClassicalGenreConfig,
     trackRepository: TrackRepository,
     albumRepository: AlbumRepository,
@@ -50,8 +50,12 @@ class TracksScreenViewModel @Inject constructor(
     val uiState: StateFlow<TracksScreenUiState>
     val entityHeaderState: StateFlow<EntityHeaderState>
 
+    @AssistedFactory
+    interface Factory {
+        fun create(route: TracksRoute): TracksScreenViewModel
+    }
+
     init {
-        val route = savedStateHandle.toRoute<TracksRoute>()
         val albumId = route.albumId
         val genreId = route.genreId
         val performanceId = if (route.performanceId == -1L) null else route.performanceId

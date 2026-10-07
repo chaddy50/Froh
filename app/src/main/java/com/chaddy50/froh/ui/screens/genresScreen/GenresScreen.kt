@@ -32,8 +32,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.chaddy50.froh.data.entity.Genre
+import com.chaddy50.froh.navigation.AppNavigator
 import com.chaddy50.froh.navigation.ArtistsRoute
 import com.chaddy50.froh.ui.composables.AddToPlaylistHandler
 import com.chaddy50.froh.ui.composables.EmptyStateContent
@@ -47,7 +47,7 @@ import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 fun GenresScreen(
     playbackViewModel: PlaybackViewModel,
     playlistViewModel: PlaylistViewModel,
-    navController: NavController,
+    appNavigator: AppNavigator,
     screenViewModel: GenresScreenViewModel = hiltViewModel(),
 ) {
     val uiState by screenViewModel.uiState.collectAsStateWithLifecycle()
@@ -126,7 +126,7 @@ fun GenresScreen(
                         EntityCard(
                             genreWithStats.genre.name,
                             onClick = {
-                                navController.navigate(
+                                appNavigator.push(
                                     ArtistsRoute(
                                         genreId = genreWithStats.genre.id,
                                         title = genreWithStats.genre.name,

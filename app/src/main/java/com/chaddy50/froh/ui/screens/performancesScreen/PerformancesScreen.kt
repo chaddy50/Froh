@@ -4,11 +4,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
+import com.chaddy50.froh.navigation.AppNavigator
+import com.chaddy50.froh.navigation.TopBarContent
 import com.chaddy50.froh.navigation.TracksRoute
 import com.chaddy50.froh.ui.composables.EntityCard
 import com.chaddy50.froh.ui.composables.EntityScreen
@@ -21,14 +22,20 @@ import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 fun PerformancesScreen(
     genreId: Long,
     albumId: Long,
+    title: String,
     playbackViewModel: PlaybackViewModel,
     playlistViewModel: PlaylistViewModel,
-    navController: NavController,
-    screenViewModel: PerformancesScreenViewModel = hiltViewModel(),
+    appNavigator: AppNavigator,
+    onTopBarContentChanged: (TopBarContent) -> Unit = {},
+    screenViewModel: PerformancesScreenViewModel,
 ) {
     val uiState by screenViewModel.uiState.collectAsStateWithLifecycle()
     val entityHeaderState by screenViewModel.entityHeaderState.collectAsStateWithLifecycle()
     val allPlaylists by playlistViewModel.allPlaylists.collectAsStateWithLifecycle()
+
+    LaunchedEffect(title) {
+        onTopBarContentChanged(TopBarContent(title = title))
+    }
 
     EntityScreen(
         uiState.isLoading,
@@ -48,7 +55,7 @@ fun PerformancesScreen(
                     EntityCard(
                         title = performance.artistName,
                         onClick = {
-                            navController.navigate(TracksRoute(genreId = genreId, albumId = albumId, performanceId = performance.id, title = uiState.screenTitle))
+                            appNavigator.push(TracksRoute(genreId = genreId, albumId = albumId, performanceId = performance.id, title = uiState.screenTitle))
                         },
                         subtitle = performance.year,
                     )

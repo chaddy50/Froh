@@ -1,9 +1,7 @@
 package com.chaddy50.froh.ui.screens.albumsScreen
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.chaddy50.froh.data.ClassicalGenreConfig
 import com.chaddy50.froh.data.entity.Album
 import com.chaddy50.froh.data.entity.Genre
@@ -15,6 +13,9 @@ import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.navigation.AlbumsRoute
 import com.chaddy50.froh.utilities.chooseAlbumLabel
 import com.chaddy50.froh.ui.composables.entityHeader.EntityHeaderState
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +27,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
 data class AlbumsScreenUiState(
     val screenTitle: String = "Artists",
@@ -35,9 +35,9 @@ data class AlbumsScreenUiState(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class AlbumsScreenViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = AlbumsScreenViewModel.Factory::class)
+class AlbumsScreenViewModel @AssistedInject constructor(
+    @Assisted route: AlbumsRoute,
     classicalGenreConfig: ClassicalGenreConfig,
     albumRepository: AlbumRepository,
     albumArtistRepository: AlbumArtistRepository,
@@ -54,8 +54,12 @@ class AlbumsScreenViewModel @Inject constructor(
     val uiState: StateFlow<AlbumsScreenUiState>
     val entityHeaderState: StateFlow<EntityHeaderState>
 
+    @AssistedFactory
+    interface Factory {
+        fun create(route: AlbumsRoute): AlbumsScreenViewModel
+    }
+
     init {
-        val route = savedStateHandle.toRoute<AlbumsRoute>()
         genreId = route.genreId
         val albumArtistId = route.albumArtistId
         val classicalGenreId = classicalGenreConfig.classicalGenreId

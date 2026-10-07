@@ -1,13 +1,14 @@
 package com.chaddy50.froh.ui.screens.playlistTracksScreen
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.navigation.PlaylistTracksRoute
 import com.chaddy50.froh.ui.composables.entityHeader.EntityHeaderState
 import com.chaddy50.froh.utilities.formatMillisecondsIntoMinutesAndSeconds
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,7 +19,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.data.entity.Track
-import javax.inject.Inject
 
 data class PlaylistTracksScreenState(
     val playlist: Playlist? = null,
@@ -27,16 +27,20 @@ data class PlaylistTracksScreenState(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class PlaylistTracksScreenViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = PlaylistTracksScreenViewModel.Factory::class)
+class PlaylistTracksScreenViewModel @AssistedInject constructor(
+    @Assisted route: PlaylistTracksRoute,
     playlistRepository: PlaylistRepository,
 ) : ViewModel() {
     val uiState: StateFlow<PlaylistTracksScreenState>
     val entityHeaderState: StateFlow<EntityHeaderState>
 
+    @AssistedFactory
+    interface Factory {
+        fun create(route: PlaylistTracksRoute): PlaylistTracksScreenViewModel
+    }
+
     init {
-        val route = savedStateHandle.toRoute<PlaylistTracksRoute>()
         val playlistId = route.playlistId
 
         val stateFlow = playlistRepository.getPlaylistById(playlistId).flatMapLatest { playlist ->

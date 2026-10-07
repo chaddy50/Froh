@@ -4,17 +4,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import com.chaddy50.froh.data.entity.Album
+import com.chaddy50.froh.navigation.AppNavigator
 import com.chaddy50.froh.navigation.PerformancesRoute
+import com.chaddy50.froh.navigation.TopBarContent
 import com.chaddy50.froh.navigation.TracksRoute
 import com.chaddy50.froh.ui.composables.AddToPlaylistHandler
 import com.chaddy50.froh.ui.composables.EntityCard
 import com.chaddy50.froh.ui.composables.EntityScreen
+import com.chaddy50.froh.ui.composables.SubGenreFilterButton
 import com.chaddy50.froh.ui.composables.entityHeader.EntityHeader
 import com.chaddy50.froh.ui.composables.entityHeader.EntityType
 import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
@@ -27,15 +29,34 @@ fun AlbumsScreen(
     albumArtistId: Long,
     playbackViewModel: PlaybackViewModel,
     playlistViewModel: PlaylistViewModel,
-    navController: NavController,
-    screenViewModel: AlbumsScreenViewModel = hiltViewModel(),
+    appNavigator: AppNavigator,
+    onTopBarContentChanged: (TopBarContent) -> Unit = {},
+    screenViewModel: AlbumsScreenViewModel,
 ) {
     val uiState by screenViewModel.uiState.collectAsStateWithLifecycle()
     val entityHeaderState by screenViewModel.entityHeaderState.collectAsStateWithLifecycle()
     val allPlaylists by playlistViewModel.allPlaylists.collectAsStateWithLifecycle()
     val isClassical = screenViewModel.isClassical
+    val subGenres by screenViewModel.subGenres.collectAsStateWithLifecycle()
     val selectedSubGenreId by screenViewModel.selectedSubGenreId.collectAsStateWithLifecycle()
     val effectiveGenreId = selectedSubGenreId ?: screenViewModel.genreId
+
+    LaunchedEffect(uiState.screenTitle, subGenres, selectedSubGenreId) {
+        onTopBarContentChanged(
+            TopBarContent(
+                title = uiState.screenTitle,
+                actions = {
+                    if (subGenres.size > 1) {
+                        SubGenreFilterButton(
+                            subGenres = subGenres,
+                            selectedSubGenreId = selectedSubGenreId,
+                            onSubGenreSelected = { screenViewModel.updateSelectedSubGenreId(it) },
+                        )
+                    }
+                },
+            )
+        )
+    }
 
     val addToPlaylistState = rememberAddToPlaylistState<Album>(
         getPlaylistMembership = { album -> playlistViewModel.getPlaylistsThatAlbumIsAlreadyIn(album.id) },
@@ -64,9 +85,9 @@ fun AlbumsScreen(
                         title = album.title,
                         onClick = {
                             if (isClassical) {
-                                navController.navigate(PerformancesRoute(genreId = genreId, albumId = album.id, title = album.title))
+                                appNavigator.push(PerformancesRoute(genreId = genreId, albumId = album.id, title = album.title))
                             } else {
-                                navController.navigate(TracksRoute(genreId = genreId, albumId = album.id, title = album.title))
+                                appNavigator.push(TracksRoute(genreId = genreId, albumId = album.id, title = album.title))
                             }
                         },
                         onLongClick = { addToPlaylistState.show(album) },

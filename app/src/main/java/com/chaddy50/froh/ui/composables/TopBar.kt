@@ -13,17 +13,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.navigation.NavController
+import com.chaddy50.froh.navigation.AppNavigator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
     title: String,
-    navController: NavController,
+    appNavigator: AppNavigator,
     scrollBehavior: TopAppBarScrollBehavior,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
-    val canGoBack = navController.previousBackStackEntry != null
+    val canGoBack = appNavigator.canGoBack
 
     TopAppBar(
         title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -34,7 +34,7 @@ fun TopBar(
         ),
         navigationIcon = {
             if (canGoBack) {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = { appNavigator.pop() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Go back"

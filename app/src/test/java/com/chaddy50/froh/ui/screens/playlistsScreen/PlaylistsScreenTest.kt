@@ -23,13 +23,14 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
 import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.fakes.FakePlaylistDao
 import com.chaddy50.froh.fakes.FakeTrackDao
 import com.chaddy50.froh.fakes.MainDispatcherRule
+import com.chaddy50.froh.navigation.HomeRoute
+import com.chaddy50.froh.navigation.rememberAppNavigator
 import com.chaddy50.froh.ui.composables.EmptyStateContent
 import com.chaddy50.froh.ui.composables.EntityCard
 import com.chaddy50.froh.ui.composables.EntityScreen
@@ -202,7 +203,7 @@ class PlaylistsScreenTest {
                     TrackRepository(trackDao),
                     PlaylistRepository(playlistDao),
                 ),
-                navController = rememberNavController(),
+                appNavigator = rememberAppNavigator(HomeRoute),
                 screenViewModel = PlaylistsScreenViewModel(
                     PlaylistRepository(playlistDao),
                     TrackRepository(trackDao),
