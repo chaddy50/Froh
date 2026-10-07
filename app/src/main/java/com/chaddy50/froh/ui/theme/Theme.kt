@@ -8,6 +8,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import com.chaddy50.froh.utilities.supportsDynamicColor
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -34,7 +35,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun MusicAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = supportsDynamicColor(),
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

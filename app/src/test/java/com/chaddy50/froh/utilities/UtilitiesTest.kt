@@ -1,5 +1,7 @@
 package com.chaddy50.froh.utilities
 
+import android.Manifest
+import android.os.Build
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -150,5 +152,41 @@ class FormatMillisecondsTest {
     @Test
     fun multiHourValuePadsMinutesAndSeconds() {
         assertEquals("2:30:05", formatMillisecondsIntoMinutesAndSeconds(9_005_000))
+    }
+}
+
+class AudioLibraryPermissionTest {
+
+    @Test
+    fun requestsReadExternalStorageBelowTiramisu() {
+        assertEquals(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            audioLibraryPermission(sdkInt = Build.VERSION_CODES.R)
+        )
+        assertEquals(
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            audioLibraryPermission(sdkInt = Build.VERSION_CODES.S_V2)
+        )
+    }
+
+    @Test
+    fun requestsReadMediaAudioFromTiramisuOnward() {
+        assertEquals(
+            Manifest.permission.READ_MEDIA_AUDIO,
+            audioLibraryPermission(sdkInt = Build.VERSION_CODES.TIRAMISU)
+        )
+    }
+}
+
+class SupportsDynamicColorTest {
+
+    @Test
+    fun falseBelowAndroidTwelve() {
+        assertEquals(false, supportsDynamicColor(sdkInt = Build.VERSION_CODES.R))
+    }
+
+    @Test
+    fun trueFromAndroidTwelveOnward() {
+        assertEquals(true, supportsDynamicColor(sdkInt = Build.VERSION_CODES.S))
     }
 }

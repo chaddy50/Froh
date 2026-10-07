@@ -1,5 +1,7 @@
 package com.chaddy50.froh.utilities
 
+import android.Manifest
+import android.os.Build
 import java.text.Normalizer
 import java.util.Locale
 
@@ -47,6 +49,16 @@ fun chooseAlbumArtworkPath(
     albumArtistPortraitPath: String?,
 ): String? =
     if (isClassical) ownArtworkPath ?: albumArtistPortraitPath else ownArtworkPath
+
+fun audioLibraryPermission(sdkInt: Int = Build.VERSION.SDK_INT): String =
+    if (sdkInt >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.READ_MEDIA_AUDIO
+    } else {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    }
+
+fun supportsDynamicColor(sdkInt: Int = Build.VERSION.SDK_INT): Boolean =
+    sdkInt >= Build.VERSION_CODES.S
 
 fun formatMillisecondsIntoMinutesAndSeconds(milliseconds: Long): String {
     val totalSeconds = milliseconds / 1000

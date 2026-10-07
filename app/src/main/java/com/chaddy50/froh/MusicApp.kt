@@ -1,6 +1,5 @@
 package com.chaddy50.froh
 
-import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -28,6 +27,7 @@ import com.chaddy50.froh.navigation.NavigationHost
 import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 import com.chaddy50.froh.ui.theme.MusicAppTheme
+import com.chaddy50.froh.utilities.audioLibraryPermission
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.launch
@@ -44,12 +44,12 @@ class MusicApp : ComponentActivity() {
 
         if (ContextCompat.checkSelfPermission(
                 this.applicationContext,
-                Manifest.permission.READ_MEDIA_AUDIO
+                audioLibraryPermission()
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             triggerLibraryScanIfNeeded()
         } else {
-            permissionRequestLauncher.launch(Manifest.permission.READ_MEDIA_AUDIO)
+            permissionRequestLauncher.launch(audioLibraryPermission())
         }
 
         enableEdgeToEdge()
@@ -71,7 +71,7 @@ class MusicApp : ComponentActivity() {
 
         if (ContextCompat.checkSelfPermission(
                 this.applicationContext,
-                Manifest.permission.READ_MEDIA_AUDIO
+                audioLibraryPermission()
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             triggerLibraryScanIfNeeded()

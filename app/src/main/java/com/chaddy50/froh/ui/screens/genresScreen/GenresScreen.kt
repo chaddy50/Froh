@@ -1,6 +1,5 @@
 package com.chaddy50.froh.ui.screens.genresScreen
 
-import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -42,6 +41,7 @@ import com.chaddy50.froh.ui.composables.EntityScreen
 import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
 import com.chaddy50.froh.ui.composables.rememberAddToPlaylistState
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
+import com.chaddy50.froh.utilities.audioLibraryPermission
 
 @Composable
 fun GenresScreen(
@@ -59,7 +59,7 @@ fun GenresScreen(
     var isPermissionGranted by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
-                context, Manifest.permission.READ_MEDIA_AUDIO
+                context, audioLibraryPermission()
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
@@ -68,7 +68,7 @@ fun GenresScreen(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 isPermissionGranted = ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.READ_MEDIA_AUDIO
+                    context, audioLibraryPermission()
                 ) == PackageManager.PERMISSION_GRANTED
             }
         }
@@ -94,7 +94,7 @@ fun GenresScreen(
             if (!isPermissionGranted && uiState.genres.isEmpty()) {
                 val activity = context as Activity
                 val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
-                    activity, Manifest.permission.READ_MEDIA_AUDIO
+                    activity, audioLibraryPermission()
                 )
                 EmptyStateContent(
                     icon = Icons.Filled.FolderOff,
@@ -103,7 +103,7 @@ fun GenresScreen(
                     action = {
                         if (shouldShowRationale) {
                             Button(onClick = {
-                                permissionLauncher.launch(Manifest.permission.READ_MEDIA_AUDIO)
+                                permissionLauncher.launch(audioLibraryPermission())
                             }) {
                                 Text("Grant permission")
                             }
