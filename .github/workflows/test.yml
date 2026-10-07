@@ -26,6 +26,9 @@ jobs:
 
   instrumentation-tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        api-level: [30, 36]
     steps:
       - uses: actions/checkout@v4
 
@@ -47,6 +50,6 @@ jobs:
       - name: Run instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 33
+          api-level: ${{ matrix.api-level }}
           arch: x86_64
           script: ./gradlew connectedDebugAndroidTest
