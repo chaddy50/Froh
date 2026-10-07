@@ -24,7 +24,7 @@ jobs:
       - name: Run unit tests
         run: ./gradlew app:testDebugUnitTest
 
-  instrumentation-tests:
+  instrumentation-tests-matrix:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -53,3 +53,16 @@ jobs:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           script: ./gradlew connectedDebugAndroidTest
+
+  instrumentation-tests:
+    name: instrumentation-tests
+    needs: instrumentation-tests-matrix
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check matrix result
+        run: |
+          if [ "${{ needs.instrumentation-tests-matrix.result }}" != "success" ]; then
+            echo "One or more instrumentation-tests matrix legs failed"
+            exit 1
+          fi
