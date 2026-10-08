@@ -16,6 +16,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+private const val CLASSICAL_GENRE = "Classical"
+
 @RunWith(RobolectricTestRunner::class)
 class BackAffordanceTest {
 
@@ -25,10 +27,10 @@ class BackAffordanceTest {
     @Test
     fun rendersLabel() {
         composeTestRule.setContent {
-            BackAffordance(label = "Classical", appNavigator = rememberAppNavigator(HomeRoute))
+            BackAffordance(label = CLASSICAL_GENRE, appNavigator = rememberAppNavigator(HomeRoute))
         }
 
-        composeTestRule.onNodeWithText("Classical").assertIsDisplayed()
+        composeTestRule.onNodeWithText(CLASSICAL_GENRE).assertIsDisplayed()
     }
 
     @Test
@@ -36,11 +38,11 @@ class BackAffordanceTest {
         lateinit var appNavigator: AppNavigator
         composeTestRule.setContent {
             appNavigator = rememberAppNavigator(HomeRoute)
-            remember(Unit) { appNavigator.push(ArtistsRoute(genreId = 1L, title = "Classical")) }
-            BackAffordance(label = "Classical", appNavigator = appNavigator)
+            remember(Unit) { appNavigator.push(ArtistsRoute(genreId = 1L, title = CLASSICAL_GENRE)) }
+            BackAffordance(label = CLASSICAL_GENRE, appNavigator = appNavigator)
         }
 
-        composeTestRule.onNodeWithText("Classical").performClick()
+        composeTestRule.onNodeWithText(CLASSICAL_GENRE).performClick()
 
         assertEquals(HomeRoute, appNavigator.currentKey)
     }

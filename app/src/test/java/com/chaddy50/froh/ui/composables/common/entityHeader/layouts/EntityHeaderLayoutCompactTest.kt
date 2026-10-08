@@ -16,6 +16,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+private const val FAVORITES_PLAYLIST_TITLE = "Favorites"
+private const val RENAME_PLAYLIST = "Rename playlist"
+
 @RunWith(RobolectricTestRunner::class)
 class EntityHeaderLayoutCompactTest {
 
@@ -26,11 +29,11 @@ class EntityHeaderLayoutCompactTest {
     fun showsRenameIconForPlaylistType() {
         composeTestRule.setContent {
             EntityHeaderLayoutCompact(
-                uiState = EntityHeaderState(title = "Favorites", subtitle = "2 tracks", isLoading = false),
+                uiState = EntityHeaderState(title = FAVORITES_PLAYLIST_TITLE, subtitle = "2 tracks", isLoading = false),
                 type = EntityType.Playlist,
             )
         }
-        composeTestRule.onNodeWithContentDescription("Rename playlist").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(RENAME_PLAYLIST).assertIsDisplayed()
     }
 
     @Test
@@ -41,20 +44,20 @@ class EntityHeaderLayoutCompactTest {
                 type = EntityType.Artist,
             )
         }
-        composeTestRule.onNodeWithContentDescription("Rename playlist").assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(RENAME_PLAYLIST).assertDoesNotExist()
     }
 
     @Test
     fun tappingRenameIconOpensDialogPrefilledWithCurrentTitle() {
         composeTestRule.setContent {
             EntityHeaderLayoutCompact(
-                uiState = EntityHeaderState(title = "Favorites", subtitle = "", isLoading = false),
+                uiState = EntityHeaderState(title = FAVORITES_PLAYLIST_TITLE, subtitle = "", isLoading = false),
                 type = EntityType.Playlist,
             )
         }
-        composeTestRule.onNodeWithContentDescription("Rename playlist").performClick()
+        composeTestRule.onNodeWithContentDescription(RENAME_PLAYLIST).performClick()
 
-        composeTestRule.onNodeWithText("Rename playlist").assertIsDisplayed()
+        composeTestRule.onNodeWithText(RENAME_PLAYLIST).assertIsDisplayed()
         composeTestRule.onNode(hasSetTextAction()).assertIsDisplayed()
     }
 
@@ -63,12 +66,12 @@ class EntityHeaderLayoutCompactTest {
         var renamedTo: String? = null
         composeTestRule.setContent {
             EntityHeaderLayoutCompact(
-                uiState = EntityHeaderState(title = "Favorites", subtitle = "", isLoading = false),
+                uiState = EntityHeaderState(title = FAVORITES_PLAYLIST_TITLE, subtitle = "", isLoading = false),
                 type = EntityType.Playlist,
                 onRename = { renamedTo = it },
             )
         }
-        composeTestRule.onNodeWithContentDescription("Rename playlist").performClick()
+        composeTestRule.onNodeWithContentDescription(RENAME_PLAYLIST).performClick()
         composeTestRule.onNode(hasSetTextAction()).performTextReplacement("Workout")
         composeTestRule.onNodeWithText("Rename").performClick()
 

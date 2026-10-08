@@ -22,13 +22,17 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+private const val TRACK_TITLE = "Track"
+private const val TRACK_ARTIST = "Artist"
+private const val PLAY = "Play"
+
 @RunWith(RobolectricTestRunner::class)
 class MiniPlayerExpandedTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private fun track(title: String = "Track", artist: String = "Artist"): MediaItem =
+    private fun track(title: String = TRACK_TITLE, artist: String = TRACK_ARTIST): MediaItem =
         MediaItem.Builder()
             .setMediaMetadata(MediaMetadata.Builder().setTitle(title).setArtist(artist).build())
             .build()
@@ -48,8 +52,8 @@ class MiniPlayerExpandedTest {
             )
         }
 
-        composeTestRule.onNodeWithText("Track").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Artist").assertIsDisplayed()
+        composeTestRule.onNodeWithText(TRACK_TITLE).assertIsDisplayed()
+        composeTestRule.onNodeWithText(TRACK_ARTIST).assertIsDisplayed()
     }
 
     @Test
@@ -68,7 +72,7 @@ class MiniPlayerExpandedTest {
             )
         }
 
-        composeTestRule.onNodeWithContentDescription("Play").performClick()
+        composeTestRule.onNodeWithContentDescription(PLAY).performClick()
 
         assertTrue(called)
     }
@@ -156,7 +160,7 @@ class MiniPlayerExpandedTest {
             )
         }
 
-        composeTestRule.onNodeWithContentDescription("Play").performClick()
+        composeTestRule.onNodeWithContentDescription(PLAY).performClick()
 
         assertTrue(playPauseCalled)
         assertFalse(expanded)
@@ -179,8 +183,8 @@ class MiniPlayerExpandedTest {
             }
         }
 
-        composeTestRule.onNodeWithText("Track").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Artist").assertIsDisplayed()
+        composeTestRule.onNodeWithText(TRACK_TITLE).assertIsDisplayed()
+        composeTestRule.onNodeWithText(TRACK_ARTIST).assertIsDisplayed()
     }
 
     @Test
@@ -200,7 +204,7 @@ class MiniPlayerExpandedTest {
             }
         }
 
-        composeTestRule.onNodeWithText("Track").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Artist").assertIsDisplayed()
+        composeTestRule.onNodeWithText(TRACK_TITLE).assertIsDisplayed()
+        composeTestRule.onNodeWithText(TRACK_ARTIST).assertIsDisplayed()
     }
 }

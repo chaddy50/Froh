@@ -35,6 +35,8 @@ data class AlbumsScreenUiState(
     val isLoading: Boolean = true
 )
 
+private const val DEFAULT_GENRE_NAME = "Genre"
+
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel(assistedFactory = AlbumsScreenViewModel.Factory::class)
 class AlbumsScreenViewModel @AssistedInject constructor(
@@ -74,8 +76,8 @@ class AlbumsScreenViewModel @AssistedInject constructor(
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
         genreName = genreRepository.getGenreById(genreId)
-            .map { it?.name ?: "Genre" }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "Genre")
+            .map { it?.name ?: DEFAULT_GENRE_NAME }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DEFAULT_GENRE_NAME)
 
         val albums: StateFlow<List<Album>> = _selectedSubGenreId
             .flatMapLatest { selectedSubGenreId ->
@@ -134,7 +136,7 @@ class AlbumsScreenViewModel @AssistedInject constructor(
             } else {
                 EntityHeaderState(
                     albumArtist?.name ?: "Artist",
-                    genre?.name ?: "Genre",
+                    genre?.name ?: DEFAULT_GENRE_NAME,
                     "$numberOfAlbums $albumsLabel",
                     albumArtist?.portraitPath,
                     false,

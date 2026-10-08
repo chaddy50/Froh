@@ -15,6 +15,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+private const val NO_MUSIC_YET = "No music yet"
+private const val ADD_MUSIC_SUBTITLE = "Add music to your device to get started"
+private const val SOME_SUBTITLE = "Some subtitle"
+
 @RunWith(RobolectricTestRunner::class)
 class EmptyStateContentTest {
 
@@ -26,11 +30,11 @@ class EmptyStateContentTest {
         composeTestRule.setContent {
             EmptyStateContent(
                 icon = Icons.Filled.MusicNote,
-                title = "No music yet",
-                subtitle = "Add music to your device to get started",
+                title = NO_MUSIC_YET,
+                subtitle = ADD_MUSIC_SUBTITLE,
             )
         }
-        composeTestRule.onNodeWithText("No music yet").assertIsDisplayed()
+        composeTestRule.onNodeWithText(NO_MUSIC_YET).assertIsDisplayed()
     }
 
     @Test
@@ -38,11 +42,11 @@ class EmptyStateContentTest {
         composeTestRule.setContent {
             EmptyStateContent(
                 icon = Icons.Filled.MusicNote,
-                title = "No music yet",
-                subtitle = "Add music to your device to get started",
+                title = NO_MUSIC_YET,
+                subtitle = ADD_MUSIC_SUBTITLE,
             )
         }
-        composeTestRule.onNodeWithText("Add music to your device to get started").assertIsDisplayed()
+        composeTestRule.onNodeWithText(ADD_MUSIC_SUBTITLE).assertIsDisplayed()
     }
 
     @Test
@@ -50,12 +54,12 @@ class EmptyStateContentTest {
         composeTestRule.setContent {
             EmptyStateContent(
                 icon = Icons.Filled.MusicNote,
-                title = "No music yet",
-                subtitle = "Add music to your device to get started",
+                title = NO_MUSIC_YET,
+                subtitle = ADD_MUSIC_SUBTITLE,
             )
         }
-        composeTestRule.onNodeWithText("No music yet").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Add music to your device to get started").assertIsDisplayed()
+        composeTestRule.onNodeWithText(NO_MUSIC_YET).assertIsDisplayed()
+        composeTestRule.onNodeWithText(ADD_MUSIC_SUBTITLE).assertIsDisplayed()
     }
 
     @Test
@@ -64,10 +68,10 @@ class EmptyStateContentTest {
             EmptyStateContent(
                 icon = Icons.Filled.MusicNote,
                 title = "",
-                subtitle = "Some subtitle",
+                subtitle = SOME_SUBTITLE,
             )
         }
-        composeTestRule.onNodeWithText("Some subtitle").assertIsDisplayed()
+        composeTestRule.onNodeWithText(SOME_SUBTITLE).assertIsDisplayed()
     }
 
     @Test
@@ -100,8 +104,8 @@ class EmptyStateContentTest {
         composeTestRule.setContent {
             EmptyStateContent(
                 icon = Icons.Filled.MusicNote,
-                title = "No music yet",
-                subtitle = "Add music to your device to get started",
+                title = NO_MUSIC_YET,
+                subtitle = ADD_MUSIC_SUBTITLE,
             )
         }
         composeTestRule.onNodeWithText("Grant").assertDoesNotExist()
@@ -112,8 +116,8 @@ class EmptyStateContentTest {
         composeTestRule.setContent {
             EmptyStateContent(
                 icon = Icons.Filled.MusicNote,
-                title = "No music yet",
-                subtitle = "Some subtitle",
+                title = NO_MUSIC_YET,
+                subtitle = SOME_SUBTITLE,
                 action = {
                     Button(onClick = {}) {
                         Text("Grant permission")

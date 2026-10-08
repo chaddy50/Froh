@@ -12,6 +12,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+private const val PLAY = "Play"
+private const val SHUFFLE = "Shuffle"
+
 @RunWith(RobolectricTestRunner::class)
 class EntityScreenTest {
 
@@ -28,8 +31,8 @@ class EntityScreenTest {
                 onShuffle = {},
             )
         }
-        composeTestRule.onNodeWithContentDescription("Play").assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription("Shuffle").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(PLAY).assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(SHUFFLE).assertIsDisplayed()
     }
 
     @Test
@@ -42,8 +45,8 @@ class EntityScreenTest {
                 onShuffle = null,
             )
         }
-        composeTestRule.onNodeWithContentDescription("Play").assertDoesNotExist()
-        composeTestRule.onNodeWithContentDescription("Shuffle").assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(PLAY).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(SHUFFLE).assertDoesNotExist()
     }
 
     @Test
@@ -56,8 +59,8 @@ class EntityScreenTest {
                 onShuffle = {},
             )
         }
-        composeTestRule.onNodeWithContentDescription("Play").assertDoesNotExist()
-        composeTestRule.onNodeWithContentDescription("Shuffle").assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(PLAY).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(SHUFFLE).assertDoesNotExist()
     }
 
     @Test
@@ -70,8 +73,8 @@ class EntityScreenTest {
                 onShuffle = null,
             )
         }
-        composeTestRule.onNodeWithContentDescription("Play").assertDoesNotExist()
-        composeTestRule.onNodeWithContentDescription("Shuffle").assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(PLAY).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(SHUFFLE).assertDoesNotExist()
     }
 
     @Test
@@ -86,7 +89,7 @@ class EntityScreenTest {
                 )
             }
         }
-        composeTestRule.onNodeWithContentDescription("Play").assertDoesNotExist()
-        composeTestRule.onNodeWithContentDescription("Shuffle").assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(PLAY).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(SHUFFLE).assertDoesNotExist()
     }
 }

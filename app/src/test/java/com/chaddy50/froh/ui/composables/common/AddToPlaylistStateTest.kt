@@ -5,6 +5,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
+private const val GENRE_ENTITY = "genre1"
+private const val ENTITY_NAME = "myEntity"
+
 class AddToPlaylistStateTest {
 
     private fun createState(
@@ -25,14 +28,14 @@ class AddToPlaylistStateTest {
     @Test
     fun showSetsEntityToAdd() {
         val state = createState()
-        state.show("genre1")
-        assertEquals("genre1", state.entityToAdd)
+        state.show(GENRE_ENTITY)
+        assertEquals(GENRE_ENTITY, state.entityToAdd)
     }
 
     @Test
     fun dismissClearsEntityToAdd() {
         val state = createState()
-        state.show("genre1")
+        state.show(GENRE_ENTITY)
         state.dismiss()
         assertNull(state.entityToAdd)
     }
@@ -55,10 +58,10 @@ class AddToPlaylistStateTest {
                 capturedEntity = entity
             },
         )
-        state.show("myEntity")
+        state.show(ENTITY_NAME)
         state.addToPlaylist(42L)
         assertEquals(42L, capturedPlaylistId)
-        assertEquals("myEntity", capturedEntity)
+        assertEquals(ENTITY_NAME, capturedEntity)
     }
 
     @Test
@@ -71,10 +74,10 @@ class AddToPlaylistStateTest {
                 capturedEntity = entity
             },
         )
-        state.show("myEntity")
+        state.show(ENTITY_NAME)
         state.createAndAddToPlaylist("New Playlist")
         assertEquals("New Playlist", capturedName)
-        assertEquals("myEntity", capturedEntity)
+        assertEquals(ENTITY_NAME, capturedEntity)
     }
 
     @Test

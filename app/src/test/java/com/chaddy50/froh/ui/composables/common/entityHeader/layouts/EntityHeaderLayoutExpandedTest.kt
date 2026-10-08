@@ -14,6 +14,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+private const val CLASSICAL_GENRE = "Classical"
+private const val ADD_TO_PLAYLIST = "Add to playlist"
+private const val PLAY = "Play"
+private const val SHUFFLE = "Shuffle"
+
 @RunWith(RobolectricTestRunner::class)
 class EntityHeaderLayoutExpandedTest {
 
@@ -43,12 +48,12 @@ class EntityHeaderLayoutExpandedTest {
     fun showsAddToPlaylistIconForApplicableType() {
         composeTestRule.setContent {
             EntityHeaderLayoutExpanded(
-                uiState = EntityHeaderState(title = "Classical", subtitle = "48 composers", isLoading = false),
+                uiState = EntityHeaderState(title = CLASSICAL_GENRE, subtitle = "48 composers", isLoading = false),
                 type = EntityType.Genre,
             )
         }
 
-        composeTestRule.onNodeWithContentDescription("Add to playlist").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription(ADD_TO_PLAYLIST).assertIsDisplayed()
     }
 
     @Test
@@ -60,7 +65,7 @@ class EntityHeaderLayoutExpandedTest {
             )
         }
 
-        composeTestRule.onNodeWithContentDescription("Add to playlist").assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(ADD_TO_PLAYLIST).assertDoesNotExist()
     }
 
     @Test
@@ -68,14 +73,14 @@ class EntityHeaderLayoutExpandedTest {
         var played = false
         composeTestRule.setContent {
             EntityHeaderLayoutExpanded(
-                uiState = EntityHeaderState(title = "Classical", subtitle = "", isLoading = false),
+                uiState = EntityHeaderState(title = CLASSICAL_GENRE, subtitle = "", isLoading = false),
                 type = EntityType.Genre,
                 onPlay = { played = true },
                 onShuffle = {},
             )
         }
 
-        composeTestRule.onNodeWithText("Play").performClick()
+        composeTestRule.onNodeWithText(PLAY).performClick()
 
         assertTrue(played)
     }
@@ -85,14 +90,14 @@ class EntityHeaderLayoutExpandedTest {
         var shuffled = false
         composeTestRule.setContent {
             EntityHeaderLayoutExpanded(
-                uiState = EntityHeaderState(title = "Classical", subtitle = "", isLoading = false),
+                uiState = EntityHeaderState(title = CLASSICAL_GENRE, subtitle = "", isLoading = false),
                 type = EntityType.Genre,
                 onPlay = {},
                 onShuffle = { shuffled = true },
             )
         }
 
-        composeTestRule.onNodeWithText("Shuffle").performClick()
+        composeTestRule.onNodeWithText(SHUFFLE).performClick()
 
         assertTrue(shuffled)
     }
@@ -101,14 +106,14 @@ class EntityHeaderLayoutExpandedTest {
     fun hidesPlayAndShuffleWhenCallbacksAreNull() {
         composeTestRule.setContent {
             EntityHeaderLayoutExpanded(
-                uiState = EntityHeaderState(title = "Classical", subtitle = "", isLoading = false),
+                uiState = EntityHeaderState(title = CLASSICAL_GENRE, subtitle = "", isLoading = false),
                 type = EntityType.Genre,
                 onPlay = null,
                 onShuffle = null,
             )
         }
 
-        composeTestRule.onNodeWithText("Play").assertDoesNotExist()
-        composeTestRule.onNodeWithText("Shuffle").assertDoesNotExist()
+        composeTestRule.onNodeWithText(PLAY).assertDoesNotExist()
+        composeTestRule.onNodeWithText(SHUFFLE).assertDoesNotExist()
     }
 }
