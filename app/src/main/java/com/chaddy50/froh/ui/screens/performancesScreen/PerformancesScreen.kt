@@ -1,21 +1,19 @@
 package com.chaddy50.froh.ui.screens.performancesScreen
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.chaddy50.froh.data.entity.Performance
 import com.chaddy50.froh.navigation.AppNavigator
+import com.chaddy50.froh.navigation.LocalWindowWidthSizeClass
+import com.chaddy50.froh.navigation.WindowWidthSizeClass
 import com.chaddy50.froh.navigation.TopBarContent
 import com.chaddy50.froh.navigation.TracksRoute
-import com.chaddy50.froh.ui.composables.EntityCard
-import com.chaddy50.froh.ui.composables.EntityScreen
-import com.chaddy50.froh.ui.composables.entityHeader.EntityHeader
-import com.chaddy50.froh.ui.composables.entityHeader.EntityType
-import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
+import com.chaddy50.froh.ui.composables.common.EntityScreen
+import com.chaddy50.froh.ui.composables.common.nowPlayingBar.PlaybackViewModel
+import com.chaddy50.froh.ui.screens.performancesScreen.layouts.PerformancesScreenLayoutCompact
+import com.chaddy50.froh.ui.screens.performancesScreen.layouts.PerformancesScreenLayoutExpanded
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 
 @Composable
@@ -37,32 +35,41 @@ fun PerformancesScreen(
         onTopBarContentChanged(TopBarContent(title = title))
     }
 
+    val onAddToPlaylist: (Long) -> Unit = { playlistId -> playlistViewModel.addAlbumToPlaylist(playlistId, albumId) }
+    val onCreateAndAdd: (String) -> Unit = { name -> playlistViewModel.createPlaylistAndAddAlbum(name, albumId) }
+    val onPlay = if (uiState.performances.isNotEmpty()) {{ playbackViewModel.playTracksForAlbumInGenre(albumId, screenViewModel.genreId, null, false) }} else null
+    val onShuffle = if (uiState.performances.isNotEmpty()) {{ playbackViewModel.playTracksForAlbumInGenre(albumId, screenViewModel.genreId, null, true) }} else null
+    val onPerformanceClick: (Performance) -> Unit = { performance ->
+        appNavigator.push(TracksRoute(genreId = genreId, albumId = albumId, performanceId = performance.id, title = uiState.screenTitle))
+    }
+
     EntityScreen(
         uiState.isLoading,
         {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                item {
-                    EntityHeader(
-                        uiState = entityHeaderState,
-                        type = EntityType.Album,
-                        allPlaylists = allPlaylists,
-                        onAddToPlaylist = { playlistId -> playlistViewModel.addAlbumToPlaylist(playlistId, albumId) },
-                        onCreateAndAdd = { name -> playlistViewModel.createPlaylistAndAddAlbum(name, albumId) },
-                    )
-                }
-
-                items(uiState.performances) { performance ->
-                    EntityCard(
-                        title = performance.artistName,
-                        onClick = {
-                            appNavigator.push(TracksRoute(genreId = genreId, albumId = albumId, performanceId = performance.id, title = uiState.screenTitle))
-                        },
-                        subtitle = performance.year,
-                    )
-                }
+            when (LocalWindowWidthSizeClass.current) {
+                WindowWidthSizeClass.EXPANDED -> PerformancesScreenLayoutExpanded(
+                    albumArtistName = uiState.albumArtist?.name ?: "Unknown Artist",
+                    appNavigator = appNavigator,
+                    entityHeaderState = entityHeaderState,
+                    allPlaylists = allPlaylists,
+                    onAddToPlaylist = onAddToPlaylist,
+                    onCreateAndAdd = onCreateAndAdd,
+                    onPlay = onPlay,
+                    onShuffle = onShuffle,
+                    performances = uiState.performances,
+                    onPerformanceClick = onPerformanceClick,
+                )
+                WindowWidthSizeClass.MEDIUM, WindowWidthSizeClass.COMPACT -> PerformancesScreenLayoutCompact(
+                    entityHeaderState = entityHeaderState,
+                    allPlaylists = allPlaylists,
+                    onAddToPlaylist = onAddToPlaylist,
+                    onCreateAndAdd = onCreateAndAdd,
+                    performances = uiState.performances,
+                    onPerformanceClick = onPerformanceClick,
+                )
             }
         },
-        onPlay = if (uiState.performances.isNotEmpty()) {{ playbackViewModel.playTracksForAlbumInGenre(albumId, screenViewModel.genreId, null, false) }} else null,
-        onShuffle = if (uiState.performances.isNotEmpty()) {{ playbackViewModel.playTracksForAlbumInGenre(albumId, screenViewModel.genreId, null, true) }} else null,
+        onPlay = onPlay,
+        onShuffle = onShuffle,
     )
 }

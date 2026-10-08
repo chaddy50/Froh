@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.navigation.PlaylistTracksRoute
-import com.chaddy50.froh.ui.composables.entityHeader.EntityHeaderState
+import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.utilities.formatMillisecondsIntoMinutesAndSeconds
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

@@ -12,7 +12,7 @@ import com.chaddy50.froh.data.repository.GenreRepository
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.navigation.AlbumsRoute
 import com.chaddy50.froh.utilities.chooseAlbumLabel
-import com.chaddy50.froh.ui.composables.entityHeader.EntityHeaderState
+import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -50,6 +51,7 @@ class AlbumsScreenViewModel @AssistedInject constructor(
 
     val isClassical: Boolean
     val genreId: Long
+    val genreName: StateFlow<String>
     val subGenres: StateFlow<List<Genre>>
     val uiState: StateFlow<AlbumsScreenUiState>
     val entityHeaderState: StateFlow<EntityHeaderState>
@@ -70,6 +72,10 @@ class AlbumsScreenViewModel @AssistedInject constructor(
         } else {
             flowOf(emptyList())
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+        genreName = genreRepository.getGenreById(genreId)
+            .map { it?.name ?: "Genre" }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "Genre")
 
         val albums: StateFlow<List<Album>> = _selectedSubGenreId
             .flatMapLatest { selectedSubGenreId ->

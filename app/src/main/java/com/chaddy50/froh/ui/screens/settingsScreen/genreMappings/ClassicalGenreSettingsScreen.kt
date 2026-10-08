@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.chaddy50.froh.navigation.LocalWindowWidthSizeClass
+import com.chaddy50.froh.navigation.WindowWidthSizeClass
 import com.chaddy50.froh.navigation.TopBarContent
 import kotlinx.coroutines.launch
 
@@ -61,6 +64,7 @@ fun ClassicalGenreSettingsScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        contentPadding = if (LocalWindowWidthSizeClass.current == WindowWidthSizeClass.EXPANDED) PaddingValues(bottom = 120.dp) else PaddingValues(),
     ) {
         items(uiState.genres, key = { it.genreId }) { genre ->
             Row(

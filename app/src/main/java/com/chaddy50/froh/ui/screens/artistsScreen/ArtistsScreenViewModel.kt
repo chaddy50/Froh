@@ -9,7 +9,7 @@ import com.chaddy50.froh.data.repository.AlbumRepository
 import com.chaddy50.froh.data.repository.GenreRepository
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.navigation.ArtistsRoute
-import com.chaddy50.froh.ui.composables.entityHeader.EntityHeaderState
+import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.utilities.chooseAlbumLabel
 import com.chaddy50.froh.utilities.chooseArtistLabel
 import dagger.assisted.Assisted

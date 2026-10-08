@@ -16,12 +16,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.chaddy50.froh.navigation.AppNavigator
+import com.chaddy50.froh.navigation.LocalWindowWidthSizeClass
+import com.chaddy50.froh.navigation.WindowWidthSizeClass
 import com.chaddy50.froh.navigation.SettingsRoute
 import com.chaddy50.froh.navigation.TopBarContent
-import com.chaddy50.froh.ui.composables.SettingsGearButton
+import com.chaddy50.froh.ui.composables.compact.SettingsGearButton
 import com.chaddy50.froh.ui.screens.genresScreen.GenresScreen
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistsScreen
-import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
+import com.chaddy50.froh.ui.composables.common.nowPlayingBar.PlaybackViewModel
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 import kotlinx.coroutines.launch
 
@@ -32,6 +34,10 @@ fun HomeScreen(
     appNavigator: AppNavigator,
     onTopBarContentChanged: (TopBarContent) -> Unit,
 ) {
+    if (LocalWindowWidthSizeClass.current == WindowWidthSizeClass.EXPANDED) {
+        return
+    }
+
     val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
 

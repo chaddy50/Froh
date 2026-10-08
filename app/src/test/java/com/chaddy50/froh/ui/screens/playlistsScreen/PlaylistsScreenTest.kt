@@ -31,9 +31,9 @@ import com.chaddy50.froh.fakes.FakeTrackDao
 import com.chaddy50.froh.fakes.MainDispatcherRule
 import com.chaddy50.froh.navigation.HomeRoute
 import com.chaddy50.froh.navigation.rememberAppNavigator
-import com.chaddy50.froh.ui.composables.EmptyStateContent
-import com.chaddy50.froh.ui.composables.EntityCard
-import com.chaddy50.froh.ui.composables.EntityScreen
+import com.chaddy50.froh.ui.composables.compact.EmptyStateContent
+import com.chaddy50.froh.ui.composables.common.EntityCard
+import com.chaddy50.froh.ui.composables.common.EntityScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Rule
