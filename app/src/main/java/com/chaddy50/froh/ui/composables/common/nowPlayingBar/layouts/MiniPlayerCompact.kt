@@ -37,7 +37,7 @@ import coil.request.ImageRequest
 
 @Composable
 fun MiniPlayerCompact(
-    currentTrack: MediaItem?,
+    currentTrack: MediaItem,
     isPlaying: Boolean,
     playbackPosition: Long,
     durationMs: Long,
@@ -47,8 +47,6 @@ fun MiniPlayerCompact(
     onShuffleToggled: () -> Unit,
     onExpand: () -> Unit,
 ) {
-    if (currentTrack == null) return
-
     val metadata = currentTrack.mediaMetadata
 
     BottomAppBar(

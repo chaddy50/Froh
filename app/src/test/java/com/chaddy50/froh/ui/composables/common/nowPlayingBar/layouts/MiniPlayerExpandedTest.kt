@@ -34,24 +34,6 @@ class MiniPlayerExpandedTest {
             .build()
 
     @Test
-    fun rendersNothingWhenNoTrackIsPlaying() {
-        composeTestRule.setContent {
-            MiniPlayerExpanded(
-                currentTrack = null,
-                isPlaying = false,
-                playbackPosition = 0,
-                durationMs = 0,
-                onPlayPause = {},
-                onSkipToNextTrack = {},
-                onSkipToPreviousTrack = {},
-                onExpand = {},
-            )
-        }
-
-        composeTestRule.onNodeWithText("Track").assertDoesNotExist()
-    }
-
-    @Test
     fun rendersTitleAndArtistWhenTrackIsPlaying() {
         composeTestRule.setContent {
             MiniPlayerExpanded(

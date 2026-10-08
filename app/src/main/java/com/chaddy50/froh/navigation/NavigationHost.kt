@@ -132,19 +132,21 @@ fun NavigationHost(
                             onAlbumsTopBarContentChanged = { albumsTopBarContent = it },
                             onScreenTopBarContentChanged = { screenTopBarContent = it },
                         )
-                        MiniPlayerExpanded(
-                            currentTrack = currentTrack,
-                            isPlaying = isPlaying,
-                            playbackPosition = playbackPosition,
-                            durationMs = durationMs,
-                            onPlayPause = onPlayPause,
-                            onSkipToNextTrack = onSkipToNextTrack,
-                            onSkipToPreviousTrack = onSkipToPreviousTrack,
-                            onExpand = { shouldShowNowPlayingSheet = true },
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(start = 32.dp, end = 32.dp, bottom = 24.dp),
-                        )
+                        currentTrack?.let { track ->
+                            MiniPlayerExpanded(
+                                currentTrack = track,
+                                isPlaying = isPlaying,
+                                playbackPosition = playbackPosition,
+                                durationMs = durationMs,
+                                onPlayPause = onPlayPause,
+                                onSkipToNextTrack = onSkipToNextTrack,
+                                onSkipToPreviousTrack = onSkipToPreviousTrack,
+                                onExpand = { shouldShowNowPlayingSheet = true },
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(start = 32.dp, end = 32.dp, bottom = 24.dp),
+                            )
+                        }
                     }
                 }
             } else {
@@ -167,17 +169,19 @@ fun NavigationHost(
                     bottomBar = {
                         Column {
                             MusicScannerProgressBar(isScanInProgress, scanProgress)
-                            MiniPlayerCompact(
-                                currentTrack,
-                                isPlaying,
-                                playbackPosition,
-                                durationMs,
-                                isShuffleModeEnabled,
-                                onPlayPause,
-                                onSkipToNextTrack,
-                                onShuffleToggled,
-                                { shouldShowNowPlayingSheet = true },
-                            )
+                            currentTrack?.let { track ->
+                                MiniPlayerCompact(
+                                    track,
+                                    isPlaying,
+                                    playbackPosition,
+                                    durationMs,
+                                    isShuffleModeEnabled,
+                                    onPlayPause,
+                                    onSkipToNextTrack,
+                                    onShuffleToggled,
+                                    { shouldShowNowPlayingSheet = true },
+                                )
+                            }
                         }
                     },
                     modifier = Modifier

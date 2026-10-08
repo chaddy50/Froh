@@ -41,7 +41,7 @@ import coil.request.ImageRequest
 
 @Composable
 fun MiniPlayerExpanded(
-    currentTrack: MediaItem?,
+    currentTrack: MediaItem,
     isPlaying: Boolean,
     playbackPosition: Long,
     durationMs: Long,
@@ -51,8 +51,6 @@ fun MiniPlayerExpanded(
     onExpand: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    if (currentTrack == null) return
-
     val metadata = currentTrack.mediaMetadata
 
     Surface(
