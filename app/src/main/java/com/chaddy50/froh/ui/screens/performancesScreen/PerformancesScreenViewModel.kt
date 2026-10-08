@@ -61,14 +61,14 @@ class PerformancesScreenViewModel @AssistedInject constructor(
         val classicalGenreId = classicalGenreConfig.classicalGenreId
         val isClassical = genreId == classicalGenreId
 
-        val albumTitle: Flow<String> = albumRepository.getAlbumById(albumId)
+        val albumTitleFlow: Flow<String> = albumRepository.getAlbumById(albumId)
             .filterNotNull()
             .map { it.title }
 
-        val performances: Flow<List<Performance>> =
+        val performancesFlow: Flow<List<Performance>> =
             performanceRepository.getPerformancesForAlbumForGenre(albumId, genreId)
 
-        val albumArtist: Flow<AlbumArtist?> = albumRepository.getAlbumById(albumId).flatMapLatest { album ->
+        val albumArtistFlow: Flow<AlbumArtist?> = albumRepository.getAlbumById(albumId).flatMapLatest { album ->
             if (album != null) {
                 albumArtistRepository.getAlbumArtistById(album.artistId)
             } else {
@@ -76,7 +76,7 @@ class PerformancesScreenViewModel @AssistedInject constructor(
             }
         }
 
-        uiState = combine(performances, albumTitle, albumArtist) { performances, albumTitle, albumArtist ->
+        uiState = combine(performancesFlow, albumTitleFlow, albumArtistFlow) { performances, albumTitle, albumArtist ->
             PerformanceScreenUiState(albumTitle, performances, albumArtist, false)
         }.stateIn(
             viewModelScope,

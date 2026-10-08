@@ -30,8 +30,6 @@ class PlaybackViewModel @Inject constructor(
     val nowPlayingState = NowPlayingState(application, viewModelScope)
     private val controller: MediaController? get() = nowPlayingState.controller
 
-    private val classicalGenreId: Long? get() = classicalGenreConfig.classicalGenreId
-
     fun playAllTracks(shuffled: Boolean) {
         viewModelScope.launch {
             val tracks = trackRepository.getAllTracks().first()
@@ -84,7 +82,7 @@ class PlaybackViewModel @Inject constructor(
 
     private suspend fun playTracks(tracks: List<Track>, shuffled: Boolean) {
         if (tracks.isNotEmpty()) {
-            val mediaItems = buildMediaItems(tracks, classicalGenreId, albumArtistRepository)
+            val mediaItems = buildMediaItems(tracks, classicalGenreConfig.classicalGenreId, albumArtistRepository)
             controller?.let { controller ->
                 controller.shuffleModeEnabled = shuffled
                 controller.setMediaItems(mediaItems)
@@ -96,7 +94,7 @@ class PlaybackViewModel @Inject constructor(
 
     fun playTrack(track: Track, allTracks: List<Track>) {
         viewModelScope.launch {
-            val mediaItems = buildMediaItems(allTracks, classicalGenreId, albumArtistRepository)
+            val mediaItems = buildMediaItems(allTracks, classicalGenreConfig.classicalGenreId, albumArtistRepository)
             val trackIndex = allTracks.indexOfFirst { it.id == track.id }
 
             controller?.let { controller ->

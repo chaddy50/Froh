@@ -94,7 +94,7 @@ fun EntityHeaderLayoutCompact(
 
                     if (!uiState.details.isNullOrEmpty()) {
                         Row(modifier = Modifier.padding(10.dp, 3.dp)) {
-                            Text(uiState.details!!, style = TextStyle(fontSize = 14.sp))
+                            Text(uiState.details, style = TextStyle(fontSize = 14.sp))
                         }
                     }
                 }
