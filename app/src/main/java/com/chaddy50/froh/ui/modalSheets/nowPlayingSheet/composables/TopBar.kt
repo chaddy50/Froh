@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.FilledTonalIconButton
@@ -22,7 +23,10 @@ import androidx.compose.ui.unit.dp
 fun TopBar(
     onDismiss: () -> Unit,
     isShuffleModeEnabled: Boolean,
-    onShuffleToggled: () -> Unit
+    onShuffleToggled: () -> Unit,
+    showQueueToggle: Boolean = false,
+    isQueueHidden: Boolean = false,
+    onQueueHiddenToggled: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -65,6 +69,33 @@ fun TopBar(
                         contentDescription = "Shuffle",
                         modifier = Modifier.size(24.dp)
                     )
+                }
+            }
+            if (showQueueToggle) {
+                if (!isQueueHidden) {
+                    FilledTonalIconButton(
+                        onClick = onQueueHiddenToggled,
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.QueueMusic,
+                            contentDescription = "Queue",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                } else {
+                    IconButton(
+                        onClick = onQueueHiddenToggled
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.QueueMusic,
+                            contentDescription = "Queue",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }

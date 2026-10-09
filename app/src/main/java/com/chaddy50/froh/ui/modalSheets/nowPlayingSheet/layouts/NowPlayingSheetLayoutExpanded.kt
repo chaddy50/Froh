@@ -1,7 +1,12 @@
 package com.chaddy50.froh.ui.modalSheets.nowPlayingSheet.layouts
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -18,6 +23,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +58,8 @@ fun NowPlayingSheetLayoutExpanded(
     onSkipToNextTrack: () -> Unit,
     onSkipToTrack: (Int) -> Unit,
     onSeek: (Long) -> Unit,
+    isQueueHidden: Boolean,
+    onQueueHiddenToggled: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -75,84 +83,103 @@ fun NowPlayingSheetLayoutExpanded(
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.fillMaxSize()
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(24.dp)
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.SpaceEvenly,
-                        modifier = Modifier
-                            .width(LEFT_PANE_WIDTH)
-                            .fillMaxHeight()
-                    ) {
-                        TopBar(
-                            onDismiss = {
-                                coroutineScope.launch {
-                                    sheetState.hide()
-                                    onDismiss()
-                                }
-                            },
-                            isShuffleModeEnabled = isShuffleModeEnabled,
-                            onShuffleToggled = onShuffleToggled
-                        )
+                    val leftPaneWidth by animateDpAsState(
+                        targetValue = if (isQueueHidden) maxWidth else LEFT_PANE_WIDTH,
+                        label = "nowPlayingLeftPaneWidth"
+                    )
 
-                        AlbumArtwork(currentTrack)
-
-                        TrackInfo(currentTrack)
-
-                        ProgressBar(
-                            playbackPosition,
-                            durationMs,
-                            onSeek
-                        )
-
-                        PlaybackControls(
-                            isPlaying,
-                            onPlayPause,
-                            onSkipToPreviousTrack,
-                            onSkipToNextTrack
-                        )
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(28.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(24.dp),
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.SpaceEvenly,
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(24.dp)
+                                .width(leftPaneWidth)
+                                .fillMaxHeight()
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = "Queue",
-                                    fontWeight = FontWeight.Bold,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Text(
-                                    text = "${currentTrackIndex + 1} of ${queue.size}",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
+                            TopBar(
+                                onDismiss = {
+                                    coroutineScope.launch {
+                                        sheetState.hide()
+                                        onDismiss()
+                                    }
+                                },
+                                isShuffleModeEnabled = isShuffleModeEnabled,
+                                onShuffleToggled = onShuffleToggled,
+                                showQueueToggle = true,
+                                isQueueHidden = isQueueHidden,
+                                onQueueHiddenToggled = onQueueHiddenToggled
+                            )
 
-                            Box(modifier = Modifier.weight(1f)) {
-                                QueueView(
-                                    queue,
-                                    currentTrackIndex,
-                                    onSkipToTrack,
-                                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-                                )
+                            AlbumArtwork(currentTrack)
+
+                            TrackInfo(currentTrack)
+
+                            ProgressBar(
+                                playbackPosition,
+                                durationMs,
+                                onSeek
+                            )
+
+                            PlaybackControls(
+                                isPlaying,
+                                onPlayPause,
+                                onSkipToPreviousTrack,
+                                onSkipToNextTrack
+                            )
+                        }
+
+                        AnimatedVisibility(
+                            visible = !isQueueHidden,
+                            enter = fadeIn(),
+                            exit = fadeOut(),
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(28.dp),
+                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(24.dp)
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text(
+                                            text = "Queue",
+                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                        Text(
+                                            text = "${currentTrackIndex + 1} of ${queue.size}",
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        QueueView(
+                                            queue,
+                                            currentTrackIndex,
+                                            onSkipToTrack,
+                                            backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

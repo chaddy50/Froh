@@ -83,6 +83,8 @@ fun NavigationHost(
     val onSkipToNextTrack = { playbackViewModel.nowPlayingState.skipNext() }
     val onShuffleToggled = { playbackViewModel.nowPlayingState.toggleShuffleMode() }
     val onSeek = { positionMs: Long -> playbackViewModel.nowPlayingState.seekTo(positionMs) }
+    val isQueueHidden by playbackViewModel.isQueueHidden.collectAsStateWithLifecycle()
+    val onQueueHiddenToggled = { playbackViewModel.toggleQueueHidden() }
 
     val isScanInProgress by libraryScanViewModel.isScanInProgress.collectAsStateWithLifecycle()
     val scanProgress by libraryScanViewModel.scanProgress.collectAsStateWithLifecycle()
@@ -219,6 +221,8 @@ fun NavigationHost(
                     onSkipToNextTrack,
                     onSkipToTrack,
                     onSeek,
+                    isQueueHidden,
+                    onQueueHiddenToggled,
                     { shouldShowNowPlayingSheet = false }
                 )
             }

@@ -10,12 +10,16 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import com.chaddy50.froh.data.ClassicalGenreConfig
 import com.chaddy50.froh.data.entity.Track
+import com.chaddy50.froh.data.preferences.IQueuePreferences
 import com.chaddy50.froh.data.repository.AlbumArtistRepository
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.utilities.chooseAlbumArtworkPath
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,9 +30,19 @@ class PlaybackViewModel @Inject constructor(
     private val trackRepository: TrackRepository,
     private val playlistRepository: PlaylistRepository,
     private val albumArtistRepository: AlbumArtistRepository,
+    private val queuePreferences: IQueuePreferences,
 ) : ViewModel() {
     val nowPlayingState = NowPlayingState(application, viewModelScope)
     private val controller: MediaController? get() = nowPlayingState.controller
+
+    val isQueueHidden: StateFlow<Boolean> = queuePreferences.isQueueHidden
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    fun toggleQueueHidden() {
+        viewModelScope.launch {
+            queuePreferences.setQueueHidden(!isQueueHidden.value)
+        }
+    }
 
     fun playAllTracks(shuffled: Boolean) {
         viewModelScope.launch {

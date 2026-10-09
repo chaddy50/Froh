@@ -8,6 +8,8 @@ import com.chaddy50.froh.data.api.listenBrainz.ListenBrainzPreferences
 import com.chaddy50.froh.data.api.listenBrainz.IListenBrainzPreferences
 import com.chaddy50.froh.data.api.listenBrainz.ListenBrainzRepository
 import com.chaddy50.froh.data.api.listenBrainz.ListenBrainzService
+import com.chaddy50.froh.data.preferences.IQueuePreferences
+import com.chaddy50.froh.data.preferences.QueuePreferences
 import com.chaddy50.froh.data.scrobbling.IScrobbleService
 import com.chaddy50.froh.data.scrobbling.ScrobbleManager
 import com.chaddy50.froh.data.api.audioDb.AudioDbRepository
@@ -164,6 +166,11 @@ object AppModule {
     @Singleton
     fun provideListenBrainzPreferences(@ApplicationContext context: Context): IListenBrainzPreferences =
         ListenBrainzPreferences(context)
+
+    @Provides
+    @Singleton
+    fun provideQueuePreferences(@ApplicationContext context: Context): IQueuePreferences =
+        QueuePreferences(context)
 
     @Provides
     @Singleton
