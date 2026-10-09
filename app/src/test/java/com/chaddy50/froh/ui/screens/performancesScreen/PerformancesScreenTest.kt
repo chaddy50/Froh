@@ -20,7 +20,7 @@ import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.FakePerformanceDao
 import com.chaddy50.froh.fakes.FakePlaylistDao
 import com.chaddy50.froh.fakes.FakeTrackDao
@@ -61,7 +61,7 @@ class PerformancesScreenTest {
             ClassicalGenreConfig(),
             PerformanceRepository(FakePerformanceDao()),
             AlbumRepository(FakeAlbumDao()),
-            AlbumArtistRepository(FakeAlbumArtistDao(), FakeAudioDbRepository()),
+            AlbumArtistRepository(FakeAlbumArtistDao(), FakeDeezerRepository()),
             TrackRepository(FakeTrackDao()),
             PlaylistRepository(FakePlaylistDao()),
         )
@@ -97,7 +97,7 @@ class PerformancesScreenTest {
             ClassicalGenreConfig(),
             PerformanceRepository(FakePerformanceDao(MutableStateFlow(performances))),
             AlbumRepository(FakeAlbumDao(albums)),
-            AlbumArtistRepository(FakeAlbumArtistDao(albumArtists), FakeAudioDbRepository()),
+            AlbumArtistRepository(FakeAlbumArtistDao(albumArtists), FakeDeezerRepository()),
             TrackRepository(FakeTrackDao()),
             PlaylistRepository(FakePlaylistDao()),
         )

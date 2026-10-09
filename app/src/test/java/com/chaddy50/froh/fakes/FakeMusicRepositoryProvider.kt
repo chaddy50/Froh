@@ -21,7 +21,7 @@ class FakeMusicRepositoryProvider(
     override val albumRepository = AlbumRepository(albumDao)
     override val genreRepository = GenreRepository(genreDao)
     override val albumArtistRepository = AlbumArtistRepository(
-        albumArtistDao, FakeAudioDbRepository()
+        albumArtistDao, FakeDeezerRepository()
     )
     override val performanceRepository = PerformanceRepository(performanceDao)
     override val playlistRepository = PlaylistRepository(playlistDao)

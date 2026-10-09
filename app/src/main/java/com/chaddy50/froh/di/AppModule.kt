@@ -2,7 +2,7 @@ package com.chaddy50.froh.di
 
 import android.content.Context
 import com.chaddy50.froh.data.MusicDatabase
-import com.chaddy50.froh.data.api.audioDb.AudioDbClient
+import com.chaddy50.froh.data.api.deezer.DeezerClient
 import com.chaddy50.froh.data.api.listenBrainz.ListenBrainzClient
 import com.chaddy50.froh.data.api.listenBrainz.ListenBrainzPreferences
 import com.chaddy50.froh.data.api.listenBrainz.IListenBrainzPreferences
@@ -12,9 +12,9 @@ import com.chaddy50.froh.data.preferences.IQueuePreferences
 import com.chaddy50.froh.data.preferences.QueuePreferences
 import com.chaddy50.froh.data.scrobbling.IScrobbleService
 import com.chaddy50.froh.data.scrobbling.ScrobbleManager
-import com.chaddy50.froh.data.api.audioDb.AudioDbRepository
-import com.chaddy50.froh.data.api.audioDb.AudioDbService
-import com.chaddy50.froh.data.api.audioDb.IAudioDbRepository
+import com.chaddy50.froh.data.api.deezer.DeezerRepository
+import com.chaddy50.froh.data.api.deezer.DeezerService
+import com.chaddy50.froh.data.api.deezer.IDeezerRepository
 import com.chaddy50.froh.data.api.openOpus.IOpenOpusRepository
 import com.chaddy50.froh.data.api.openOpus.OpenOpusClient
 import com.chaddy50.froh.data.api.openOpus.OpenOpusRepository
@@ -75,7 +75,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAudioDbService(): AudioDbService = AudioDbClient.service
+    fun provideDeezerService(): DeezerService = DeezerClient.service
 
     @Provides
     @Singleton
@@ -123,9 +123,9 @@ object AppModule {
     @Singleton
     fun provideAlbumArtistRepository(
         albumArtistDao: AlbumArtistDao,
-        audioDbRepository: IAudioDbRepository,
+        deezerRepository: IDeezerRepository,
     ): AlbumArtistRepository =
-        AlbumArtistRepository(albumArtistDao, audioDbRepository)
+        AlbumArtistRepository(albumArtistDao, deezerRepository)
 
     @Provides
     @Singleton
@@ -139,11 +139,11 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAudioDbRepository(
-        service: AudioDbService,
+    fun provideDeezerRepository(
+        service: DeezerService,
         artworkDownloader: IArtworkDownloader,
-    ): IAudioDbRepository =
-        AudioDbRepository(service, artworkDownloader)
+    ): IDeezerRepository =
+        DeezerRepository(service, artworkDownloader)
 
     @Provides
     @Singleton

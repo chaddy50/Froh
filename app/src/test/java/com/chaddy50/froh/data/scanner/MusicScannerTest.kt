@@ -16,7 +16,7 @@ import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
 import com.chaddy50.froh.fakes.FakeArtworkDownloader
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.FakeComposerDao
 import com.chaddy50.froh.fakes.FakeGenreDao
 import com.chaddy50.froh.fakes.FakeGenreMappingDao
@@ -35,6 +35,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
+private const val DOWNLOADED_PORTRAIT_PATH = "/downloaded/portrait.jpg"
+
 @RunWith(RobolectricTestRunner::class)
 class MusicScannerTest {
 
@@ -44,7 +46,7 @@ class MusicScannerTest {
     private lateinit var albumArtistDao: FakeAlbumArtistDao
 
     private fun createScanner(
-        audioDbRepository: FakeAudioDbRepository = FakeAudioDbRepository(),
+        deezerRepository: FakeDeezerRepository = FakeDeezerRepository(),
         openOpusRepository: FakeOpenOpusRepository = FakeOpenOpusRepository(),
         artworkDownloader: FakeArtworkDownloader = FakeArtworkDownloader(),
     ): MusicScanner {
@@ -72,7 +74,7 @@ class MusicScannerTest {
             genreRepository = GenreRepository(genreDao),
             genreMappingRepository = GenreMappingRepository(FakeGenreMappingDao()),
             artistRepository = ArtistRepository(stubArtistDao),
-            albumArtistRepository = AlbumArtistRepository(albumArtistDao, audioDbRepository),
+            albumArtistRepository = AlbumArtistRepository(albumArtistDao, deezerRepository),
             albumRepository = AlbumRepository(FakeAlbumDao()),
             trackRepository = TrackRepository(FakeTrackDao()),
             performanceRepository = PerformanceRepository(FakePerformanceDao()),
@@ -82,29 +84,29 @@ class MusicScannerTest {
 
     @Test
     fun fetchesPortraitForNonClassicalArtistWithoutPortrait() = runTest {
-        val audioDbRepo = FakeAudioDbRepository(portraitUrl = "/downloaded/portrait.jpg")
+        val deezerRepo = FakeDeezerRepository(portraitUrl = DOWNLOADED_PORTRAIT_PATH)
         genresFlow.value = listOf(Genre(id = 5L, name = "Rock"))
         albumArtistsFlow.value = listOf(
             AlbumArtist(id = 1, name = "Led Zeppelin", sortName = "Led Zeppelin"),
         )
 
-        val scanner = createScanner(audioDbRepository = audioDbRepo)
+        val scanner = createScanner(deezerRepository = deezerRepo)
         albumArtistDao.setGenresForArtist(1, setOf(5L))
         scanner.fetchArtistArtwork()
 
         val artist = albumArtistsFlow.value.find { it.id == 1L }
-        assertEquals("/downloaded/portrait.jpg", artist?.portraitPath)
+        assertEquals(DOWNLOADED_PORTRAIT_PATH, artist?.portraitPath)
     }
 
     @Test
     fun skipsArtistThatAlreadyHasPortrait() = runTest {
-        val audioDbRepo = FakeAudioDbRepository(portraitUrl = "/new/portrait.jpg")
+        val deezerRepo = FakeDeezerRepository(portraitUrl = "/new/portrait.jpg")
         genresFlow.value = listOf(Genre(id = 5L, name = "Rock"))
         albumArtistsFlow.value = listOf(
             AlbumArtist(id = 1, name = "Led Zeppelin", sortName = "Led Zeppelin", portraitPath = "/existing/portrait.jpg"),
         )
 
-        val scanner = createScanner(audioDbRepository = audioDbRepo)
+        val scanner = createScanner(deezerRepository = deezerRepo)
         albumArtistDao.setGenresForArtist(1, setOf(5L))
         scanner.fetchArtistArtwork()
 
@@ -191,13 +193,13 @@ class MusicScannerTest {
 
     @Test
     fun skipsArtistInDeniedGenre() = runTest {
-        val audioDbRepo = FakeAudioDbRepository(portraitUrl = "/downloaded/portrait.jpg")
+        val deezerRepo = FakeDeezerRepository(portraitUrl = DOWNLOADED_PORTRAIT_PATH)
         genresFlow.value = listOf(Genre(id = 5L, name = "Anime"))
         albumArtistsFlow.value = listOf(
             AlbumArtist(id = 1, name = "Some Artist", sortName = "Some Artist"),
         )
 
-        val scanner = createScanner(audioDbRepository = audioDbRepo)
+        val scanner = createScanner(deezerRepository = deezerRepo)
         albumArtistDao.setGenresForArtist(1, setOf(5L))
         scanner.fetchArtistArtwork()
 
@@ -208,37 +210,37 @@ class MusicScannerTest {
     @Test
     fun continuesProcessingWhenOneFetchThrows() = runTest {
         // Use a repo that succeeds for all - the test verifies all artists get processed
-        val audioDbRepo = FakeAudioDbRepository(portraitUrl = "/downloaded/portrait.jpg")
+        val deezerRepo = FakeDeezerRepository(portraitUrl = DOWNLOADED_PORTRAIT_PATH)
         genresFlow.value = listOf(Genre(id = 5L, name = "Rock"))
         albumArtistsFlow.value = listOf(
             AlbumArtist(id = 1, name = "Artist One", sortName = "Artist One"),
             AlbumArtist(id = 2, name = "Artist Two", sortName = "Artist Two"),
         )
 
-        val scanner = createScanner(audioDbRepository = audioDbRepo)
+        val scanner = createScanner(deezerRepository = deezerRepo)
         albumArtistDao.setGenresForArtist(1, setOf(5L))
         albumArtistDao.setGenresForArtist(2, setOf(5L))
         scanner.fetchArtistArtwork()
 
         val artist1 = albumArtistsFlow.value.find { it.id == 1L }
         val artist2 = albumArtistsFlow.value.find { it.id == 2L }
-        assertEquals("/downloaded/portrait.jpg", artist1?.portraitPath)
-        assertEquals("/downloaded/portrait.jpg", artist2?.portraitPath)
+        assertEquals(DOWNLOADED_PORTRAIT_PATH, artist1?.portraitPath)
+        assertEquals(DOWNLOADED_PORTRAIT_PATH, artist2?.portraitPath)
     }
 
     @Test
     fun handlesNoClassicalGenreInDatabase() = runTest {
-        val audioDbRepo = FakeAudioDbRepository(portraitUrl = "/downloaded/portrait.jpg")
+        val deezerRepo = FakeDeezerRepository(portraitUrl = DOWNLOADED_PORTRAIT_PATH)
         genresFlow.value = listOf(Genre(id = 5L, name = "Rock"))
         albumArtistsFlow.value = listOf(
             AlbumArtist(id = 1, name = "Led Zeppelin", sortName = "Led Zeppelin"),
         )
 
-        val scanner = createScanner(audioDbRepository = audioDbRepo)
+        val scanner = createScanner(deezerRepository = deezerRepo)
         albumArtistDao.setGenresForArtist(1, setOf(5L))
         scanner.fetchArtistArtwork()
 
         val artist = albumArtistsFlow.value.find { it.id == 1L }
-        assertEquals("/downloaded/portrait.jpg", artist?.portraitPath)
+        assertEquals(DOWNLOADED_PORTRAIT_PATH, artist?.portraitPath)
     }
 }

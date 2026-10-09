@@ -1,6 +1,6 @@
 package com.chaddy50.froh.data.repository
 
-import com.chaddy50.froh.data.api.audioDb.IAudioDbRepository
+import com.chaddy50.froh.data.api.deezer.IDeezerRepository
 import com.chaddy50.froh.data.dao.AlbumArtistDao
 import com.chaddy50.froh.data.entity.AlbumArtist
 import com.chaddy50.froh.utilities.stripArticles
@@ -12,7 +12,7 @@ interface IAlbumArtistRepository {
 
 class AlbumArtistRepository(
     private val albumArtistDao: AlbumArtistDao,
-    private val audioDbRepository: IAudioDbRepository,
+    private val deezerRepository: IDeezerRepository,
 ) : IAlbumArtistRepository {
     suspend fun insert(albumArtist: AlbumArtist) {
         albumArtistDao.insert(albumArtist)
@@ -63,7 +63,7 @@ class AlbumArtistRepository(
     suspend fun fetchAndUpdatePortrait(
         albumArtist: AlbumArtist,
     ) {
-        val portraitPath = audioDbRepository.fetchArtistPortraitUrl(albumArtist.name)
+        val portraitPath = deezerRepository.fetchArtistPortraitUrl(albumArtist.name, albumArtist.id)
         update(albumArtist.copy(portraitPath = portraitPath))
     }
 }

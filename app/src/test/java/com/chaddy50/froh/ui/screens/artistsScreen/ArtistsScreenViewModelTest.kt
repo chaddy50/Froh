@@ -13,7 +13,7 @@ import com.chaddy50.froh.navigation.ArtistsRoute
 import kotlinx.coroutines.Dispatchers
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.FakeGenreDao
 import com.chaddy50.froh.fakes.FakePlaylistDao
 import com.chaddy50.froh.fakes.MainDispatcherRule
@@ -58,7 +58,7 @@ class ArtistsScreenViewModelTest {
         return ArtistsScreenViewModel(
             ArtistsRoute(genreId = genreId, title = title),
             config,
-            AlbumArtistRepository(albumArtistDao, FakeAudioDbRepository()),
+            AlbumArtistRepository(albumArtistDao, FakeDeezerRepository()),
             AlbumRepository(albumDao),
             GenreRepository(genreDao),
             PlaylistRepository(playlistDao),

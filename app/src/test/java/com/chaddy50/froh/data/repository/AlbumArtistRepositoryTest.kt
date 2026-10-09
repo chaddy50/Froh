@@ -2,7 +2,7 @@ package com.chaddy50.froh.data.repository
 
 import com.chaddy50.froh.data.entity.AlbumArtist
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -57,8 +57,8 @@ class AlbumArtistRepositoryTest {
     @Test
     fun fetchAndUpdatePortraitUpdatesAlbumArtist() = runTest {
         val dao = FakeAlbumArtistDao()
-        val audioDbRepo = FakeAudioDbRepository(portraitUrl = "/path/to/portrait.jpg")
-        val repo = createRepository(dao, audioDbRepo)
+        val deezerRepo = FakeDeezerRepository(portraitUrl = "/path/to/portrait.jpg")
+        val repo = createRepository(dao, deezerRepo)
         val artist = AlbumArtist(id = 1, name = "Mozart", sortName = "Mozart")
 
         repo.fetchAndUpdatePortrait(artist)
@@ -71,8 +71,8 @@ class AlbumArtistRepositoryTest {
     @Test
     fun fetchAndUpdatePortraitSetsNullWhenNoResults() = runTest {
         val dao = FakeAlbumArtistDao()
-        val audioDbRepo = FakeAudioDbRepository(portraitUrl = null)
-        val repo = createRepository(dao, audioDbRepo)
+        val deezerRepo = FakeDeezerRepository(portraitUrl = null)
+        val repo = createRepository(dao, deezerRepo)
         val artist = AlbumArtist(id = 1, name = "Unknown", sortName = "Unknown")
 
         repo.fetchAndUpdatePortrait(artist)
@@ -85,8 +85,6 @@ class AlbumArtistRepositoryTest {
 
     private fun createRepository(
         dao: FakeAlbumArtistDao = FakeAlbumArtistDao(),
-        audioDbRepo: FakeAudioDbRepository = FakeAudioDbRepository(),
-    ): AlbumArtistRepository {
-        return AlbumArtistRepository(dao, audioDbRepo)
-    }
+        deezerRepo: FakeDeezerRepository = FakeDeezerRepository(),
+    ): AlbumArtistRepository = AlbumArtistRepository(dao, deezerRepo)
 }

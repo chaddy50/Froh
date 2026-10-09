@@ -7,7 +7,7 @@ import com.chaddy50.froh.data.repository.AlbumArtistRepository
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.FakePlaylistDao
 import com.chaddy50.froh.fakes.FakeTrackDao
 import com.chaddy50.froh.fakes.MainDispatcherRule
@@ -32,7 +32,7 @@ class PlaybackViewModelQueueVisibilityTest {
             ClassicalGenreConfig(),
             TrackRepository(FakeTrackDao()),
             PlaylistRepository(FakePlaylistDao()),
-            AlbumArtistRepository(FakeAlbumArtistDao(), FakeAudioDbRepository()),
+            AlbumArtistRepository(FakeAlbumArtistDao(), FakeDeezerRepository()),
             queuePreferences,
         )
 
