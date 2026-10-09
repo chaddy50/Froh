@@ -19,6 +19,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+private const val CLASSICAL_GENRE_TITLE = "Classical"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @RunWith(RobolectricTestRunner::class)
 class TopBarTest {
@@ -28,15 +30,16 @@ class TopBarTest {
 
     @Test
     fun clickingBackIconInvokesAnActiveScreenBackHandlerInsteadOfPoppingDirectly() {
-        lateinit var appNavigator: AppNavigator
+        var appNavigator: AppNavigator? = null
         var wasScreenBackHandlerInvoked = false
         composeTestRule.setContent {
-            appNavigator = rememberAppNavigator(HomeRoute)
-            remember(Unit) { appNavigator.push(ArtistsRoute(genreId = 1L, title = "Classical")) }
+            val navigator = rememberAppNavigator(HomeRoute)
+            appNavigator = navigator
+            remember(Unit) { navigator.push(ArtistsRoute(genreId = 1L, title = CLASSICAL_GENRE_TITLE)) }
             BackHandler { wasScreenBackHandlerInvoked = true }
             TopBar(
-                title = "Classical",
-                appNavigator = appNavigator,
+                title = CLASSICAL_GENRE_TITLE,
+                appNavigator = navigator,
                 scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
             )
         }
@@ -44,26 +47,27 @@ class TopBarTest {
         composeTestRule.onNodeWithContentDescription("Go back").performClick()
 
         assertTrue(wasScreenBackHandlerInvoked)
-        assertEquals(ArtistsRoute(genreId = 1L, title = "Classical"), appNavigator.currentKey)
+        assertEquals(ArtistsRoute(genreId = 1L, title = CLASSICAL_GENRE_TITLE), appNavigator?.currentKey)
     }
 
     @Test
     fun clickingBackIconStillPopsTheBackStackWhenNoScreenBackHandlerIsRegistered() {
-        lateinit var appNavigator: AppNavigator
+        var appNavigator: AppNavigator? = null
         composeTestRule.setContent {
-            appNavigator = rememberAppNavigator(HomeRoute)
-            remember(Unit) { appNavigator.push(ArtistsRoute(genreId = 1L, title = "Classical")) }
-            // Mirrors NavDisplay's own `onBack = { appNavigator.pop() }` fallback registration.
-            BackHandler { appNavigator.pop() }
+            val navigator = rememberAppNavigator(HomeRoute)
+            appNavigator = navigator
+            remember(Unit) { navigator.push(ArtistsRoute(genreId = 1L, title = CLASSICAL_GENRE_TITLE)) }
+            // Mirrors NavDisplay's own `onBack = { navigator.pop() }` fallback registration.
+            BackHandler { navigator.pop() }
             TopBar(
-                title = "Classical",
-                appNavigator = appNavigator,
+                title = CLASSICAL_GENRE_TITLE,
+                appNavigator = navigator,
                 scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
             )
         }
 
         composeTestRule.onNodeWithContentDescription("Go back").performClick()
 
-        assertEquals(HomeRoute, appNavigator.currentKey)
+        assertEquals(HomeRoute, appNavigator?.currentKey)
     }
 }
