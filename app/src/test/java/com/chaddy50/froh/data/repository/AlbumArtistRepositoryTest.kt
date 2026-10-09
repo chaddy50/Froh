@@ -86,7 +86,5 @@ class AlbumArtistRepositoryTest {
     private fun createRepository(
         dao: FakeAlbumArtistDao = FakeAlbumArtistDao(),
         deezerRepo: FakeDeezerRepository = FakeDeezerRepository(),
-    ): AlbumArtistRepository {
-        return AlbumArtistRepository(dao, deezerRepo)
-    }
+    ): AlbumArtistRepository = AlbumArtistRepository(dao, deezerRepo)
 }

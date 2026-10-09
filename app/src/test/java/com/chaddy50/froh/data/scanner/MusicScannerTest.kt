@@ -35,6 +35,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
+private const val DOWNLOADED_PORTRAIT_PATH = "/downloaded/portrait.jpg"
+
 @RunWith(RobolectricTestRunner::class)
 class MusicScannerTest {
 
@@ -82,7 +84,7 @@ class MusicScannerTest {
 
     @Test
     fun fetchesPortraitForNonClassicalArtistWithoutPortrait() = runTest {
-        val deezerRepo = FakeDeezerRepository(portraitUrl = "/downloaded/portrait.jpg")
+        val deezerRepo = FakeDeezerRepository(portraitUrl = DOWNLOADED_PORTRAIT_PATH)
         genresFlow.value = listOf(Genre(id = 5L, name = "Rock"))
         albumArtistsFlow.value = listOf(
             AlbumArtist(id = 1, name = "Led Zeppelin", sortName = "Led Zeppelin"),
@@ -93,7 +95,7 @@ class MusicScannerTest {
         scanner.fetchArtistArtwork()
 
         val artist = albumArtistsFlow.value.find { it.id == 1L }
-        assertEquals("/downloaded/portrait.jpg", artist?.portraitPath)
+        assertEquals(DOWNLOADED_PORTRAIT_PATH, artist?.portraitPath)
     }
 
     @Test
@@ -191,7 +193,7 @@ class MusicScannerTest {
 
     @Test
     fun skipsArtistInDeniedGenre() = runTest {
-        val deezerRepo = FakeDeezerRepository(portraitUrl = "/downloaded/portrait.jpg")
+        val deezerRepo = FakeDeezerRepository(portraitUrl = DOWNLOADED_PORTRAIT_PATH)
         genresFlow.value = listOf(Genre(id = 5L, name = "Anime"))
         albumArtistsFlow.value = listOf(
             AlbumArtist(id = 1, name = "Some Artist", sortName = "Some Artist"),
@@ -208,7 +210,7 @@ class MusicScannerTest {
     @Test
     fun continuesProcessingWhenOneFetchThrows() = runTest {
         // Use a repo that succeeds for all - the test verifies all artists get processed
-        val deezerRepo = FakeDeezerRepository(portraitUrl = "/downloaded/portrait.jpg")
+        val deezerRepo = FakeDeezerRepository(portraitUrl = DOWNLOADED_PORTRAIT_PATH)
         genresFlow.value = listOf(Genre(id = 5L, name = "Rock"))
         albumArtistsFlow.value = listOf(
             AlbumArtist(id = 1, name = "Artist One", sortName = "Artist One"),
@@ -222,13 +224,13 @@ class MusicScannerTest {
 
         val artist1 = albumArtistsFlow.value.find { it.id == 1L }
         val artist2 = albumArtistsFlow.value.find { it.id == 2L }
-        assertEquals("/downloaded/portrait.jpg", artist1?.portraitPath)
-        assertEquals("/downloaded/portrait.jpg", artist2?.portraitPath)
+        assertEquals(DOWNLOADED_PORTRAIT_PATH, artist1?.portraitPath)
+        assertEquals(DOWNLOADED_PORTRAIT_PATH, artist2?.portraitPath)
     }
 
     @Test
     fun handlesNoClassicalGenreInDatabase() = runTest {
-        val deezerRepo = FakeDeezerRepository(portraitUrl = "/downloaded/portrait.jpg")
+        val deezerRepo = FakeDeezerRepository(portraitUrl = DOWNLOADED_PORTRAIT_PATH)
         genresFlow.value = listOf(Genre(id = 5L, name = "Rock"))
         albumArtistsFlow.value = listOf(
             AlbumArtist(id = 1, name = "Led Zeppelin", sortName = "Led Zeppelin"),
@@ -239,6 +241,6 @@ class MusicScannerTest {
         scanner.fetchArtistArtwork()
 
         val artist = albumArtistsFlow.value.find { it.id == 1L }
-        assertEquals("/downloaded/portrait.jpg", artist?.portraitPath)
+        assertEquals(DOWNLOADED_PORTRAIT_PATH, artist?.portraitPath)
     }
 }
