@@ -94,7 +94,7 @@ class NavigationDrawerTest {
                     )
                 )
             ),
-            AlbumArtistRepository(FakeAlbumArtistDao(), FakeAudioDbRepository()),
+            AlbumArtistRepository(FakeAlbumArtistDao(), FakeDeezerRepository()),
             AlbumRepository(FakeAlbumDao()),
             ClassicalGenreConfig(),
         )
