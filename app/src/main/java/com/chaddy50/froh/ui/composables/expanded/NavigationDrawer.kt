@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
@@ -83,73 +85,78 @@ fun NavigationDrawer(
         )
 
         Spacer(modifier = Modifier.height(24.dp))
-        DrawerSectionLabel("GENRES")
-        Spacer(modifier = Modifier.height(8.dp))
 
-        for (genreWithStats in uiState.genres) {
-            DrawerItem(
-                title = genreWithStats.genre.name,
-                subtitle = genreWithStats.subtitle,
-                isSelected = currentKey is ArtistsRoute && currentKey.genreId == genreWithStats.genre.id,
-                onClick = {
-                    appNavigator.resetTo(
-                        HomeRoute,
-                        ArtistsRoute(genreId = genreWithStats.genre.id, title = genreWithStats.genre.name),
-                    )
-                },
-            )
-        }
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
         ) {
-            DrawerSectionLabel("PLAYLISTS")
-            IconButton(onClick = { showCreateDialog = true }, modifier = Modifier.size(32.dp)) {
-                Icon(Icons.Filled.Add, contentDescription = "Create playlist")
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
+            DrawerSectionLabel("GENRES")
+            Spacer(modifier = Modifier.height(8.dp))
 
-        for (playlist in allPlaylists) {
-            Box {
+            for (genreWithStats in uiState.genres) {
                 DrawerItem(
-                    title = playlist.name,
-                    isSelected = currentKey is PlaylistTracksRoute && currentKey.playlistId == playlist.id,
+                    title = genreWithStats.genre.name,
+                    subtitle = genreWithStats.subtitle,
+                    isSelected = currentKey is ArtistsRoute && currentKey.genreId == genreWithStats.genre.id,
                     onClick = {
                         appNavigator.resetTo(
                             HomeRoute,
-                            PlaylistTracksRoute(playlistId = playlist.id, title = playlist.name),
+                            ArtistsRoute(genreId = genreWithStats.genre.id, title = genreWithStats.genre.name),
                         )
                     },
-                    onLongClick = { playlistWithMenu = playlist },
                 )
-                DropdownMenu(
-                    expanded = playlistWithMenu?.id == playlist.id,
-                    onDismissRequest = { playlistWithMenu = null },
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Rename") },
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                DrawerSectionLabel("PLAYLISTS")
+                IconButton(onClick = { showCreateDialog = true }, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Filled.Add, contentDescription = "Create playlist")
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            for (playlist in allPlaylists) {
+                Box {
+                    DrawerItem(
+                        title = playlist.name,
+                        isSelected = currentKey is PlaylistTracksRoute && currentKey.playlistId == playlist.id,
                         onClick = {
-                            playlistToRename = playlist
-                            playlistWithMenu = null
+                            appNavigator.resetTo(
+                                HomeRoute,
+                                PlaylistTracksRoute(playlistId = playlist.id, title = playlist.name),
+                            )
                         },
+                        onLongClick = { playlistWithMenu = playlist },
                     )
-                    DropdownMenuItem(
-                        text = { Text("Delete") },
-                        onClick = {
-                            playlistToDelete = playlist
-                            playlistWithMenu = null
-                        },
-                    )
+                    DropdownMenu(
+                        expanded = playlistWithMenu?.id == playlist.id,
+                        onDismissRequest = { playlistWithMenu = null },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Rename") },
+                            onClick = {
+                                playlistToRename = playlist
+                                playlistWithMenu = null
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = {
+                                playlistToDelete = playlist
+                                playlistWithMenu = null
+                            },
+                        )
+                    }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
 
         DrawerItem(
             title = "Settings",

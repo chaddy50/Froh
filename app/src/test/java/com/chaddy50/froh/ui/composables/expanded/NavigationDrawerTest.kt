@@ -5,12 +5,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import com.chaddy50.froh.data.ClassicalGenreConfig
@@ -72,16 +74,30 @@ class NavigationDrawerTest {
 
     private lateinit var appNavigator: AppNavigator
 
-    private fun setDrawerContent() {
+    private fun setDrawerContent(screenViewModel: GenresScreenViewModel = genresScreenViewModel) {
         composeTestRule.setContent {
             appNavigator = rememberAppNavigator(HomeRoute)
             NavigationDrawer(
                 playlistViewModel = playlistViewModel,
                 appNavigator = appNavigator,
-                screenViewModel = genresScreenViewModel,
+                screenViewModel = screenViewModel,
             )
         }
     }
+
+    private fun manyGenresScreenViewModel(genreCount: Int = 60): GenresScreenViewModel =
+        GenresScreenViewModel(
+            GenreRepository(
+                FakeGenreDao(
+                    topLevelGenresFlow = MutableStateFlow(
+                        (1..genreCount).map { Genre(id = it.toLong(), name = "Genre $it") }
+                    )
+                )
+            ),
+            AlbumArtistRepository(FakeAlbumArtistDao(), FakeAudioDbRepository()),
+            AlbumRepository(FakeAlbumDao()),
+            ClassicalGenreConfig(),
+        )
 
     @Test
     fun listsEachTopLevelGenreWithItsStatsSubtitle() {
@@ -215,6 +231,43 @@ class NavigationDrawerTest {
 
         assertEquals(1, playlistDao.updatedPlaylists.size)
         assertEquals("Workout", playlistDao.updatedPlaylists[0].name)
+    }
+
+    @Test
+    fun settingsStaysDisplayedAndClickableWhenGenresOverflowTheDrawerHeight() {
+        setDrawerContent(manyGenresScreenViewModel())
+
+        composeTestRule.onNodeWithText("Settings").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Settings").performClick()
+
+        assertTrue(appNavigator.currentKey is SettingsRoute)
+    }
+
+    @Test
+    fun scrollingRevealsAGenreThatOverflowedTheDrawerHeightAndItRemainsClickable() {
+        setDrawerContent(manyGenresScreenViewModel())
+        val lastGenreName = "Genre 60"
+
+        composeTestRule.onNodeWithText(lastGenreName).assertIsNotDisplayed()
+
+        composeTestRule.onNodeWithText(lastGenreName).performScrollTo()
+        composeTestRule.onNodeWithText(lastGenreName).assertIsDisplayed()
+        composeTestRule.onNodeWithText(lastGenreName).performClick()
+
+        assertEquals(ArtistsRoute(genreId = 60L, title = lastGenreName), appNavigator.currentKey)
+    }
+
+    @Test
+    fun scrollingRevealsAPlaylistThatOverflowedBehindManyGenresAndItRemainsClickable() {
+        setDrawerContent(manyGenresScreenViewModel())
+
+        composeTestRule.onNodeWithText("Favorites").assertIsNotDisplayed()
+
+        composeTestRule.onNodeWithText("Favorites").performScrollTo()
+        composeTestRule.onNodeWithText("Favorites").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Favorites").performClick()
+
+        assertEquals(PlaylistTracksRoute(playlistId = 1, title = "Favorites"), appNavigator.currentKey)
     }
 
     @Test
