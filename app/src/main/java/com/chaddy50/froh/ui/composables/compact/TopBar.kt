@@ -1,5 +1,6 @@
 package com.chaddy50.froh.ui.composables.compact
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,6 +25,7 @@ fun TopBar(
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     val canGoBack = appNavigator.canGoBack
+    val backPressedDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     TopAppBar(
         title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -34,7 +36,7 @@ fun TopBar(
         ),
         navigationIcon = {
             if (canGoBack) {
-                IconButton(onClick = { appNavigator.pop() }) {
+                IconButton(onClick = { backPressedDispatcher?.onBackPressed() }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Go back"
