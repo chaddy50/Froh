@@ -20,13 +20,19 @@ class TopBarTest {
     private fun setContent(
         isShuffleModeEnabled: Boolean = false,
         onDismiss: () -> Unit = {},
-        onShuffleToggled: () -> Unit = {}
+        onShuffleToggled: () -> Unit = {},
+        showQueueToggle: Boolean = false,
+        isQueueHidden: Boolean = false,
+        onQueueHiddenToggled: () -> Unit = {}
     ) {
         composeTestRule.setContent {
             TopBar(
                 onDismiss = onDismiss,
                 isShuffleModeEnabled = isShuffleModeEnabled,
-                onShuffleToggled = onShuffleToggled
+                onShuffleToggled = onShuffleToggled,
+                showQueueToggle = showQueueToggle,
+                isQueueHidden = isQueueHidden,
+                onQueueHiddenToggled = onQueueHiddenToggled
             )
         }
     }
@@ -68,6 +74,26 @@ class TopBarTest {
         var clicked = false
         setContent(onShuffleToggled = { clicked = true })
         composeTestRule.onNodeWithContentDescription("Shuffle").performClick()
+        assert(clicked)
+    }
+
+    @Test
+    fun displaysQueueButtonWhenToggleShown() {
+        setContent(showQueueToggle = true)
+        composeTestRule.onNodeWithContentDescription("Queue").assertIsDisplayed()
+    }
+
+    @Test
+    fun displaysQueueButtonWhenHidden() {
+        setContent(showQueueToggle = true, isQueueHidden = true)
+        composeTestRule.onNodeWithContentDescription("Queue").assertIsDisplayed()
+    }
+
+    @Test
+    fun clickingQueueButtonTriggersCallback() {
+        var clicked = false
+        setContent(showQueueToggle = true, onQueueHiddenToggled = { clicked = true })
+        composeTestRule.onNodeWithContentDescription("Queue").performClick()
         assert(clicked)
     }
 }

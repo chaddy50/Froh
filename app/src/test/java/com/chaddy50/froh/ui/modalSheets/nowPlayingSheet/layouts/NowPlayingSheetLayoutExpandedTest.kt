@@ -49,6 +49,8 @@ class NowPlayingSheetLayoutExpandedTest {
         onSkipToNextTrack: () -> Unit = {},
         onSkipToTrack: (Int) -> Unit = {},
         onSeek: (Long) -> Unit = {},
+        isQueueHidden: Boolean = false,
+        onQueueHiddenToggled: () -> Unit = {},
         onDismiss: () -> Unit = {},
     ) {
         composeTestRule.setContent {
@@ -66,6 +68,8 @@ class NowPlayingSheetLayoutExpandedTest {
                 onSkipToNextTrack = onSkipToNextTrack,
                 onSkipToTrack = onSkipToTrack,
                 onSeek = onSeek,
+                isQueueHidden = isQueueHidden,
+                onQueueHiddenToggled = onQueueHiddenToggled,
                 onDismiss = onDismiss,
             )
         }
@@ -82,6 +86,16 @@ class NowPlayingSheetLayoutExpandedTest {
         composeTestRule.onNodeWithText("Queue").assertIsDisplayed()
         composeTestRule.onNodeWithText("2 of 8").assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription("Skip Next").assertIsDisplayed()
+    }
+
+    @Test
+    fun hidesQueuePaneWhenQueueHidden() {
+        val queue = buildQueue(8)
+        setContent(currentTrack = queue[1], queue = queue, currentTrackIndex = 1, isQueueHidden = true)
+
+        composeTestRule.onAllNodesWithText("Track 1").assertCountEquals(1)
+        composeTestRule.onNodeWithText("Queue").assertDoesNotExist()
+        composeTestRule.onNodeWithText("2 of 8").assertDoesNotExist()
     }
 
     // Dismiss/queue-tap interactions aren't covered: input dispatch into a ModalBottomSheet's

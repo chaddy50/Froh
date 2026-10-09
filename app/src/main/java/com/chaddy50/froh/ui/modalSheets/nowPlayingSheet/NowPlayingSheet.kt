@@ -22,6 +22,8 @@ fun NowPlayingSheet(
     onSkipToNextTrack: () -> Unit,
     onSkipToTrack: (Int) -> Unit,
     onSeek: (Long) -> Unit,
+    isQueueHidden: Boolean,
+    onQueueHiddenToggled: () -> Unit,
     onDismiss: () -> Unit
 ) {
     when (LocalWindowWidthSizeClass.current) {
@@ -55,6 +57,8 @@ fun NowPlayingSheet(
             onSkipToNextTrack,
             onSkipToTrack,
             onSeek,
+            isQueueHidden,
+            onQueueHiddenToggled,
             onDismiss
         )
     }
