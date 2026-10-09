@@ -25,7 +25,7 @@ import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.FakeGenreDao
 import com.chaddy50.froh.fakes.FakePlaylistDao
 import com.chaddy50.froh.fakes.FakeTrackDao
@@ -67,7 +67,7 @@ class NavigationDrawerTest {
     )
     private val genresScreenViewModel = GenresScreenViewModel(
         GenreRepository(FakeGenreDao(topLevelGenresFlow = MutableStateFlow(listOf(Genre(id = 5L, name = "Rock"))))),
-        AlbumArtistRepository(FakeAlbumArtistDao(), FakeAudioDbRepository()),
+        AlbumArtistRepository(FakeAlbumArtistDao(), FakeDeezerRepository()),
         AlbumRepository(FakeAlbumDao()),
         ClassicalGenreConfig(),
     )

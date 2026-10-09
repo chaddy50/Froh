@@ -18,7 +18,7 @@ import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.FakeGenreDao
 import com.chaddy50.froh.fakes.FakePlaylistDao
 import com.chaddy50.froh.fakes.FakeTrackDao
@@ -57,7 +57,7 @@ class ArtistsScreenTest {
         val screenViewModel = ArtistsScreenViewModel(
             ArtistsRoute(genreId = 5L, title = "Rock"),
             ClassicalGenreConfig(),
-            AlbumArtistRepository(FakeAlbumArtistDao(), FakeAudioDbRepository()),
+            AlbumArtistRepository(FakeAlbumArtistDao(), FakeDeezerRepository()),
             AlbumRepository(FakeAlbumDao()),
             GenreRepository(FakeGenreDao(allGenres = genresFlow)),
             PlaylistRepository(FakePlaylistDao()),
@@ -90,7 +90,7 @@ class ArtistsScreenTest {
         return ArtistsScreenViewModel(
             ArtistsRoute(genreId = genreId, title = genreName),
             ClassicalGenreConfig(),
-            AlbumArtistRepository(FakeAlbumArtistDao(artistsFlow), FakeAudioDbRepository()),
+            AlbumArtistRepository(FakeAlbumArtistDao(artistsFlow), FakeDeezerRepository()),
             AlbumRepository(FakeAlbumDao()),
             GenreRepository(FakeGenreDao(allGenres = genresFlow)),
             PlaylistRepository(FakePlaylistDao()),

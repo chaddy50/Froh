@@ -1,16 +1,16 @@
-package com.chaddy50.froh.data.api.audioDb
+package com.chaddy50.froh.data.api.deezer
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object AudioDbClient {
-    private const val BASE_URL = "https://www.theaudiodb.com/api/v1/json/2/"
+object DeezerClient {
+    private const val BASE_URL = "https://api.deezer.com/"
 
-    val service: AudioDbService by lazy {
+    val service: DeezerService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(AudioDbService::class.java)
+            .create(DeezerService::class.java)
     }
 }

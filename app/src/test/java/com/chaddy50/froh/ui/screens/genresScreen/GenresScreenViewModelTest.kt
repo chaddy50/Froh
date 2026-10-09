@@ -10,7 +10,7 @@ import com.chaddy50.froh.data.repository.AlbumRepository
 import com.chaddy50.froh.data.repository.GenreRepository
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.FakeGenreDao
 import com.chaddy50.froh.fakes.MainDispatcherRule
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +45,7 @@ class GenresScreenViewModelTest {
         val config = ClassicalGenreConfig().apply { this.classicalGenreId = classicalGenreId }
         return GenresScreenViewModel(
             GenreRepository(genreDao),
-            AlbumArtistRepository(albumArtistDao, FakeAudioDbRepository()),
+            AlbumArtistRepository(albumArtistDao, FakeDeezerRepository()),
             AlbumRepository(albumDao),
             config,
         )

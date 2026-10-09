@@ -30,7 +30,7 @@ import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
 import com.chaddy50.froh.fakes.FakeArtworkDownloader
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.FakeComposerDao
 import com.chaddy50.froh.fakes.FakeGenreDao
 import com.chaddy50.froh.fakes.FakeOpenOpusRepository
@@ -89,7 +89,7 @@ class AlbumsScreenTest {
             AlbumsRoute(genreId = genreId, albumArtistId = 1L, title = "Bach"),
             config,
             AlbumRepository(FakeAlbumDao(MutableStateFlow(albums))),
-            AlbumArtistRepository(albumArtistDao, FakeAudioDbRepository()),
+            AlbumArtistRepository(albumArtistDao, FakeDeezerRepository()),
             GenreRepository(FakeGenreDao(allGenres = genresFlow)),
             PlaylistRepository(FakePlaylistDao()),
             ComposerRepository(FakeComposerDao(composersFlow), FakeOpenOpusRepository(), FakeArtworkDownloader(), albumArtistDao),

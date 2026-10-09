@@ -13,7 +13,7 @@ import com.chaddy50.froh.data.repository.TrackRepository
 import kotlinx.coroutines.Dispatchers
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.FakeGenreDao
 import com.chaddy50.froh.fakes.FakePerformanceDao
 import com.chaddy50.froh.fakes.FakePlaylistDao
@@ -59,7 +59,7 @@ class TracksScreenViewModelTest {
         val albumDao = FakeAlbumDao(albumsFlow)
         val trackDao = FakeTrackDao(tracksFlow)
         val performanceDao = FakePerformanceDao(performancesFlow)
-        val audioDbRepository = FakeAudioDbRepository()
+        val deezerRepository = FakeDeezerRepository()
 
         val config = ClassicalGenreConfig().apply { this.classicalGenreId = classicalGenreId }
         return TracksScreenViewModel(
@@ -67,7 +67,7 @@ class TracksScreenViewModelTest {
             config,
             TrackRepository(trackDao),
             AlbumRepository(albumDao),
-            AlbumArtistRepository(albumArtistDao, audioDbRepository),
+            AlbumArtistRepository(albumArtistDao, deezerRepository),
             PerformanceRepository(performanceDao),
             PlaylistRepository(FakePlaylistDao()),
         )

@@ -4,7 +4,7 @@ import androidx.core.net.toUri
 import com.chaddy50.froh.data.entity.AlbumArtist
 import com.chaddy50.froh.data.repository.AlbumArtistRepository
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.testTrack
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -21,7 +21,7 @@ class BuildMediaItemsTest {
 
     private fun createAlbumArtistRepository(vararg albumArtists: AlbumArtist): AlbumArtistRepository {
         val dao = FakeAlbumArtistDao(MutableStateFlow(albumArtists.toList()))
-        return AlbumArtistRepository(dao, FakeAudioDbRepository())
+        return AlbumArtistRepository(dao, FakeDeezerRepository())
     }
 
     @Test

@@ -17,7 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import com.chaddy50.froh.fakes.FakeAlbumArtistDao
 import com.chaddy50.froh.fakes.FakeAlbumDao
 import com.chaddy50.froh.fakes.FakeArtworkDownloader
-import com.chaddy50.froh.fakes.FakeAudioDbRepository
+import com.chaddy50.froh.fakes.FakeDeezerRepository
 import com.chaddy50.froh.fakes.FakeComposerDao
 import com.chaddy50.froh.fakes.FakeGenreDao
 import com.chaddy50.froh.fakes.FakeOpenOpusRepository
@@ -88,7 +88,7 @@ class AlbumsScreenViewModelTest {
         val albumDao = FakeAlbumDao(albumsFlow, tracksFlow)
         val composerDao = FakeComposerDao(composersFlow)
         val artworkDownloader = FakeArtworkDownloader()
-        val audioDbRepository = FakeAudioDbRepository()
+        val deezerRepository = FakeDeezerRepository()
         val openOpusRepository = FakeOpenOpusRepository()
 
         val config = ClassicalGenreConfig().apply { this.classicalGenreId = classicalGenreId }
@@ -96,7 +96,7 @@ class AlbumsScreenViewModelTest {
             AlbumsRoute(genreId = genreId, albumArtistId = albumArtistId, title = "Test"),
             config,
             AlbumRepository(albumDao),
-            AlbumArtistRepository(albumArtistDao, audioDbRepository),
+            AlbumArtistRepository(albumArtistDao, deezerRepository),
             GenreRepository(genreDao),
             PlaylistRepository(FakePlaylistDao()),
             ComposerRepository(composerDao, openOpusRepository, artworkDownloader, albumArtistDao),
