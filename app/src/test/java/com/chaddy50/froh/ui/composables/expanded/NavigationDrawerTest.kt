@@ -74,16 +74,30 @@ class NavigationDrawerTest {
 
     private lateinit var appNavigator: AppNavigator
 
-    private fun setDrawerContent() {
+    private fun setDrawerContent(screenViewModel: GenresScreenViewModel = genresScreenViewModel) {
         composeTestRule.setContent {
             appNavigator = rememberAppNavigator(HomeRoute)
             NavigationDrawer(
                 playlistViewModel = playlistViewModel,
                 appNavigator = appNavigator,
-                screenViewModel = genresScreenViewModel,
+                screenViewModel = screenViewModel,
             )
         }
     }
+
+    private fun manyGenresScreenViewModel(genreCount: Int = 60): GenresScreenViewModel =
+        GenresScreenViewModel(
+            GenreRepository(
+                FakeGenreDao(
+                    topLevelGenresFlow = MutableStateFlow(
+                        (1..genreCount).map { Genre(id = it.toLong(), name = "Genre $it") }
+                    )
+                )
+            ),
+            AlbumArtistRepository(FakeAlbumArtistDao(), FakeAudioDbRepository()),
+            AlbumRepository(FakeAlbumDao()),
+            ClassicalGenreConfig(),
+        )
 
     @Test
     fun listsEachTopLevelGenreWithItsStatsSubtitle() {
@@ -221,26 +235,7 @@ class NavigationDrawerTest {
 
     @Test
     fun settingsStaysDisplayedAndClickableWhenGenresOverflowTheDrawerHeight() {
-        val manyGenresScreenViewModel = GenresScreenViewModel(
-            GenreRepository(
-                FakeGenreDao(
-                    topLevelGenresFlow = MutableStateFlow(
-                        (1..60).map { Genre(id = it.toLong(), name = "Genre $it") }
-                    )
-                )
-            ),
-            AlbumArtistRepository(FakeAlbumArtistDao(), FakeAudioDbRepository()),
-            AlbumRepository(FakeAlbumDao()),
-            ClassicalGenreConfig(),
-        )
-        composeTestRule.setContent {
-            appNavigator = rememberAppNavigator(HomeRoute)
-            NavigationDrawer(
-                playlistViewModel = playlistViewModel,
-                appNavigator = appNavigator,
-                screenViewModel = manyGenresScreenViewModel,
-            )
-        }
+        setDrawerContent(manyGenresScreenViewModel())
 
         composeTestRule.onNodeWithText("Settings").assertIsDisplayed()
         composeTestRule.onNodeWithText("Settings").performClick()
@@ -250,58 +245,21 @@ class NavigationDrawerTest {
 
     @Test
     fun scrollingRevealsAGenreThatOverflowedTheDrawerHeightAndItRemainsClickable() {
-        val manyGenresScreenViewModel = GenresScreenViewModel(
-            GenreRepository(
-                FakeGenreDao(
-                    topLevelGenresFlow = MutableStateFlow(
-                        (1..60).map { Genre(id = it.toLong(), name = "Genre $it") }
-                    )
-                )
-            ),
-            AlbumArtistRepository(FakeAlbumArtistDao(), FakeAudioDbRepository()),
-            AlbumRepository(FakeAlbumDao()),
-            ClassicalGenreConfig(),
-        )
-        composeTestRule.setContent {
-            appNavigator = rememberAppNavigator(HomeRoute)
-            NavigationDrawer(
-                playlistViewModel = playlistViewModel,
-                appNavigator = appNavigator,
-                screenViewModel = manyGenresScreenViewModel,
-            )
-        }
+        setDrawerContent(manyGenresScreenViewModel())
+        val lastGenreName = "Genre 60"
 
-        composeTestRule.onNodeWithText("Genre 60").assertIsNotDisplayed()
+        composeTestRule.onNodeWithText(lastGenreName).assertIsNotDisplayed()
 
-        composeTestRule.onNodeWithText("Genre 60").performScrollTo()
-        composeTestRule.onNodeWithText("Genre 60").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Genre 60").performClick()
+        composeTestRule.onNodeWithText(lastGenreName).performScrollTo()
+        composeTestRule.onNodeWithText(lastGenreName).assertIsDisplayed()
+        composeTestRule.onNodeWithText(lastGenreName).performClick()
 
-        assertEquals(ArtistsRoute(genreId = 60L, title = "Genre 60"), appNavigator.currentKey)
+        assertEquals(ArtistsRoute(genreId = 60L, title = lastGenreName), appNavigator.currentKey)
     }
 
     @Test
     fun scrollingRevealsAPlaylistThatOverflowedBehindManyGenresAndItRemainsClickable() {
-        val manyGenresScreenViewModel = GenresScreenViewModel(
-            GenreRepository(
-                FakeGenreDao(
-                    topLevelGenresFlow = MutableStateFlow(
-                        (1..60).map { Genre(id = it.toLong(), name = "Genre $it") }
-                    )
-                )
-            ),
-            AlbumArtistRepository(FakeAlbumArtistDao(), FakeAudioDbRepository()),
-            AlbumRepository(FakeAlbumDao()),
-            ClassicalGenreConfig(),
-        )
-        composeTestRule.setContent {
-            appNavigator = rememberAppNavigator(HomeRoute)
-            NavigationDrawer(
-                playlistViewModel = playlistViewModel,
-                appNavigator = appNavigator,
-                screenViewModel = manyGenresScreenViewModel,
-            )
-        }
+        setDrawerContent(manyGenresScreenViewModel())
 
         composeTestRule.onNodeWithText("Favorites").assertIsNotDisplayed()
 
