@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.chaddy50.froh.navigation.AppNavigator
 import com.chaddy50.froh.navigation.ClassicalGenreSettingsRoute
+import com.chaddy50.froh.navigation.LocalWindowWidthSizeClass
+import com.chaddy50.froh.navigation.WindowWidthSizeClass
 import com.chaddy50.froh.navigation.TopBarContent
 import com.chaddy50.froh.ui.screens.settingsScreen.genreMappings.ClassicalGenreSettingsRow
 import com.chaddy50.froh.ui.screens.settingsScreen.listenBrainzLogin.ListenBrainzLogin
@@ -29,7 +31,8 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(16.dp)
+            .padding(bottom = if (LocalWindowWidthSizeClass.current == WindowWidthSizeClass.EXPANDED) 120.dp else 0.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         ListenBrainzLogin()

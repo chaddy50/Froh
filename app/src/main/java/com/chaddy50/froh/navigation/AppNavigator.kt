@@ -19,6 +19,11 @@ class AppNavigator(val backStack: NavBackStack<NavKey>) {
     fun pop() {
         backStack.removeLastOrNull()
     }
+
+    fun resetTo(vararg routes: NavKey) {
+        backStack.clear()
+        backStack.addAll(routes)
+    }
 }
 
 @Composable

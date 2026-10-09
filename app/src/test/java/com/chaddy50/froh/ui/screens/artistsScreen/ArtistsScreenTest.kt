@@ -1,8 +1,15 @@
 package com.chaddy50.froh.ui.screens.artistsScreen
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import com.chaddy50.froh.data.ClassicalGenreConfig
+import com.chaddy50.froh.data.entity.AlbumArtist
 import com.chaddy50.froh.data.entity.Genre
 import com.chaddy50.froh.data.repository.AlbumArtistRepository
 import com.chaddy50.froh.data.repository.AlbumRepository
@@ -16,10 +23,14 @@ import com.chaddy50.froh.fakes.FakeGenreDao
 import com.chaddy50.froh.fakes.FakePlaylistDao
 import com.chaddy50.froh.fakes.FakeTrackDao
 import com.chaddy50.froh.fakes.MainDispatcherRule
+import com.chaddy50.froh.navigation.AlbumsRoute
+import com.chaddy50.froh.navigation.AppNavigator
 import com.chaddy50.froh.navigation.ArtistsRoute
 import com.chaddy50.froh.navigation.HomeRoute
+import com.chaddy50.froh.navigation.LocalWindowWidthSizeClass
+import com.chaddy50.froh.navigation.WindowWidthSizeClass
 import com.chaddy50.froh.navigation.rememberAppNavigator
-import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
+import com.chaddy50.froh.ui.composables.common.nowPlayingBar.PlaybackViewModel
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -66,5 +77,68 @@ class ArtistsScreenTest {
         }
 
         assertEquals("Rock", reportedTitle)
+    }
+
+    private fun buildViewModel(
+        genreId: Long = 5L,
+        genreName: String = "Rock",
+        artistsFlow: MutableStateFlow<List<AlbumArtist>> = MutableStateFlow(
+            listOf(AlbumArtist(id = 1L, name = "Bayside", sortName = "Bayside"))
+        ),
+    ): ArtistsScreenViewModel {
+        val genresFlow = MutableStateFlow(listOf(Genre(id = genreId, name = genreName)))
+        return ArtistsScreenViewModel(
+            ArtistsRoute(genreId = genreId, title = genreName),
+            ClassicalGenreConfig(),
+            AlbumArtistRepository(FakeAlbumArtistDao(artistsFlow), FakeAudioDbRepository()),
+            AlbumRepository(FakeAlbumDao()),
+            GenreRepository(FakeGenreDao(allGenres = genresFlow)),
+            PlaylistRepository(FakePlaylistDao()),
+        )
+    }
+
+    private lateinit var capturedAppNavigator: AppNavigator
+
+    private fun setWideLayoutContent(screenViewModel: ArtistsScreenViewModel) {
+        composeTestRule.setContent {
+            capturedAppNavigator = rememberAppNavigator(HomeRoute)
+            CompositionLocalProvider(LocalWindowWidthSizeClass provides WindowWidthSizeClass.EXPANDED) {
+                ArtistsScreen(
+                    genreId = 5L,
+                    title = "Rock",
+                    playbackViewModel = mockk(relaxed = true),
+                    playlistViewModel = PlaylistViewModel(TrackRepository(FakeTrackDao()), PlaylistRepository(FakePlaylistDao())),
+                    appNavigator = capturedAppNavigator,
+                    screenViewModel = screenViewModel,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun wideLayoutRendersArtistNameAndInlinePlayShuffleButtons() {
+        setWideLayoutContent(buildViewModel())
+
+        composeTestRule.onNodeWithText("Bayside").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Play").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Shuffle").assertIsDisplayed()
+    }
+
+    @Test
+    fun wideLayoutTappingArtistCellNavigatesToAlbumsRoute() {
+        setWideLayoutContent(buildViewModel())
+
+        composeTestRule.onNodeWithText("Bayside").performClick()
+
+        assertEquals(AlbumsRoute(genreId = 5L, albumArtistId = 1L, title = "Bayside"), capturedAppNavigator.currentKey)
+    }
+
+    @Test
+    fun wideLayoutLongPressOnArtistCellOpensAddToPlaylistSheet() {
+        setWideLayoutContent(buildViewModel())
+
+        composeTestRule.onNodeWithText("Bayside").performTouchInput { longClick() }
+
+        composeTestRule.onNodeWithText("Add to playlist").assertIsDisplayed()
     }
 }

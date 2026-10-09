@@ -113,7 +113,7 @@ class QueueViewTest {
         var queue by mutableStateOf(originalQueue)
         var currentTrackIndex by mutableIntStateOf(0)
         composeTestRule.setContent {
-            QueueView(queue, currentTrackIndex) {}
+            QueueView(queue, currentTrackIndex, onTrackClicked = {})
         }
 
         composeTestRule.runOnIdle {
@@ -131,7 +131,7 @@ class QueueViewTest {
         val queue = buildQueue(50)
         var currentTrackIndex by mutableIntStateOf(0)
         composeTestRule.setContent {
-            QueueView(queue, currentTrackIndex) {}
+            QueueView(queue, currentTrackIndex, onTrackClicked = {})
         }
 
         composeTestRule.runOnIdle { currentTrackIndex = 40 }
@@ -145,7 +145,7 @@ class QueueViewTest {
         var queue by mutableStateOf(buildQueue(50))
         var currentTrackIndex by mutableIntStateOf(0)
         composeTestRule.setContent {
-            QueueView(queue, currentTrackIndex) {}
+            QueueView(queue, currentTrackIndex, onTrackClicked = {})
         }
 
         // A rebuilt-but-equal list is what a track advance produces; it must not re-scroll.

@@ -24,7 +24,7 @@ import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.data.scanner.LibraryScanViewModel
 import com.chaddy50.froh.navigation.NavigationHost
-import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
+import com.chaddy50.froh.ui.composables.common.nowPlayingBar.PlaybackViewModel
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 import com.chaddy50.froh.ui.theme.MusicAppTheme
 import com.chaddy50.froh.utilities.audioLibraryPermission

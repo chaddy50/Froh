@@ -39,7 +39,8 @@ import coil.request.ImageRequest
 fun QueueView(
     queue: List<MediaItem>,
     currentTrackIndex: Int,
-    onTrackClicked: (Int) -> Unit
+    onTrackClicked: (Int) -> Unit,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
 ) {
     // Re-created whenever the queue's order changes, already anchored on the playing track, so the
     // reordered list renders in position on its very first frame. Scrolling from an effect instead
@@ -62,7 +63,7 @@ fun QueueView(
                     .fillMaxWidth()
                     .background(
                         if (isCurrent) MaterialTheme.colorScheme.primaryContainer
-                        else MaterialTheme.colorScheme.surface
+                        else backgroundColor
                     )
                     .clickable { onTrackClicked(index) }
                     .padding(horizontal = 16.dp, vertical = 12.dp)

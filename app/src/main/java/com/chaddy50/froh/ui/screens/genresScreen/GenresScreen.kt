@@ -34,12 +34,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chaddy50.froh.data.entity.Genre
 import com.chaddy50.froh.navigation.AppNavigator
 import com.chaddy50.froh.navigation.ArtistsRoute
-import com.chaddy50.froh.ui.composables.AddToPlaylistHandler
-import com.chaddy50.froh.ui.composables.EmptyStateContent
-import com.chaddy50.froh.ui.composables.EntityCard
-import com.chaddy50.froh.ui.composables.EntityScreen
-import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
-import com.chaddy50.froh.ui.composables.rememberAddToPlaylistState
+import com.chaddy50.froh.ui.composables.common.AddToPlaylistHandler
+import com.chaddy50.froh.ui.composables.compact.EmptyStateContent
+import com.chaddy50.froh.ui.composables.common.EntityCard
+import com.chaddy50.froh.ui.composables.common.EntityScreen
+import com.chaddy50.froh.ui.composables.common.nowPlayingBar.PlaybackViewModel
+import com.chaddy50.froh.ui.composables.common.rememberAddToPlaylistState
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 import com.chaddy50.froh.utilities.audioLibraryPermission
 

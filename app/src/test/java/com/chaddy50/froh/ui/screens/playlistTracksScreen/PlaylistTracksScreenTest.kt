@@ -15,7 +15,7 @@ import com.chaddy50.froh.fakes.FakeTrackDao
 import com.chaddy50.froh.fakes.MainDispatcherRule
 import com.chaddy50.froh.fakes.testTrack
 import com.chaddy50.froh.navigation.PlaylistTracksRoute
-import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
+import com.chaddy50.froh.ui.composables.common.nowPlayingBar.PlaybackViewModel
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 import com.chaddy50.froh.ui.screens.tracksScreen.TrackCard
 import io.mockk.mockk

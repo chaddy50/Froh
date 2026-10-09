@@ -1,6 +1,7 @@
 package com.chaddy50.froh.ui.screens.playlistTracksScreen
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,13 +16,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.unit.dp
 import com.chaddy50.froh.data.entity.Track
+import com.chaddy50.froh.navigation.LocalWindowWidthSizeClass
+import com.chaddy50.froh.navigation.WindowWidthSizeClass
 import com.chaddy50.froh.navigation.TopBarContent
-import com.chaddy50.froh.ui.composables.EntityScreen
-import com.chaddy50.froh.ui.composables.entityHeader.EntityHeader
-import com.chaddy50.froh.ui.composables.entityHeader.EntityType
+import com.chaddy50.froh.ui.composables.common.EntityScreen
+import com.chaddy50.froh.ui.composables.common.entityHeader.layouts.EntityHeaderLayoutCompact
+import com.chaddy50.froh.ui.composables.common.entityHeader.EntityType
 import com.chaddy50.froh.ui.screens.tracksScreen.TrackCard
-import com.chaddy50.froh.ui.composables.nowPlayingBar.PlaybackViewModel
+import com.chaddy50.froh.ui.composables.common.nowPlayingBar.PlaybackViewModel
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 
 @Composable
@@ -46,9 +50,12 @@ fun PlaylistTracksScreen(
     EntityScreen(
         isLoading = uiState.isLoading,
         content = {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = if (LocalWindowWidthSizeClass.current == WindowWidthSizeClass.EXPANDED) PaddingValues(bottom = 120.dp) else PaddingValues(),
+            ) {
                 item {
-                    EntityHeader(
+                    EntityHeaderLayoutCompact(
                         uiState = entityHeaderState,
                         type = EntityType.Playlist,
                         onRename = { newName ->

@@ -28,11 +28,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.navigation.AppNavigator
 import com.chaddy50.froh.navigation.PlaylistTracksRoute
-import com.chaddy50.froh.ui.composables.CreateNewPlaylistDialog
-import com.chaddy50.froh.ui.composables.EmptyStateContent
-import com.chaddy50.froh.ui.composables.EntityCard
-import com.chaddy50.froh.ui.composables.EntityScreen
-import com.chaddy50.froh.ui.composables.RenamePlaylistDialog
+import com.chaddy50.froh.ui.composables.common.CreateNewPlaylistDialog
+import com.chaddy50.froh.ui.composables.compact.EmptyStateContent
+import com.chaddy50.froh.ui.composables.common.EntityCard
+import com.chaddy50.froh.ui.composables.common.EntityScreen
+import com.chaddy50.froh.ui.composables.common.RenamePlaylistDialog
 
 @Composable
 fun PlaylistsScreen(

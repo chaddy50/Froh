@@ -3,6 +3,7 @@ package com.chaddy50.froh.ui.screens.performancesScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chaddy50.froh.data.ClassicalGenreConfig
+import com.chaddy50.froh.data.entity.AlbumArtist
 import com.chaddy50.froh.data.entity.Performance
 import com.chaddy50.froh.data.repository.AlbumArtistRepository
 import com.chaddy50.froh.data.repository.AlbumRepository
@@ -10,7 +11,7 @@ import com.chaddy50.froh.data.repository.PerformanceRepository
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.navigation.PerformancesRoute
-import com.chaddy50.froh.ui.composables.entityHeader.EntityHeaderState
+import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.utilities.formatMillisecondsIntoMinutesAndSeconds
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.stateIn
 data class PerformanceScreenUiState(
     val screenTitle: String = "Performance",
     val performances: List<Performance> = emptyList(),
+    val albumArtist: AlbumArtist? = null,
     val isLoading: Boolean = true
 )
 
@@ -59,15 +61,23 @@ class PerformancesScreenViewModel @AssistedInject constructor(
         val classicalGenreId = classicalGenreConfig.classicalGenreId
         val isClassical = genreId == classicalGenreId
 
-        val albumTitle: Flow<String> = albumRepository.getAlbumById(albumId)
+        val albumTitleFlow: Flow<String> = albumRepository.getAlbumById(albumId)
             .filterNotNull()
             .map { it.title }
 
-        val performances: Flow<List<Performance>> =
+        val performancesFlow: Flow<List<Performance>> =
             performanceRepository.getPerformancesForAlbumForGenre(albumId, genreId)
 
-        uiState = combine(performances, albumTitle) { performances, albumTitle ->
-            PerformanceScreenUiState(albumTitle, performances, false)
+        val albumArtistFlow: Flow<AlbumArtist?> = albumRepository.getAlbumById(albumId).flatMapLatest { album ->
+            if (album != null) {
+                albumArtistRepository.getAlbumArtistById(album.artistId)
+            } else {
+                flowOf(null)
+            }
+        }
+
+        uiState = combine(performancesFlow, albumTitleFlow, albumArtistFlow) { performances, albumTitle, albumArtist ->
+            PerformanceScreenUiState(albumTitle, performances, albumArtist, false)
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000),
