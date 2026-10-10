@@ -51,6 +51,10 @@ class TrackRepository(private val trackDao: TrackDao) {
     suspend fun getAllTrackIds(): List<Long> = trackDao.getAllTrackIds()
 
     suspend fun deleteByIds(ids: List<Long>) {
-        trackDao.deleteByIds(ids)
+        ids.chunked(MAXIMUM_IDS_PER_DELETE).forEach { trackDao.deleteByIds(it) }
+    }
+
+    private companion object {
+        const val MAXIMUM_IDS_PER_DELETE = 900
     }
 }
