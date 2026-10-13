@@ -216,25 +216,28 @@ class MusicScanner(
     }
 
     private suspend fun deleteTracksThatAreNoLongerInFileSystem() {
-        // Lightweight query to get all current MediaStore track IDs for deletion detection
-        val mediaStoreIds = mutableSetOf<Long>()
-        context.contentResolver.query(
+        val mediaStoreIds = queryAllMediaStoreTrackIds() ?: return
+
+        val dbTrackIds = trackRepository.getAllTrackIds()
+        val deletedIds = dbTrackIds.filter { it !in mediaStoreIds }
+        if (deletedIds.isNotEmpty()) {
+            trackRepository.deleteByIds(deletedIds)
+        }
+    }
+
+    private fun queryAllMediaStoreTrackIds(): Set<Long>? {
+        return context.contentResolver.query(
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
             arrayOf(MediaStore.Audio.AudioColumns._ID),
             "${MediaStore.Audio.AudioColumns.IS_MUSIC} != 0",
             null,
             null
         )?.use { cursor ->
+            val ids = mutableSetOf<Long>()
             while (cursor.moveToNext()) {
-                mediaStoreIds.add(cursor.getLong(0))
+                ids.add(cursor.getLong(0))
             }
-        }
-
-        // Remove tracks that no longer exist in MediaStore
-        val dbTrackIds = trackRepository.getAllTrackIds()
-        val deletedIds = dbTrackIds.filter { it !in mediaStoreIds }
-        if (deletedIds.isNotEmpty()) {
-            trackRepository.deleteByIds(deletedIds)
+            ids
         }
     }
 
