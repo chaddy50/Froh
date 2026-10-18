@@ -28,10 +28,6 @@ class TrackRepository(private val trackDao: TrackDao) {
 
     fun getNumberOfTracksInPerformance(performanceId: Long) = trackDao.getNumberOfTracksInPerformance(performanceId)
 
-    suspend fun getNumberOfTracksSuspend(): Int {
-        return trackDao.getNumberOfTracksSuspend()
-    }
-
     suspend fun insert(track: Track) {
         trackDao.insert(track)
     }
