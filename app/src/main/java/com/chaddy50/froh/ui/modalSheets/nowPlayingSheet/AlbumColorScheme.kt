@@ -123,13 +123,14 @@ private suspend fun buildAlbumColorScheme(context: Context, artworkUri: Uri, isD
     val darkMuted = palette.darkMutedSwatch
     val lightMuted = palette.lightMutedSwatch
 
-    if (vibrant == null && darkVibrant == null && muted == null) return null
+    val fallbackRgb = (vibrant ?: darkVibrant ?: muted)?.rgb ?: return null
 
-    return buildColorScheme(isDark, vibrant, darkVibrant, lightVibrant, muted, darkMuted, lightMuted)
+    return buildColorScheme(isDark, fallbackRgb, vibrant, darkVibrant, lightVibrant, muted, darkMuted, lightMuted)
 }
 
 private fun buildColorScheme(
     isDark: Boolean,
+    fallbackRgb: Int,
     vibrant: Palette.Swatch?,
     darkVibrant: Palette.Swatch?,
     lightVibrant: Palette.Swatch?,
@@ -140,35 +141,35 @@ private fun buildColorScheme(
     val anchor = if (isDark) Color.Black else Color.White
 
     val rawSurface = Color(
-        if (isDark) darkVibrant?.rgb ?: muted?.rgb ?: vibrant!!.rgb
-        else        lightVibrant?.rgb ?: muted?.rgb ?: vibrant!!.rgb
+        if (isDark) darkVibrant?.rgb ?: muted?.rgb ?: fallbackRgb
+        else        lightVibrant?.rgb ?: muted?.rgb ?: fallbackRgb
     )
     val surface = lerp(anchor, rawSurface, 0.45f)
 
     val primary = Color(
-        if (isDark) lightVibrant?.rgb ?: vibrant?.rgb ?: muted!!.rgb
-        else        darkVibrant?.rgb ?: vibrant?.rgb ?: muted!!.rgb
+        if (isDark) lightVibrant?.rgb ?: vibrant?.rgb ?: fallbackRgb
+        else        darkVibrant?.rgb ?: vibrant?.rgb ?: fallbackRgb
     )
     val onPrimary = getContrastingColor(primary)
-    val primaryContainer = Color(vibrant?.rgb ?: (if (isDark) lightVibrant else darkVibrant)?.rgb ?: muted!!.rgb)
+    val primaryContainer = Color(vibrant?.rgb ?: (if (isDark) lightVibrant else darkVibrant)?.rgb ?: fallbackRgb)
     val onPrimaryContainer = getContrastingColor(primaryContainer)
 
-    val secondary = Color(muted?.rgb ?: vibrant?.rgb ?: darkVibrant!!.rgb)
+    val secondary = Color(muted?.rgb ?: vibrant?.rgb ?: fallbackRgb)
     val onSecondary = getContrastingColor(secondary)
     val secondaryContainer = Color(
-        if (isDark) darkMuted?.rgb ?: darkVibrant?.rgb ?: muted?.rgb ?: vibrant!!.rgb
-        else        lightMuted?.rgb ?: lightVibrant?.rgb ?: muted?.rgb ?: vibrant!!.rgb
+        if (isDark) darkMuted?.rgb ?: darkVibrant?.rgb ?: muted?.rgb ?: fallbackRgb
+        else        lightMuted?.rgb ?: lightVibrant?.rgb ?: muted?.rgb ?: fallbackRgb
     )
     val onSecondaryContainer = getContrastingColor(secondaryContainer)
 
     val tertiary = Color(
-        if (isDark) lightMuted?.rgb ?: lightVibrant?.rgb ?: muted?.rgb ?: vibrant!!.rgb
-        else        darkMuted?.rgb ?: darkVibrant?.rgb ?: muted?.rgb ?: vibrant!!.rgb
+        if (isDark) lightMuted?.rgb ?: lightVibrant?.rgb ?: muted?.rgb ?: fallbackRgb
+        else        darkMuted?.rgb ?: darkVibrant?.rgb ?: muted?.rgb ?: fallbackRgb
     )
 
     val rawSurfaceVariant = Color(
-        if (isDark) darkMuted?.rgb ?: darkVibrant?.rgb ?: muted?.rgb ?: vibrant!!.rgb
-        else        lightMuted?.rgb ?: lightVibrant?.rgb ?: muted?.rgb ?: vibrant!!.rgb
+        if (isDark) darkMuted?.rgb ?: darkVibrant?.rgb ?: muted?.rgb ?: fallbackRgb
+        else        lightMuted?.rgb ?: lightVibrant?.rgb ?: muted?.rgb ?: fallbackRgb
     )
     val surfaceVariant = lerp(anchor, rawSurfaceVariant, 0.55f)
     val onSurfaceVariant = getContrastingColor(surfaceVariant)
