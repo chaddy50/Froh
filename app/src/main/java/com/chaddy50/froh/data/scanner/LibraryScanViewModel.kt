@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chaddy50.froh.data.ClassicalGenreConfig
 import com.chaddy50.froh.data.repository.GenreRepository
-import com.chaddy50.froh.data.repository.TrackRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +15,6 @@ import javax.inject.Inject
 class LibraryScanViewModel @Inject constructor(
     private val classicalGenreConfig: ClassicalGenreConfig,
     private val musicScanner: MusicScanner,
-    private val trackRepository: TrackRepository,
     private val genreRepository: GenreRepository,
 ) : ViewModel() {
     private val _isScanInProgress = MutableStateFlow(false)
@@ -33,10 +31,6 @@ class LibraryScanViewModel @Inject constructor(
                 _scanProgress.value = it
             }
         }
-    }
-
-    suspend fun getTrackCount(): Int {
-        return trackRepository.getNumberOfTracksSuspend()
     }
 
     fun rebuildLibrary() {

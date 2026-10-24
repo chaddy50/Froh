@@ -45,7 +45,6 @@ class FakeTrackDao(
     override suspend fun update(track: Track) = Unit
     override suspend fun delete(track: Track) = Unit
     override fun getNumberOfTracks(): Flow<Int> = tracksFlow.map { it.size }
-    override suspend fun getNumberOfTracksSuspend(): Int = tracksFlow.value.size
     override suspend fun getAllTrackIds(): List<Long> = tracksFlow.value.map { it.id }
     override suspend fun deleteByIds(ids: List<Long>) = Unit
 }
