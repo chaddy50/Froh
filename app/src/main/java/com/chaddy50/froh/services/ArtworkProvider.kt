@@ -22,7 +22,9 @@ class ArtworkProvider : ContentProvider() {
 
     override fun openFile(uri: Uri, mode: String): ParcelFileDescriptor {
         val relativePath = uri.path ?: throw FileNotFoundException("null path")
-        val file = File(context!!.filesDir, relativePath)
+        val artworkRoot = context!!.filesDir.canonicalFile
+        val file = File(artworkRoot, relativePath).canonicalFile
+        if (!file.path.startsWith(artworkRoot.path + File.separator)) throw FileNotFoundException(relativePath)
         if (!file.exists()) throw FileNotFoundException(relativePath)
         return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
     }
