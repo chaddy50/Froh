@@ -22,8 +22,6 @@ class GenreRepository(private val genreDao: GenreDao) {
         genreDao.delete(genre)
     }
 
-    fun getNumberOfGenres() = genreDao.getNumberOfGenres()
-
     fun getAllGenres() = genreDao.getAllGenres()
 
     suspend fun getGenreName(genreId: Long) = genreDao.getGenreName(genreId)
@@ -35,8 +33,6 @@ class GenreRepository(private val genreDao: GenreDao) {
     suspend fun getParentGenreId(genreId: Long) = genreDao.getParentGenreId(genreId)
 
     fun getAllTopLevelGenres() = genreDao.getAllTopLevelGenres()
-
-    fun getNumberOfTopLevelGenres() = genreDao.getNumberOfTopLevelGenres()
 
     suspend fun findOrInsertGenreByName(name: String, parentGenreId: Long? = null): Long {
         val existingGenre = genreDao.getGenreByName(name)
@@ -61,8 +57,6 @@ class GenreRepository(private val genreDao: GenreDao) {
             emitAll(genreDao.getSubGenresForAlbumArtist(parentGenreId, albumArtistId))
         }.flowOn(Dispatchers.IO)
     }
-
-    fun getNumberOfSubGenresForAlbumArtist(parentGenreId: Long, albumArtistId: Long) = genreDao.getNumberOfSubGenresForAlbumArtist(parentGenreId, albumArtistId)
 
     fun getSubGenres(parentGenreId: Long): Flow<List<Genre>> {
         return flow {
