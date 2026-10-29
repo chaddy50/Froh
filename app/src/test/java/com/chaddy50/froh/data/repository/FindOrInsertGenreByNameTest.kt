@@ -83,15 +83,11 @@ private class FakeGenreDao : GenreDao {
     // Unused methods — required by interface
     override suspend fun update(genre: Genre) = TODO()
     override suspend fun delete(genre: Genre) = TODO()
-    override fun getNumberOfGenres(): Flow<Int> = TODO()
     override fun getGenreById(id: Long): Flow<Genre?> = TODO()
     override fun getAllGenres(): Flow<List<Genre>> = TODO()
     override suspend fun getGenreName(genreId: Long): String? = TODO()
     override fun getAllTopLevelGenres(): Flow<List<Genre>> = TODO()
-    override fun getNumberOfTopLevelGenres(): Flow<Int> = TODO()
     override fun getSubGenres(parentGenreId: Long): Flow<List<Genre>> = TODO()
-    override fun getSubGenreIds(parentGenreId: Long): List<Long> = TODO()
     override fun getSubGenresForAlbumArtist(parentGenreId: Long, albumArtistId: Long): Flow<List<Genre>> = TODO()
-    override fun getNumberOfSubGenresForAlbumArtist(parentGenreId: Long, albumArtistId: Long): Flow<Int> = TODO()
     override suspend fun getParentGenreId(genreId: Long): Long? = TODO()
 }

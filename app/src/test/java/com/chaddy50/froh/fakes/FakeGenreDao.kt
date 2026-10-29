@@ -32,9 +32,6 @@ class FakeGenreDao(
     override suspend fun getGenreName(genreId: Long): String? =
         allGenres.value.find { it.id == genreId }?.name
 
-    override fun getSubGenreIds(parentGenreId: Long): List<Long> =
-        allGenres.value.filter { it.parentGenreId == parentGenreId }.map { it.id }
-
     override fun getSubGenres(parentGenreId: Long): Flow<List<Genre>> =
         allGenres.map { list -> list.filter { it.parentGenreId == parentGenreId } }
 
@@ -48,8 +45,5 @@ class FakeGenreDao(
         genres[genre.name] = genre
     }
     override suspend fun delete(genre: Genre) = TODO()
-    override fun getNumberOfGenres(): Flow<Int> = TODO()
     override fun getAllGenres(): Flow<List<Genre>> = allGenres
-    override fun getNumberOfTopLevelGenres(): Flow<Int> = TODO()
-    override fun getNumberOfSubGenresForAlbumArtist(parentGenreId: Long, albumArtistId: Long): Flow<Int> = TODO()
 }
