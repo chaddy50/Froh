@@ -20,6 +20,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -100,6 +101,23 @@ fun NavigationHost(
         else -> screenTopBarContent.title
     }
 
+    // Moved (not recreated) between the wide Row and the compact Scaffold below, so toggling
+    // window size class doesn't tear down and rebuild every screen's ViewModel store.
+    val navigationEntryDisplay = remember {
+        movableContentOf<Modifier> { modifier ->
+            NavigationEntryDisplay(
+                modifier = modifier,
+                appNavigator = appNavigator,
+                libraryScanViewModel = libraryScanViewModel,
+                playbackViewModel = playbackViewModel,
+                playlistViewModel = playlistViewModel,
+                onHomeTopBarContentChanged = { homeTopBarContent = it },
+                onAlbumsTopBarContentChanged = { albumsTopBarContent = it },
+                onScreenTopBarContentChanged = { screenTopBarContent = it },
+            )
+        }
+    }
+
     CompositionLocalProvider(LocalWindowWidthSizeClass provides windowWidthSizeClass) {
         Box(
             modifier = Modifier
@@ -124,16 +142,7 @@ fun NavigationHost(
                             .weight(1f)
                             .fillMaxHeight(),
                     ) {
-                        NavigationEntryDisplay(
-                            modifier = Modifier.fillMaxSize(),
-                            appNavigator = appNavigator,
-                            libraryScanViewModel = libraryScanViewModel,
-                            playbackViewModel = playbackViewModel,
-                            playlistViewModel = playlistViewModel,
-                            onHomeTopBarContentChanged = { homeTopBarContent = it },
-                            onAlbumsTopBarContentChanged = { albumsTopBarContent = it },
-                            onScreenTopBarContentChanged = { screenTopBarContent = it },
-                        )
+                        navigationEntryDisplay(Modifier.fillMaxSize())
                         currentTrack?.let { track ->
                             MiniPlayerExpanded(
                                 currentTrack = track,
@@ -191,17 +200,10 @@ fun NavigationHost(
                         .nestedScroll(scrollBehavior.nestedScrollConnection)
                         .windowInsetsPadding(WindowInsets.navigationBars)
                 ) { innerPadding ->
-                    NavigationEntryDisplay(
-                        modifier = Modifier
+                    navigationEntryDisplay(
+                        Modifier
                             .padding(innerPadding)
                             .imePadding(),
-                        appNavigator = appNavigator,
-                        libraryScanViewModel = libraryScanViewModel,
-                        playbackViewModel = playbackViewModel,
-                        playlistViewModel = playlistViewModel,
-                        onHomeTopBarContentChanged = { homeTopBarContent = it },
-                        onAlbumsTopBarContentChanged = { albumsTopBarContent = it },
-                        onScreenTopBarContentChanged = { screenTopBarContent = it },
                     )
                 }
             }

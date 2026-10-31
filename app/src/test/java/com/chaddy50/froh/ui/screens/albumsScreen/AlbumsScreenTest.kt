@@ -67,6 +67,7 @@ class AlbumsScreenTest {
     private val keyboardGenreName = "Keyboard"
     private val concertoGenreName = "Concerto"
     private val subGenreFilterContentDescription = "Filter by sub-genre"
+    private val clearSubGenreFilterContentDescription = "Clear sub-genre filter"
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -176,6 +177,39 @@ class AlbumsScreenTest {
         assertNull(screenViewModel.selectedSubGenreId.value)
     }
 
+    @Test
+    fun selectingSubGenreShowsItAsPillInTopBar() {
+        genresFlow.value = listOf(
+            Genre(id = 10L, name = classicalGenreName),
+            Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
+            Genre(id = 21L, name = concertoGenreName, parentGenreId = 10L),
+        )
+        setAlbumsScreenContent(createScreenViewModel(genreId = 10L, classicalGenreId = 10L), genreId = 10L)
+
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).performClick()
+        composeTestRule.onNodeWithText(keyboardGenreName).performClick()
+
+        composeTestRule.onNodeWithText(keyboardGenreName).assertIsDisplayed()
+    }
+
+    @Test
+    fun clickingClearIconOnPillClearsSubGenreSelectionWithoutOpeningDropdown() {
+        genresFlow.value = listOf(
+            Genre(id = 10L, name = classicalGenreName),
+            Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
+            Genre(id = 21L, name = concertoGenreName, parentGenreId = 10L),
+        )
+        val screenViewModel = createScreenViewModel(genreId = 10L, classicalGenreId = 10L)
+        setAlbumsScreenContent(screenViewModel, genreId = 10L)
+
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).performClick()
+        composeTestRule.onNodeWithText(keyboardGenreName).performClick()
+        composeTestRule.onNodeWithContentDescription(clearSubGenreFilterContentDescription).performClick()
+
+        assertNull(screenViewModel.selectedSubGenreId.value)
+        composeTestRule.onNodeWithText(keyboardGenreName).assertDoesNotExist()
+    }
+
     private lateinit var capturedAppNavigator: AppNavigator
 
     private fun setWideLayoutAlbumsScreenContent(screenViewModel: AlbumsScreenViewModel, genreId: Long) {
@@ -230,7 +264,7 @@ class AlbumsScreenTest {
     }
 
     @Test
-    fun wideLayoutShowsSubGenreChipsWhenMultipleSubGenres() {
+    fun wideLayoutShowsSubGenreFilterTriggerWhenMultipleSubGenresAndNoneSelected() {
         genresFlow.value = listOf(
             Genre(id = 10L, name = classicalGenreName),
             Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
@@ -238,39 +272,23 @@ class AlbumsScreenTest {
         )
         setWideLayoutAlbumsScreenContent(createScreenViewModel(genreId = 10L, classicalGenreId = 10L), genreId = 10L)
 
-        composeTestRule.onNodeWithText("All").assertIsDisplayed()
-        composeTestRule.onNodeWithText(keyboardGenreName).assertIsDisplayed()
-        composeTestRule.onNodeWithText(concertoGenreName).assertIsDisplayed()
-    }
-
-    @Test
-    fun wideLayoutHidesSubGenreChipsWhenOnlyOneSubGenre() {
-        genresFlow.value = listOf(
-            Genre(id = 10L, name = classicalGenreName),
-            Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
-        )
-        setWideLayoutAlbumsScreenContent(createScreenViewModel(genreId = 10L, classicalGenreId = 10L), genreId = 10L)
-
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).assertIsDisplayed()
         composeTestRule.onNodeWithText(keyboardGenreName).assertDoesNotExist()
     }
 
     @Test
-    fun wideLayoutSelectingSubGenreChipUpdatesScreenViewModelSelection() {
+    fun wideLayoutHidesSubGenreFilterTriggerWhenOnlyOneSubGenre() {
         genresFlow.value = listOf(
             Genre(id = 10L, name = classicalGenreName),
             Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
-            Genre(id = 21L, name = concertoGenreName, parentGenreId = 10L),
         )
-        val screenViewModel = createScreenViewModel(genreId = 10L, classicalGenreId = 10L)
-        setWideLayoutAlbumsScreenContent(screenViewModel, genreId = 10L)
+        setWideLayoutAlbumsScreenContent(createScreenViewModel(genreId = 10L, classicalGenreId = 10L), genreId = 10L)
 
-        composeTestRule.onNodeWithText(keyboardGenreName).performClick()
-
-        assertEquals(20L, screenViewModel.selectedSubGenreId.value)
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).assertDoesNotExist()
     }
 
     @Test
-    fun wideLayoutSelectingAllClearsSubGenreSelection() {
+    fun wideLayoutSelectingSubGenreFromDropdownShowsItAsPillAndUpdatesSelection() {
         genresFlow.value = listOf(
             Genre(id = 10L, name = classicalGenreName),
             Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
@@ -279,10 +297,48 @@ class AlbumsScreenTest {
         val screenViewModel = createScreenViewModel(genreId = 10L, classicalGenreId = 10L)
         setWideLayoutAlbumsScreenContent(screenViewModel, genreId = 10L)
 
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).performClick()
         composeTestRule.onNodeWithText(keyboardGenreName).performClick()
+
+        assertEquals(20L, screenViewModel.selectedSubGenreId.value)
+        composeTestRule.onNodeWithText(keyboardGenreName).assertIsDisplayed()
+    }
+
+    @Test
+    fun wideLayoutSelectingAllFromDropdownHidesPillAndClearsSubGenreSelection() {
+        genresFlow.value = listOf(
+            Genre(id = 10L, name = classicalGenreName),
+            Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
+            Genre(id = 21L, name = concertoGenreName, parentGenreId = 10L),
+        )
+        val screenViewModel = createScreenViewModel(genreId = 10L, classicalGenreId = 10L)
+        setWideLayoutAlbumsScreenContent(screenViewModel, genreId = 10L)
+
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).performClick()
+        composeTestRule.onNodeWithText(keyboardGenreName).performClick()
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).performClick()
         composeTestRule.onNodeWithText("All").performClick()
 
         assertNull(screenViewModel.selectedSubGenreId.value)
+        composeTestRule.onNodeWithText(keyboardGenreName).assertDoesNotExist()
+    }
+
+    @Test
+    fun wideLayoutClickingClearIconOnPillClearsSubGenreSelectionWithoutOpeningDropdown() {
+        genresFlow.value = listOf(
+            Genre(id = 10L, name = classicalGenreName),
+            Genre(id = 20L, name = keyboardGenreName, parentGenreId = 10L),
+            Genre(id = 21L, name = concertoGenreName, parentGenreId = 10L),
+        )
+        val screenViewModel = createScreenViewModel(genreId = 10L, classicalGenreId = 10L)
+        setWideLayoutAlbumsScreenContent(screenViewModel, genreId = 10L)
+
+        composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).performClick()
+        composeTestRule.onNodeWithText(keyboardGenreName).performClick()
+        composeTestRule.onNodeWithContentDescription(clearSubGenreFilterContentDescription).performClick()
+
+        assertNull(screenViewModel.selectedSubGenreId.value)
+        composeTestRule.onNodeWithText(keyboardGenreName).assertDoesNotExist()
     }
 
     @Test
