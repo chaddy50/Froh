@@ -60,7 +60,8 @@ fun PlaylistsScreen(
                     )
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(uiState.playlists) { playlist ->
+                        items(uiState.playlists) { playlistWithArtwork ->
+                            val playlist = playlistWithArtwork.playlist
                             Box {
                                 EntityCard(
                                     title = playlist.name,
@@ -70,6 +71,7 @@ fun PlaylistsScreen(
                                     onLongClick = {
                                         playlistWithMenu = playlist
                                     },
+                                    collageArtworkPaths = playlistWithArtwork.collageArtworkPaths,
                                 )
                                 DropdownMenu(
                                     expanded = playlistWithMenu?.id == playlist.id,
