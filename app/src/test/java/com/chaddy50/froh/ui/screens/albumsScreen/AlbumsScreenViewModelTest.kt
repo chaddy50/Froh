@@ -141,7 +141,7 @@ class AlbumsScreenViewModelTest {
     }
 
     @Test
-    fun screenTitleIncludesSubGenreWhenSelected() = runTest {
+    fun screenTitleStaysAsArtistNameWhenSubGenreSelected() = runTest {
         val vm = createViewModel(genreId = 10L, albumArtistId = 1L, classicalGenreId = 10L)
         backgroundScope.launch { vm.uiState.collect() }
 
@@ -160,31 +160,6 @@ class AlbumsScreenViewModelTest {
         vm.updateSelectedSubGenreId(20L)
         advanceUntilIdle()
 
-        assertEquals("Bach - Orchestral", vm.uiState.value.screenTitle)
-    }
-
-    @Test
-    fun clearingSubGenreResetsTitleToArtistName() = runTest {
-        val vm = createViewModel(genreId = 10L, albumArtistId = 1L, classicalGenreId = 10L)
-        backgroundScope.launch { vm.uiState.collect() }
-
-        albumArtistsFlow.value = listOf(
-            AlbumArtist(id = 1, name = "Bach", sortName = "Bach"),
-        )
-        genresFlow.value = listOf(
-            Genre(id = 10L, name = "Classical"),
-            Genre(id = 20L, name = "Orchestral", parentGenreId = 10L),
-        )
-        composersFlow.value = listOf(
-            Composer(id = 1, albumArtistId = 1, openOpusId = 1, completeName = "Bach", birthYear = null, deathYear = null, epoch = null, portraitPath = null)
-        )
-
-        vm.updateSelectedSubGenreId(20L)
-        advanceUntilIdle()
-        assertEquals("Bach - Orchestral", vm.uiState.value.screenTitle)
-
-        vm.updateSelectedSubGenreId(null)
-        advanceUntilIdle()
         assertEquals("Bach", vm.uiState.value.screenTitle)
     }
 

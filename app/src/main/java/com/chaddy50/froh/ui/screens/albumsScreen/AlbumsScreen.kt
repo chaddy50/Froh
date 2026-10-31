@@ -12,7 +12,7 @@ import com.chaddy50.froh.navigation.PerformancesRoute
 import com.chaddy50.froh.navigation.TopBarContent
 import com.chaddy50.froh.navigation.TracksRoute
 import com.chaddy50.froh.ui.composables.common.AddToPlaylistHandler
-import com.chaddy50.froh.ui.composables.compact.SubGenreFilterButton
+import com.chaddy50.froh.ui.composables.common.SubGenreFilterChip
 import com.chaddy50.froh.ui.composables.common.EntityScreen
 import com.chaddy50.froh.ui.composables.common.nowPlayingBar.PlaybackViewModel
 import com.chaddy50.froh.ui.composables.common.rememberAddToPlaylistState
@@ -45,7 +45,7 @@ fun AlbumsScreen(
                 title = uiState.screenTitle,
                 actions = {
                     if (subGenres.size > 1) {
-                        SubGenreFilterButton(
+                        SubGenreFilterChip(
                             subGenres = subGenres,
                             selectedSubGenreId = selectedSubGenreId,
                             onSubGenreSelected = { screenViewModel.updateSelectedSubGenreId(it) },
