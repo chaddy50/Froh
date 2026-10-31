@@ -25,15 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import com.chaddy50.froh.ui.composables.common.ArtworkImage
 
 @Composable
 fun QueueView(
@@ -74,14 +72,11 @@ fun QueueView(
                         .size(48.dp)
                         .clip(RoundedCornerShape(4.dp))
                 ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(item.mediaMetadata.artworkUri?.let { "file://$it".toUri() })
-                            .crossfade(true)
-                            .build(),
+                    ArtworkImage(
+                        model = item.mediaMetadata.artworkUri?.let { "file://$it".toUri() },
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
                     )
                     if (isCurrent) {
                         Box(

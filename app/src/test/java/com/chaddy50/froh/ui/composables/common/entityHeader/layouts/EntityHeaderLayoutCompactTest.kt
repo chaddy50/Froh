@@ -3,11 +3,13 @@ package com.chaddy50.froh.ui.composables.common.entityHeader.layouts
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
+import com.chaddy50.froh.ui.composables.common.ARTWORK_PLACEHOLDER_TEST_TAG
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityType
 import org.junit.Assert.assertEquals
@@ -24,6 +26,42 @@ class EntityHeaderLayoutCompactTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
+    @Test
+    fun showsPlaceholderWhenArtworkPathIsNullForArtworkCapableType() {
+        composeTestRule.setContent {
+            EntityHeaderLayoutCompact(
+                uiState = EntityHeaderState(title = "Abbey Road", subtitle = "", isLoading = false),
+                type = EntityType.Album,
+            )
+        }
+
+        composeTestRule.onNode(hasTestTag(ARTWORK_PLACEHOLDER_TEST_TAG)).assertIsDisplayed()
+    }
+
+    @Test
+    fun showsNothingWhenArtworkPathIsNullForNonArtworkCapableType() {
+        composeTestRule.setContent {
+            EntityHeaderLayoutCompact(
+                uiState = EntityHeaderState(title = "Classical", subtitle = "", isLoading = false),
+                type = EntityType.Genre,
+            )
+        }
+
+        composeTestRule.onNode(hasTestTag(ARTWORK_PLACEHOLDER_TEST_TAG)).assertDoesNotExist()
+    }
+
+    @Test
+    fun showsPlaceholderWhenArtworkPathIsNullForPersonType() {
+        composeTestRule.setContent {
+            EntityHeaderLayoutCompact(
+                uiState = EntityHeaderState(title = "Beethoven", subtitle = "", isLoading = false),
+                type = EntityType.Artist,
+            )
+        }
+
+        composeTestRule.onNode(hasTestTag(ARTWORK_PLACEHOLDER_TEST_TAG)).assertIsDisplayed()
+    }
 
     @Test
     fun showsRenameIconForPlaylistType() {

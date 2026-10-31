@@ -10,11 +10,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import com.chaddy50.froh.data.ClassicalGenreConfig
 import com.chaddy50.froh.data.entity.Album
@@ -47,7 +49,11 @@ import com.chaddy50.froh.navigation.PerformancesRoute
 import com.chaddy50.froh.navigation.TopBarContent
 import com.chaddy50.froh.navigation.TracksRoute
 import com.chaddy50.froh.navigation.rememberAppNavigator
+import com.chaddy50.froh.ui.composables.common.ARTWORK_PLACEHOLDER_TEST_TAG
+import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.ui.composables.common.nowPlayingBar.PlaybackViewModel
+import com.chaddy50.froh.ui.composables.common.rememberAddToPlaylistState
+import com.chaddy50.froh.ui.screens.albumsScreen.layouts.AlbumsScreenLayoutCompact
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -140,6 +146,33 @@ class AlbumsScreenTest {
         setAlbumsScreenContent(createScreenViewModel(genreId = 10L, classicalGenreId = 10L), genreId = 10L)
 
         composeTestRule.onNodeWithContentDescription(subGenreFilterContentDescription).assertDoesNotExist()
+    }
+
+    @Test
+    fun compactLayoutShowsArtworkPlaceholderIconWhenAlbumHasNoArtwork() {
+        val album = Album(id = 200L, title = "American Idiot", catalogueSortIndex = null, artistId = 1L, year = "2004")
+        composeTestRule.setContent {
+            val addToPlaylistState = rememberAddToPlaylistState<Album>(
+                getPlaylistMembership = { MutableStateFlow(emptySet()) },
+                onAdd = { _, _ -> },
+                onCreateAndAdd = { _, _ -> },
+            )
+            AlbumsScreenLayoutCompact(
+                entityHeaderState = EntityHeaderState(isLoading = false),
+                allPlaylists = emptyList(),
+                onAddToPlaylist = {},
+                onCreateAndAdd = {},
+                albums = listOf(album),
+                isClassical = false,
+                onAlbumClick = {},
+                addToPlaylistState = addToPlaylistState,
+            )
+        }
+
+        composeTestRule.onNodeWithText("American Idiot").performScrollTo()
+        composeTestRule
+            .onNodeWithContentDescription("American Idiot Icon", useUnmergedTree = true)
+            .assertIsDisplayed()
     }
 
     @Test
@@ -323,6 +356,23 @@ class AlbumsScreenTest {
 
         composeTestRule.onNodeWithText("American Idiot").assertIsDisplayed()
         composeTestRule.onNodeWithText("2004").assertIsDisplayed()
+    }
+
+    @Test
+    fun wideLayoutNonClassicalShowsArtworkPlaceholderWhenAlbumHasNoArtwork() {
+        genresFlow.value = listOf(Genre(id = 30L, name = "Rock"))
+        val albums = listOf(
+            Album(id = 200L, title = "American Idiot", catalogueSortIndex = null, artistId = 1L, year = "2004")
+        )
+        setWideLayoutAlbumsScreenContent(createScreenViewModel(genreId = 30L, classicalGenreId = null, albums = albums), genreId = 30L)
+
+        // The entity header above the grid also falls back to the placeholder when its own
+        // artwork is null, so two placeholders (header + grid cell) prove the grid cell has one.
+        val placeholderCount = composeTestRule
+            .onAllNodes(hasTestTag(ARTWORK_PLACEHOLDER_TEST_TAG), useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .size
+        assertEquals(2, placeholderCount)
     }
 
     @Test
