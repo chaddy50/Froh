@@ -30,14 +30,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.chaddy50.froh.data.entity.Playlist
+import com.chaddy50.froh.ui.composables.common.ArtworkImage
 import com.chaddy50.froh.ui.composables.common.AddToPlaylistSheet
 import com.chaddy50.froh.ui.composables.common.CollageArtwork
 import com.chaddy50.froh.ui.composables.common.RenamePlaylistDialog
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityType
 import com.chaddy50.froh.ui.composables.common.entityHeader.addToPlaylistTypes
+import com.chaddy50.froh.ui.composables.common.entityHeader.artworkCapableTypes
+import com.chaddy50.froh.ui.composables.common.entityHeader.artworkPlaceholderIconFor
 
 @Composable
 fun EntityHeaderLayoutCompact(
@@ -74,7 +76,7 @@ fun EntityHeaderLayoutCompact(
                         modifier = Modifier.fillMaxHeight(),
                     )
                 }
-            } else if (uiState.artworkPath != null) {
+            } else if (type in artworkCapableTypes) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -82,12 +84,13 @@ fun EntityHeaderLayoutCompact(
                         .height(300.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    AsyncImage(
+                    ArtworkImage(
                         model = uiState.artworkPath,
                         contentDescription = "${uiState.title} Artwork",
                         modifier = Modifier
                             .aspectRatio(1f)
-                            .fillMaxHeight()
+                            .fillMaxHeight(),
+                        placeholderIcon = artworkPlaceholderIconFor(type),
                     )
                 }
             }

@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -14,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import com.chaddy50.froh.ui.composables.common.ARTWORK_PLACEHOLDER_TEST_TAG
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -156,6 +158,13 @@ class QueueViewTest {
         composeTestRule.waitForIdle()
 
         assert(composeTestRule.onAllNodesWithText(trackTitle(40)).fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    fun showsPlaceholderWhenTrackHasNoArtwork() {
+        setContent(queue = buildQueue(1))
+
+        composeTestRule.onNode(hasTestTag(ARTWORK_PLACEHOLDER_TEST_TAG), useUnmergedTree = true).assertIsDisplayed()
     }
 
     @Test

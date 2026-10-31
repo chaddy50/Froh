@@ -3,6 +3,8 @@ package com.chaddy50.froh.ui.screens.artistsScreen.layouts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.chaddy50.froh.data.entity.AlbumArtist
@@ -42,6 +44,7 @@ fun ArtistsScreenLayoutCompact(
                 onLongClick = { addToPlaylistState.show(artistWithSubtitle.artist) },
                 artworkPath = artistWithSubtitle.artist.portraitPath,
                 subtitle = artistWithSubtitle.subtitle,
+                icon = Icons.Filled.Person,
             )
         }
     }

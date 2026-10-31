@@ -5,6 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
@@ -113,6 +114,25 @@ class ArtistsScreenTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun compactLayoutShowsPersonPlaceholderIconWhenArtistHasNoPortrait() {
+        val screenViewModel = buildViewModel()
+        composeTestRule.setContent {
+            ArtistsScreen(
+                genreId = 5L,
+                title = "Rock",
+                playbackViewModel = mockk(relaxed = true),
+                playlistViewModel = PlaylistViewModel(TrackRepository(FakeTrackDao()), PlaylistRepository(FakePlaylistDao())),
+                appNavigator = rememberAppNavigator(HomeRoute),
+                screenViewModel = screenViewModel,
+            )
+        }
+
+        composeTestRule
+            .onNodeWithContentDescription("Bayside Icon", useUnmergedTree = true)
+            .assertExists()
     }
 
     @Test

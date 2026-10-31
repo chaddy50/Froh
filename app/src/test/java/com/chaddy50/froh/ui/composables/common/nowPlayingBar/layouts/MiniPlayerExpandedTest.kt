@@ -7,6 +7,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import com.chaddy50.froh.ui.composables.common.ARTWORK_PLACEHOLDER_TEST_TAG
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -164,6 +166,26 @@ class MiniPlayerExpandedTest {
 
         assertTrue(playPauseCalled)
         assertFalse(expanded)
+    }
+
+    @Test
+    fun showsPlaceholderWhenTrackHasNoArtwork() {
+        composeTestRule.setContent {
+            MiniPlayerExpanded(
+                currentTrack = track(),
+                isPlaying = true,
+                playbackPosition = 0,
+                durationMs = 100,
+                onPlayPause = {},
+                onSkipToNextTrack = {},
+                onSkipToPreviousTrack = {},
+                onExpand = {},
+            )
+        }
+
+        composeTestRule
+            .onNode(hasTestTag(ARTWORK_PLACEHOLDER_TEST_TAG), useUnmergedTree = true)
+            .assertIsDisplayed()
     }
 
     @Test

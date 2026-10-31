@@ -2,10 +2,12 @@ package com.chaddy50.froh.ui.composables.common.entityHeader.layouts
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.chaddy50.froh.ui.composables.common.ARTWORK_PLACEHOLDER_TEST_TAG
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityType
 import org.junit.Assert.assertTrue
@@ -42,6 +44,42 @@ class EntityHeaderLayoutExpandedTest {
         composeTestRule.onNodeWithText("Beethoven").assertIsDisplayed()
         composeTestRule.onNodeWithText("Early Romantic - 1770–1827").assertIsDisplayed()
         composeTestRule.onNodeWithText("14 works").assertIsDisplayed()
+    }
+
+    @Test
+    fun showsPlaceholderWhenArtworkPathIsNullForArtworkCapableType() {
+        composeTestRule.setContent {
+            EntityHeaderLayoutExpanded(
+                uiState = EntityHeaderState(title = "Abbey Road", subtitle = "", isLoading = false),
+                type = EntityType.Album,
+            )
+        }
+
+        composeTestRule.onNode(hasTestTag(ARTWORK_PLACEHOLDER_TEST_TAG)).assertIsDisplayed()
+    }
+
+    @Test
+    fun showsNothingWhenArtworkPathIsNullForNonArtworkCapableType() {
+        composeTestRule.setContent {
+            EntityHeaderLayoutExpanded(
+                uiState = EntityHeaderState(title = "Classical", subtitle = "", isLoading = false),
+                type = EntityType.Genre,
+            )
+        }
+
+        composeTestRule.onNode(hasTestTag(ARTWORK_PLACEHOLDER_TEST_TAG)).assertDoesNotExist()
+    }
+
+    @Test
+    fun showsPlaceholderWhenArtworkPathIsNullForPersonType() {
+        composeTestRule.setContent {
+            EntityHeaderLayoutExpanded(
+                uiState = EntityHeaderState(title = "Beethoven", subtitle = "", isLoading = false),
+                type = EntityType.Artist,
+            )
+        }
+
+        composeTestRule.onNode(hasTestTag(ARTWORK_PLACEHOLDER_TEST_TAG)).assertIsDisplayed()
     }
 
     @Test

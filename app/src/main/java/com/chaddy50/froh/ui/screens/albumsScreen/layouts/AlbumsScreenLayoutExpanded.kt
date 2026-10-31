@@ -29,12 +29,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.chaddy50.froh.data.entity.Album
 import com.chaddy50.froh.data.entity.Genre
 import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.navigation.AppNavigator
 import com.chaddy50.froh.ui.composables.common.AddToPlaylistState
+import com.chaddy50.froh.ui.composables.common.ArtworkImage
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityType
 import com.chaddy50.froh.ui.composables.common.entityHeader.layouts.EntityHeaderLayoutExpanded
@@ -180,16 +180,14 @@ private fun AlbumArtGridCell(
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .padding(8.dp),
     ) {
-        if (album.artworkPath != null) {
-            AsyncImage(
-                model = album.artworkPath,
-                contentDescription = "${album.title} Artwork",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f),
-            )
-        }
+        ArtworkImage(
+            model = album.artworkPath,
+            contentDescription = "${album.title} Artwork",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f),
+        )
         Text(
             album.title,
             maxLines = 1,

@@ -27,12 +27,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.chaddy50.froh.data.entity.Playlist
+import com.chaddy50.froh.ui.composables.common.ArtworkImage
 import com.chaddy50.froh.ui.composables.common.AddToPlaylistSheet
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityType
 import com.chaddy50.froh.ui.composables.common.entityHeader.addToPlaylistTypes
+import com.chaddy50.froh.ui.composables.common.entityHeader.artworkCapableTypes
+import com.chaddy50.froh.ui.composables.common.entityHeader.artworkPlaceholderIconFor
 
 @Composable
 fun EntityHeaderLayoutExpanded(
@@ -52,13 +54,14 @@ fun EntityHeaderLayoutExpanded(
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        if (uiState.artworkPath != null) {
-            AsyncImage(
+        if (type in artworkCapableTypes) {
+            ArtworkImage(
                 model = uiState.artworkPath,
                 contentDescription = "${uiState.title} Artwork",
                 modifier = Modifier
                     .padding(end = 16.dp)
                     .size(112.dp),
+                placeholderIcon = artworkPlaceholderIconFor(type),
             )
         }
 

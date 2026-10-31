@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,8 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import com.chaddy50.froh.ui.composables.common.ArtworkImage
 
 @Composable
 fun MiniPlayerExpanded(
@@ -68,17 +66,12 @@ fun MiniPlayerExpanded(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (metadata.artworkUri != null) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data("file://${metadata.artworkUri}".toUri())
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = metadata.title?.toString(),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(56.dp),
-                    )
-                }
+                ArtworkImage(
+                    model = metadata.artworkUri?.let { "file://$it".toUri() },
+                    contentDescription = metadata.title?.toString(),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(56.dp),
+                )
 
                 Column(
                     modifier = Modifier
