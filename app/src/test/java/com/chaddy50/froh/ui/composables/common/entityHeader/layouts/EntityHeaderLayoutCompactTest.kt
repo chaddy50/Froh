@@ -2,6 +2,7 @@ package com.chaddy50.froh.ui.composables.common.entityHeader.layouts
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -61,6 +62,41 @@ class EntityHeaderLayoutCompactTest {
         }
 
         composeTestRule.onNode(hasTestTag(ARTWORK_PLACEHOLDER_TEST_TAG)).assertIsDisplayed()
+    }
+
+    @Test
+    fun showsCollageArtworkWhenProvided() {
+        composeTestRule.setContent {
+            EntityHeaderLayoutCompact(
+                uiState = EntityHeaderState(
+                    title = FAVORITES_PLAYLIST_TITLE,
+                    subtitle = "4 tracks",
+                    isLoading = false,
+                    collageArtworkPaths = listOf("/a.jpg", "/b.jpg", "/c.jpg", "/d.jpg"),
+                ),
+                type = EntityType.Playlist,
+            )
+        }
+        composeTestRule.onNodeWithContentDescription("$FAVORITES_PLAYLIST_TITLE Artwork 1").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("$FAVORITES_PLAYLIST_TITLE Artwork 4").assertIsDisplayed()
+    }
+
+    @Test
+    fun prefersCollageArtworkOverSingleArtwork() {
+        composeTestRule.setContent {
+            EntityHeaderLayoutCompact(
+                uiState = EntityHeaderState(
+                    title = FAVORITES_PLAYLIST_TITLE,
+                    subtitle = "4 tracks",
+                    artworkPath = "/single.jpg",
+                    isLoading = false,
+                    collageArtworkPaths = listOf("/a.jpg", "/b.jpg", "/c.jpg", "/d.jpg"),
+                ),
+                type = EntityType.Playlist,
+            )
+        }
+        composeTestRule.onNodeWithContentDescription("$FAVORITES_PLAYLIST_TITLE Artwork 1").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("$FAVORITES_PLAYLIST_TITLE Artwork").assertIsNotDisplayed()
     }
 
     @Test

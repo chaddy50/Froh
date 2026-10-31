@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +38,7 @@ import com.chaddy50.froh.ui.composables.common.ArtworkImage
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityType
 import com.chaddy50.froh.ui.composables.common.entityHeader.layouts.EntityHeaderLayoutExpanded
+import com.chaddy50.froh.ui.composables.common.SubGenreFilterChip
 import com.chaddy50.froh.ui.composables.expanded.BackAffordance
 
 private val EXPANDED_LAYOUT_BOTTOM_CONTENT_PADDING = 120.dp
@@ -63,7 +63,20 @@ fun AlbumsScreenLayoutExpanded(
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.padding(horizontal = 32.dp, vertical = 28.dp)) {
-            BackAffordance(label = genreName, appNavigator = appNavigator)
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                BackAffordance(label = genreName, appNavigator = appNavigator)
+                if (subGenres.size > 1) {
+                    SubGenreFilterChip(
+                        subGenres = subGenres,
+                        selectedSubGenreId = selectedSubGenreId,
+                        onSubGenreSelected = onSubGenreSelected,
+                    )
+                }
+            }
             EntityHeaderLayoutExpanded(
                 uiState = entityHeaderState,
                 type = EntityType.AlbumArtist,
@@ -73,25 +86,6 @@ fun AlbumsScreenLayoutExpanded(
                 onPlay = onPlay,
                 onShuffle = onShuffle,
             )
-            if (subGenres.size > 1) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(top = 16.dp),
-                ) {
-                    FilterChip(
-                        selected = selectedSubGenreId == null,
-                        onClick = { onSubGenreSelected(null) },
-                        label = { Text("All") },
-                    )
-                    subGenres.forEach { subGenre ->
-                        FilterChip(
-                            selected = selectedSubGenreId == subGenre.id,
-                            onClick = { onSubGenreSelected(subGenre.id) },
-                            label = { Text(subGenre.name) },
-                        )
-                    }
-                }
-            }
         }
         HorizontalDivider()
         if (isClassical) {

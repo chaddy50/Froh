@@ -24,6 +24,7 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import com.chaddy50.froh.data.entity.Playlist
+import com.chaddy50.froh.data.entity.Track
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.fakes.FakePlaylistDao
@@ -40,6 +41,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.minutes
 
 @RunWith(RobolectricTestRunner::class)
 class PlaylistsScreenTest {
@@ -244,5 +246,53 @@ class PlaylistsScreenTest {
 
         assertEquals(1, playlistDao.updatedPlaylists.size)
         assertEquals("Workout", playlistDao.updatedPlaylists[0].name)
+    }
+
+    private fun makeTrack(id: Long, albumId: Long, artworkPath: String?) = Track(
+        id = id,
+        uri = "uri/$id",
+        title = "Track $id",
+        number = 1,
+        albumId = albumId,
+        albumName = "Album $albumId",
+        artistId = 1,
+        artistName = "Artist",
+        albumArtistId = 1,
+        albumArtistName = "Artist",
+        genreId = 1,
+        genreName = "Genre",
+        parentGenreId = null,
+        parentGenreName = null,
+        duration = 3.minutes,
+        discNumber = 1,
+        artworkPath = artworkPath,
+        year = "2000",
+    )
+
+    @Test
+    fun playlistWithFourTracksFromDistinctAlbumsShowsCollageArtwork() {
+        val tracks = (1..4).map { makeTrack(id = it.toLong(), albumId = it.toLong(), artworkPath = "/art/$it.jpg") }
+        val playlistDaoWithTracks = FakePlaylistDao(
+            allPlaylistsFlow = MutableStateFlow(listOf(Playlist(id = 1, name = "Favorites"))),
+            tracksForPlaylistFlow = MutableStateFlow(tracks),
+        )
+        composeTestRule.setContent {
+            PlaylistsScreen(
+                playlistViewModel = PlaylistViewModel(
+                    TrackRepository(trackDao),
+                    PlaylistRepository(playlistDaoWithTracks),
+                ),
+                appNavigator = rememberAppNavigator(HomeRoute),
+                screenViewModel = PlaylistsScreenViewModel(
+                    PlaylistRepository(playlistDaoWithTracks),
+                    TrackRepository(trackDao),
+                ),
+            )
+        }
+
+        composeTestRule.onNodeWithContentDescription("Favorites Artwork 1").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Favorites Artwork 2").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Favorites Artwork 3").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Favorites Artwork 4").assertIsDisplayed()
     }
 }

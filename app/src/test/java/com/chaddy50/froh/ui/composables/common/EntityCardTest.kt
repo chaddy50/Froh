@@ -107,6 +107,35 @@ class EntityCardTest {
     }
 
     @Test
+    fun displaysCollageArtworkWhenProvided() {
+        composeTestRule.setContent {
+            EntityCard(
+                title = GLENN_GOULD,
+                collageArtworkPaths = listOf("/a.jpg", "/b.jpg", "/c.jpg", "/d.jpg"),
+            )
+        }
+        composeTestRule.onNodeWithContentDescription("Glenn Gould Artwork 1").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Glenn Gould Artwork 2").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Glenn Gould Artwork 3").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Glenn Gould Artwork 4").assertIsDisplayed()
+    }
+
+    @Test
+    fun prefersCollageArtworkOverSingleArtworkAndIcon() {
+        composeTestRule.setContent {
+            EntityCard(
+                title = GLENN_GOULD,
+                artworkPath = "/fake/path.jpg",
+                icon = Icons.Filled.MusicNote,
+                collageArtworkPaths = listOf("/a.jpg", "/b.jpg", "/c.jpg", "/d.jpg"),
+            )
+        }
+        composeTestRule.onNodeWithContentDescription("Glenn Gould Artwork 1").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("Glenn Gould Artwork").assertIsNotDisplayed()
+        composeTestRule.onNodeWithContentDescription("Glenn Gould Icon").assertIsNotDisplayed()
+    }
+
+    @Test
     fun prefersArtworkOverIcon() {
         composeTestRule.setContent {
             EntityCard(

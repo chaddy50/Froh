@@ -28,10 +28,6 @@ class TrackRepository(private val trackDao: TrackDao) {
 
     fun getNumberOfTracksInPerformance(performanceId: Long) = trackDao.getNumberOfTracksInPerformance(performanceId)
 
-    suspend fun getNumberOfTracksSuspend(): Int {
-        return trackDao.getNumberOfTracksSuspend()
-    }
-
     suspend fun insert(track: Track) {
         trackDao.insert(track)
     }
@@ -51,6 +47,10 @@ class TrackRepository(private val trackDao: TrackDao) {
     suspend fun getAllTrackIds(): List<Long> = trackDao.getAllTrackIds()
 
     suspend fun deleteByIds(ids: List<Long>) {
-        trackDao.deleteByIds(ids)
+        ids.chunked(MAXIMUM_IDS_PER_DELETE).forEach { trackDao.deleteByIds(it) }
+    }
+
+    private companion object {
+        const val MAXIMUM_IDS_PER_DELETE = 900
     }
 }

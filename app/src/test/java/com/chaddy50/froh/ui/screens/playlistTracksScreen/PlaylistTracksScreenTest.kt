@@ -7,7 +7,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.data.repository.TrackRepository
 import com.chaddy50.froh.fakes.FakePlaylistDao
@@ -15,9 +17,12 @@ import com.chaddy50.froh.fakes.FakeTrackDao
 import com.chaddy50.froh.fakes.MainDispatcherRule
 import com.chaddy50.froh.fakes.testTrack
 import com.chaddy50.froh.navigation.PlaylistTracksRoute
+import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.media3.common.MediaItem
 import com.chaddy50.froh.ui.composables.common.nowPlayingBar.PlaybackViewModel
 import com.chaddy50.froh.ui.screens.playlistsScreen.PlaylistViewModel
 import com.chaddy50.froh.ui.screens.tracksScreen.TrackCard
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Assert.assertEquals
@@ -35,6 +40,15 @@ class PlaylistTracksScreenTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
+
+    // Relaxed-mocking the whole PlaybackViewModel leaves nowPlayingState.currentTrack as an
+    // untyped relaxed mock, which crashes collectAsStateWithLifecycle() with a ClassCastException
+    // the moment a TrackCard actually reads it — stub that one chain with a real StateFlow.
+    private fun createPlaybackViewModel(): PlaybackViewModel {
+        val playbackViewModel: PlaybackViewModel = mockk(relaxed = true)
+        every { playbackViewModel.nowPlayingState.currentTrack } returns MutableStateFlow<MediaItem?>(null)
+        return playbackViewModel
+    }
 
     @Test
     fun reportsRouteTitleAsTopBarTitle() {
@@ -54,6 +68,38 @@ class PlaylistTracksScreenTest {
         }
 
         assertEquals(playlistTitle, reportedTitle)
+    }
+
+    @Test
+    fun showsCollageArtworkInHeaderWhenPlaylistHasFourDistinctAlbums() {
+        val playlistTitle = "Favorites"
+        val tracks = listOf(
+            testTrack(id = 1, albumId = 1, artworkPath = "/a.jpg"),
+            testTrack(id = 2, albumId = 2, artworkPath = "/b.jpg"),
+            testTrack(id = 3, albumId = 3, artworkPath = "/c.jpg"),
+            testTrack(id = 4, albumId = 4, artworkPath = "/d.jpg"),
+        )
+        val playlistDao = FakePlaylistDao(
+            playlistByIdFlow = MutableStateFlow(Playlist(id = 1, name = playlistTitle)),
+            tracksForPlaylistFlow = MutableStateFlow(tracks),
+        )
+        val screenViewModel = PlaylistTracksScreenViewModel(
+            PlaylistTracksRoute(playlistId = 1L, title = playlistTitle),
+            PlaylistRepository(playlistDao),
+        )
+
+        composeTestRule.setContent {
+            PlaylistTracksScreen(
+                playlistId = 1L,
+                title = playlistTitle,
+                playbackViewModel = createPlaybackViewModel(),
+                playlistViewModel = PlaylistViewModel(TrackRepository(FakeTrackDao()), PlaylistRepository(playlistDao)),
+                screenViewModel = screenViewModel,
+            )
+        }
+
+        composeTestRule.onNodeWithContentDescription("$playlistTitle Artwork 1").assertIsDisplayed()
+        composeTestRule.onNodeWithContentDescription("$playlistTitle Artwork 4").assertIsDisplayed()
     }
 
     @Test

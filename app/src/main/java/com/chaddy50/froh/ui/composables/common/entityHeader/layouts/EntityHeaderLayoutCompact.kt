@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.chaddy50.froh.data.entity.Playlist
 import com.chaddy50.froh.ui.composables.common.ArtworkImage
 import com.chaddy50.froh.ui.composables.common.AddToPlaylistSheet
+import com.chaddy50.froh.ui.composables.common.CollageArtwork
 import com.chaddy50.froh.ui.composables.common.RenamePlaylistDialog
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityType
@@ -61,7 +62,21 @@ fun EntityHeaderLayoutCompact(
                 .padding(0.dp, 10.dp, 0.dp, 0.dp)
                 .fillMaxSize()
         ) {
-            if (type in artworkCapableTypes) {
+            if (uiState.collageArtworkPaths != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .height(300.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CollageArtwork(
+                        artworkPaths = uiState.collageArtworkPaths,
+                        title = uiState.title,
+                        modifier = Modifier.fillMaxHeight(),
+                    )
+                }
+            } else if (type in artworkCapableTypes) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

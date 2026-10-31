@@ -30,9 +30,6 @@ interface TrackDao {
     @Query("SELECT COUNT(*) FROM tracks")
     fun getNumberOfTracks(): Flow<Int>
 
-    @Query("SELECT COUNT(*) FROM tracks")
-    suspend fun getNumberOfTracksSuspend(): Int
-
     // Get a single track by its ID. Returns a Flow, which will automatically update
     // if the track's data changes.
     @Query("SELECT * FROM tracks WHERE id = :id")

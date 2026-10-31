@@ -98,4 +98,34 @@ class PlaylistTracksScreenViewModelTest {
         advanceUntilIdle()
         assertEquals("Playlist", vm.entityHeaderState.value.title)
     }
+
+    @Test
+    fun entityHeaderShowsCollageArtworkFromFourDistinctAlbums() = runTest {
+        val vm = createViewModel()
+        backgroundScope.launch { vm.entityHeaderState.collect() }
+        playlistFlow.value = Playlist(id = 1, name = "Favorites")
+        tracksFlow.value = listOf(
+            testTrack(id = 1, albumId = 1, artworkPath = "/a.jpg"),
+            testTrack(id = 2, albumId = 2, artworkPath = "/b.jpg"),
+            testTrack(id = 3, albumId = 3, artworkPath = "/c.jpg"),
+            testTrack(id = 4, albumId = 4, artworkPath = "/d.jpg"),
+        )
+        advanceUntilIdle()
+
+        assertEquals(
+            listOf("/a.jpg", "/b.jpg", "/c.jpg", "/d.jpg"),
+            vm.entityHeaderState.value.collageArtworkPaths,
+        )
+    }
+
+    @Test
+    fun entityHeaderHasNoCollageArtworkWithFewerThanTwoDistinctAlbums() = runTest {
+        val vm = createViewModel()
+        backgroundScope.launch { vm.entityHeaderState.collect() }
+        playlistFlow.value = Playlist(id = 1, name = "Favorites")
+        tracksFlow.value = listOf(testTrack(id = 1, albumId = 1))
+        advanceUntilIdle()
+
+        assertNull(vm.entityHeaderState.value.collageArtworkPaths)
+    }
 }

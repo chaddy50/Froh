@@ -20,9 +20,6 @@ interface GenreDao {
     @Delete
     suspend fun delete(genre: Genre)
 
-    @Query("SELECT COUNT(*) FROM genres")
-    fun getNumberOfGenres(): Flow<Int>
-
     @Query("SELECT * FROM genres WHERE id = :id")
     fun getGenreById(id: Long): Flow<Genre?>
 
@@ -49,24 +46,8 @@ interface GenreDao {
     """)
     fun getAllTopLevelGenres(): Flow<List<Genre>>
 
-    @Query("""
-        SELECT DISTINCT COUNT(*) FROM genres
-        WHERE parentGenreId IS NULL AND EXISTS (
-            SELECT 1 FROM tracks
-            WHERE tracks.genreId = genres.id
-            UNION
-            SELECT 1 FROM tracks
-            INNER JOIN genres AS sub_genres ON tracks.genreId = sub_genres.id
-            WHERE sub_genres.parentGenreId = genres.id
-        )
-    """)
-    fun getNumberOfTopLevelGenres(): Flow<Int>
-
     @Query("SELECT * FROM genres WHERE parentGenreId = :parentGenreId ORDER BY name ASC")
     fun getSubGenres(parentGenreId: Long): Flow<List<Genre>>
-
-    @Query("SELECT id FROM genres WHERE parentGenreId = :parentGenreId")
-    fun getSubGenreIds(parentGenreId: Long): List<Long>
 
     @Query("""
         SELECT DISTINCT genres.* FROM genres
@@ -76,15 +57,6 @@ interface GenreDao {
         ORDER BY genres.name ASC
     """)
     fun getSubGenresForAlbumArtist(parentGenreId: Long, albumArtistId: Long): Flow<List<Genre>>
-
-    @Query("""
-        SELECT COUNT(DISTINCT genres.id) FROM genres
-        INNER JOIN tracks ON genres.id = tracks.genreId
-        INNER JOIN albums ON tracks.albumId = albums.id
-        WHERE albums.artistId = :albumArtistId AND genres.parentGenreId = :parentGenreId
-        ORDER BY genres.name ASC
-    """)
-    fun getNumberOfSubGenresForAlbumArtist(parentGenreId: Long, albumArtistId: Long): Flow<Int>
 
     @Query("SELECT parentGenreId FROM genres WHERE id = :genreId")
     suspend fun getParentGenreId(genreId: Long): Long?

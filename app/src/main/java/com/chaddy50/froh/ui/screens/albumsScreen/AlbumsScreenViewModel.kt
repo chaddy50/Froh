@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
@@ -87,21 +86,10 @@ class AlbumsScreenViewModel @AssistedInject constructor(
 
         val artistName = albumArtistRepository.getAlbumArtistName(albumArtistId)
 
-        val subGenreName = _selectedSubGenreId.mapLatest { selectedSubGenreId ->
-            if (selectedSubGenreId != null) {
-                genreRepository.getGenreName(selectedSubGenreId)
-            } else {
-                null
-            }
-        }
-
-
-        uiState = combine(albums, artistName, subGenreName, _selectedSubGenreId) { albums, artistName, subGenreName, selectedSubGenreId ->
-            val screenTitle = if (selectedSubGenreId == null) artistName else "$artistName - $subGenreName"
-
+        uiState = combine(albums, artistName) { currentAlbums, currentArtistName ->
             AlbumsScreenUiState(
-                screenTitle ?: "Albums",
-                albums,
+                currentArtistName ?: "Albums",
+                currentAlbums,
                 false,
             )
         }.stateIn(

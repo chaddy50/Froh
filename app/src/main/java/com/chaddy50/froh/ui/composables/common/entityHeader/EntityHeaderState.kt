@@ -46,4 +46,5 @@ data class EntityHeaderState(
     val artworkPath: String? = null,
     val isLoading: Boolean = true,
     val playlistsThatEntityIsAlreadyIn: Set<Long> = setOf(),
+    val collageArtworkPaths: List<String?>? = null,
 )
