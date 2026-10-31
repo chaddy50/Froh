@@ -34,6 +34,7 @@ fun EntityCard(
     artworkPath: String? = null,
     subtitle: String? = null,
     icon: ImageVector? = null,
+    collageArtworkPaths: List<String?>? = null,
 ) {
     Box(
         modifier = Modifier
@@ -51,7 +52,9 @@ fun EntityCard(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (artworkPath != null) {
+                if (collageArtworkPaths != null) {
+                    CollageArtwork(artworkPaths = collageArtworkPaths, title = title)
+                } else if (artworkPath != null) {
                     Column {
                         AsyncImage(
                             model = artworkPath,

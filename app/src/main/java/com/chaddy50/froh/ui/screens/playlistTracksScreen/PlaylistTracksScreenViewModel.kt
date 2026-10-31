@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.chaddy50.froh.data.repository.PlaylistRepository
 import com.chaddy50.froh.navigation.PlaylistTracksRoute
 import com.chaddy50.froh.ui.composables.common.entityHeader.EntityHeaderState
+import com.chaddy50.froh.ui.screens.playlistsScreen.collageArtworkPaths
 import com.chaddy50.froh.utilities.formatMillisecondsIntoMinutesAndSeconds
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -65,11 +66,10 @@ class PlaylistTracksScreenViewModel @AssistedInject constructor(
         ) { playlist, tracks ->
             val playlistDurationMs = tracks.sumOf { it.duration.inWholeMilliseconds }
             EntityHeaderState(
-                playlist?.name ?: "Playlist",
-                "${tracks.size} tracks - ${formatMillisecondsIntoMinutesAndSeconds(playlistDurationMs)}",
-                null,
-                null,
-                false,
+                title = playlist?.name ?: "Playlist",
+                subtitle = "${tracks.size} tracks - ${formatMillisecondsIntoMinutesAndSeconds(playlistDurationMs)}",
+                isLoading = false,
+                collageArtworkPaths = collageArtworkPaths(tracks),
             )
         }.stateIn(
             viewModelScope,
