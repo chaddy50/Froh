@@ -86,10 +86,10 @@ class AlbumsScreenViewModel @AssistedInject constructor(
 
         val artistName = albumArtistRepository.getAlbumArtistName(albumArtistId)
 
-        uiState = combine(albums, artistName) { albums, artistName ->
+        uiState = combine(albums, artistName) { currentAlbums, currentArtistName ->
             AlbumsScreenUiState(
-                artistName ?: "Albums",
-                albums,
+                currentArtistName ?: "Albums",
+                currentAlbums,
                 false,
             )
         }.stateIn(
