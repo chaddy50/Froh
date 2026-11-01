@@ -20,8 +20,6 @@ class AlbumRepository(private val albumDao: AlbumDao) : IAlbumRepository {
         albumDao.delete(album)
     }
 
-    fun getNumberOfAlbums() = albumDao.getNumberOfAlbums()
-
     fun getAllAlbums() = albumDao.getAllAlbums()
 
     fun getAlbumsForArtist(
@@ -36,10 +34,6 @@ class AlbumRepository(private val albumDao: AlbumDao) : IAlbumRepository {
     ) = albumDao.getAlbumsForArtistInGenre(albumArtistId, genreId, shouldSortByCatalogueSortIndex)
 
     fun getAlbumById(id: Long) = albumDao.getAlbumById(id)
-
-    fun getAlbumName(albumId: Long) = albumDao.getAlbumName(albumId)
-
-    fun getNumberOfAlbumsForAlbumArtist(albumArtistId: Long) = albumDao.getNumberOfAlbumsForAlbumArtist(albumArtistId)
 
     fun getNumberOfAlbumsForAlbumArtistInGenre(albumArtistId: Long, genreId: Long) = albumDao.getNumberOfAlbumsForAlbumArtistInGenre(albumArtistId, genreId)
 
