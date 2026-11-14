@@ -10,18 +10,6 @@ import kotlinx.coroutines.flow.flowOn
 
 class GenreRepository(private val genreDao: GenreDao) {
 
-    suspend fun insert(genre: Genre) {
-        genreDao.insert(genre)
-    }
-
-    suspend fun update(genre: Genre) {
-        genreDao.update(genre)
-    }
-
-    suspend fun delete(genre: Genre) {
-        genreDao.delete(genre)
-    }
-
     fun getAllGenres() = genreDao.getAllGenres()
 
     suspend fun getGenreName(genreId: Long) = genreDao.getGenreName(genreId)
