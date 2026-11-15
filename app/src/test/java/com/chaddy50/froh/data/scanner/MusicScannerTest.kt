@@ -24,9 +24,7 @@ import com.chaddy50.froh.fakes.FakeOpenOpusRepository
 import com.chaddy50.froh.fakes.FakePerformanceDao
 import com.chaddy50.froh.fakes.FakeTrackDao
 import com.chaddy50.froh.data.api.openOpus.OpenOpusComposer
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -64,8 +62,6 @@ class MusicScannerTest {
             override suspend fun update(artist: Artist) = Unit
             override suspend fun delete(artist: Artist) = Unit
             override suspend fun getArtistByName(name: String): Artist? = null
-            override fun getArtistById(id: Int): Flow<Artist?> = emptyFlow()
-            override fun getAllArtists(): Flow<List<Artist>> = emptyFlow()
         }
 
         val context = RuntimeEnvironment.getApplication()
