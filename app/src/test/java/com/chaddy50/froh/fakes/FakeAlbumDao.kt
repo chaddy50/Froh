@@ -27,12 +27,6 @@ class FakeAlbumDao(
     ): Flow<List<Album>> =
         albums.map { list -> list.filter { it.artistId == albumArtistId } }
 
-    override fun getAlbumName(albumId: Long): Flow<String?> =
-        albums.map { list -> list.find { it.id == albumId }?.title }
-
-    override fun getNumberOfAlbumsForAlbumArtist(albumArtistId: Long): Flow<Int> =
-        albums.map { list -> list.count { it.artistId == albumArtistId } }
-
     override fun getNumberOfAlbumsForAlbumArtistInGenre(albumArtistId: Long, genreId: Long): Flow<Int> =
         combine(albums, tracks) { albumList, trackList ->
             val albumIdsInGenre = trackList
@@ -54,5 +48,4 @@ class FakeAlbumDao(
     override suspend fun insert(album: Album) = Unit
     override suspend fun update(album: Album) = Unit
     override suspend fun delete(album: Album) = Unit
-    override fun getNumberOfAlbums(): Flow<Int> = albums.map { it.size }
 }
