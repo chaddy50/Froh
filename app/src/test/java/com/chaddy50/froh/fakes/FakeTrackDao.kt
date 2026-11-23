@@ -29,12 +29,6 @@ class FakeTrackDao(
     override fun getTracksForAlbumInGenre(albumId: Long, genreId: Long): Flow<List<Track>> =
         tracksFlow.map { list -> list.filter { it.albumId == albumId && (it.genreId == genreId || it.parentGenreId == genreId) } }
 
-    override fun getNumberOfTracksInAlbum(albumId: Long): Flow<Int> =
-        tracksFlow.map { list -> list.count { it.albumId == albumId } }
-
-    override fun getNumberOfTracksInPerformance(performanceId: Long): Flow<Int> =
-        tracksFlow.map { list -> list.count { it.performanceId == performanceId } }
-
     override fun getAllTracks(): Flow<List<Track>> = tracksFlow
 
     override fun getTrackById(id: Long): Flow<Track?> =

@@ -47,12 +47,6 @@ interface TrackDao {
     @Query("SELECT * FROM tracks WHERE performanceId = :performanceId ORDER BY discNumber, number ASC")
     fun getTracksForPerformance(performanceId: Long): Flow<List<Track>>
 
-    @Query("SELECT COUNT(*) FROM tracks WHERE albumId = :albumId")
-    fun getNumberOfTracksInAlbum(albumId: Long): Flow<Int>
-
-    @Query("SELECT COUNT(*) FROM tracks WHERE performanceId = :performanceId")
-    fun getNumberOfTracksInPerformance(performanceId: Long): Flow<Int>
-
     @Query("""
         SELECT tracks.* FROM tracks
         INNER JOIN albums on tracks.albumId = albums.id

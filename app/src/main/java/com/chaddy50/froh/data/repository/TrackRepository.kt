@@ -22,11 +22,7 @@ class TrackRepository(private val trackDao: TrackDao) {
 
     fun getTracksForAlbumInGenre(albumId: Long, genreId: Long) = trackDao.getTracksForAlbumInGenre(albumId, genreId)
 
-    fun getNumberOfTracksInAlbum(albumId: Long) = trackDao.getNumberOfTracksInAlbum(albumId)
-
     fun getNumberOfTracks() = trackDao.getNumberOfTracks()
-
-    fun getNumberOfTracksInPerformance(performanceId: Long) = trackDao.getNumberOfTracksInPerformance(performanceId)
 
     suspend fun insert(track: Track) {
         trackDao.insert(track)
